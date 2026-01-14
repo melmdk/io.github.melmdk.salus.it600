@@ -2,18 +2,8 @@
 
 import Homey from 'homey';
 import type { IT600Gateway } from '../../lib/salus-api';
-import type { ClimateDevice, DeviceData } from '../../lib/device-types';
-import {
-  HVAC_MODE_OFF,
-  HVAC_MODE_HEAT,
-  HVAC_MODE_COOL,
-  HVAC_MODE_AUTO,
-  PRESET_FOLLOW_SCHEDULE,
-  PRESET_PERMANENT_HOLD,
-  PRESET_OFF,
-  type HvacMode,
-  type PresetMode,
-} from '../../lib/constants';
+import type { ClimateDevice } from '../../lib/device-types';
+import type { HvacMode, PresetMode } from '../../lib/constants';
 
 interface SalusIT600App extends Homey.App {
   getGateway(): IT600Gateway | null;
@@ -27,6 +17,16 @@ class ThermostatDevice extends Homey.Device {
   async onInit(): Promise<void> {
     this.deviceId = this.getData().id as string;
     this.log(`Thermostat device initialized: ${this.getName()} (${this.deviceId})`);
+
+    // Add battery capabilities if missing (for devices paired before this feature)
+    if (!this.hasCapability('measure_battery')) {
+      await this.addCapability('measure_battery').catch(this.error);
+      this.log('Added measure_battery capability');
+    }
+    if (!this.hasCapability('alarm_battery')) {
+      await this.addCapability('alarm_battery').catch(this.error);
+      this.log('Added alarm_battery capability');
+    }
 
     // Register capability listeners
     this.registerCapabilityListener('target_temperature', this.onTargetTemperature.bind(this));
@@ -87,6 +87,20 @@ class ThermostatDevice extends Homey.Device {
     if (this.hasCapability('measure_humidity') && device.currentHumidity !== null) {
       await this.setCapabilityValue('measure_humidity', device.currentHumidity)
         .catch(this.error);
+    }
+
+    // Update battery level (API returns 0-5, convert to 0-100%)
+    if (this.hasCapability('measure_battery') && device.batteryLevel !== null) {
+      const batteryPercent = Math.round((device.batteryLevel / 5) * 100);
+      await this.setCapabilityValue('measure_battery', batteryPercent)
+        .catch(this.error);
+    }
+
+    // Set battery alarm when level is critically low (1 or below = 20% or less)
+    if (this.hasCapability('alarm_battery') && device.batteryLevel !== null) {
+      const isLowBattery = device.batteryLevel <= 1;
+      await this.setCapabilityValue('alarm_battery', isLowBattery)
+        .catch((err) => this.error('Failed to set alarm_battery:', err));
     }
 
     // Map HVAC mode to Homey thermostat_mode

@@ -41,6 +41,7 @@ export interface ClimateDevice extends BaseDevice {
   maxTemp: number;
   minTemp: number;
   currentHumidity: number | null;
+  batteryLevel: number | null;
   hvacMode: HvacMode;
   hvacAction: HvacAction;
   hvacModes: HvacMode[];
@@ -129,6 +130,7 @@ export interface ApiDeviceStatus {
     HoldType: number;
     RunningState: number;
     SunnySetpoint_x100?: number;
+    BatteryLevel?: number;
   };
   sTherS?: {
     LocalTemperature_x100: number;

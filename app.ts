@@ -16,7 +16,25 @@ class SalusIT600App extends Homey.App {
    * onInit is called when the app is initialized.
    */
   async onInit(): Promise<void> {
+    // Increase max listeners to support many devices (each device listens for updates)
+    this.homey.setMaxListeners(50);
+
     this.log('Salus IT600 app initialized');
+
+    // Restore gateway connection from saved settings
+    const settings = this.homey.settings.get('gateway') as GatewaySettings | null;
+    if (settings?.host && settings?.euid) {
+      this.log(`Restoring gateway connection to ${settings.host}`);
+      try {
+        await this.createGateway(settings.host, settings.euid);
+        // Do an immediate poll to get device data before devices initialize
+        await this.pollNow();
+        this.startPolling();
+        this.log('Gateway connection restored successfully');
+      } catch (err) {
+        this.error('Failed to restore gateway connection:', err);
+      }
+    }
   }
 
   /**

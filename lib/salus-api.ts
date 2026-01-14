@@ -340,7 +340,7 @@ export class IT600Gateway {
         data: device.data,
         manufacturer: device.sBasicS?.ManufactureName || 'SALUS',
         model: device.sGateway?.ModelIdentifier || null,
-        swVersion: device.sOTA?.OTAFirmwareVersion_d || null,
+        swVersion: device.sOTA?.OTAFirmwareVersion_d || device.sZDO?.FirmwareVersion || null,
       };
     }
   }
@@ -394,6 +394,7 @@ export class IT600Gateway {
           climateDevice = {
             ...baseProps,
             currentHumidity,
+            batteryLevel: th.BatteryLevel ?? null,
             currentTemperature: th.LocalTemperature_x100 / 100,
             targetTemperature: th.HeatingSetpoint_x100 / 100,
             maxTemp: (th.MaxHeatSetpoint_x100 ?? 3500) / 100,
@@ -440,6 +441,7 @@ export class IT600Gateway {
           climateDevice = {
             ...baseProps,
             currentHumidity: null,
+            batteryLevel: null, // FC600 is typically wired
             currentTemperature: ther.LocalTemperature_x100 / 100,
             targetTemperature: isHeating
               ? ther.HeatingSetpoint_x100 / 100

@@ -53,10 +53,14 @@ async function main() {
     if (climateDevices.size > 0) {
       console.log(`Thermostats (${climateDevices.size}):`);
       climateDevices.forEach((device, id) => {
+        const isHeating = device.hvacAction === 'heating';
+        const heatingStatus = isHeating ? '🔥 HEATING' : '❄️ Idle';
+        const batteryStr = device.batteryLevel !== null ? `Battery: ${device.batteryLevel}/5` : '';
         console.log(`  [${id}] ${device.name}`);
-        console.log(`    Current: ${device.currentTemperature}°C`);
-        console.log(`    Target: ${device.targetTemperature}°C`);
-        console.log(`    Mode: ${device.hvacMode} | Preset: ${device.presetMode}`);
+        console.log(`    Current: ${device.currentTemperature}°C → Target: ${device.targetTemperature}°C`);
+        console.log(`    Status: ${heatingStatus} | Mode: ${device.hvacMode} | Preset: ${device.presetMode}`);
+        if (batteryStr) console.log(`    ${batteryStr}`);
+        console.log(`    Model: ${device.model || 'Unknown'} | Firmware: ${device.swVersion || 'Unknown'}`);
         console.log(`    Available: ${device.available}`);
       });
       console.log('');

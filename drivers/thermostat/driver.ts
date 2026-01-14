@@ -59,11 +59,32 @@ class ThermostatDriver extends Homey.Driver {
           capabilities.push('measure_humidity');
         }
 
+        // Add battery capabilities if device has battery
+        if (device.batteryLevel !== null) {
+          capabilities.push('measure_battery');
+          capabilities.push('alarm_battery');
+        }
+
         // Add preset mode capability
         capabilities.push('salus_preset_mode');
 
         // Add thermostat mode capability
         capabilities.push('thermostat_mode');
+
+        // Build thermostat_mode values based on device's supported modes
+        const modeValues: Array<{ id: string; title: { en: string } }> = [];
+        if (device.hvacModes.includes('off')) {
+          modeValues.push({ id: 'off', title: { en: 'Off' } });
+        }
+        if (device.hvacModes.includes('heat')) {
+          modeValues.push({ id: 'heat', title: { en: 'Heat' } });
+        }
+        if (device.hvacModes.includes('cool')) {
+          modeValues.push({ id: 'cool', title: { en: 'Cool' } });
+        }
+        if (device.hvacModes.includes('auto')) {
+          modeValues.push({ id: 'auto', title: { en: 'Auto' } });
+        }
 
         devices.push({
           name: device.name,
@@ -79,6 +100,9 @@ class ThermostatDriver extends Homey.Driver {
               min: device.minTemp,
               max: device.maxTemp,
               step: 0.5,
+            },
+            thermostat_mode: {
+              values: modeValues,
             },
           },
         });
