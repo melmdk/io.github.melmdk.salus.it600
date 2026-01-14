@@ -1,1 +1,29 @@
-{}
+{
+  "pair": {
+    "gateway_credentials": {
+      "title": "Connect to Salus Gateway",
+      "hint": "Enter the IP address and EUID of your Salus UG600/UGE600 gateway. The EUID can be found on the label on the bottom of the gateway."
+    }
+  },
+  "settings": {
+    "gateway_ip": "Gateway IP Address",
+    "gateway_euid": "Gateway EUID"
+  },
+  "errors": {
+    "connection_failed": "Failed to connect to gateway",
+    "device_not_found": "Device not found",
+    "device_offline": "Device is offline"
+  },
+  "capability": {
+    "salus_preset_mode": {
+      "title": "Preset Mode",
+      "values": {
+        "Follow Schedule": "Follow Schedule",
+        "Permanent Hold": "Permanent Hold",
+        "Temporary Hold": "Temporary Hold",
+        "Eco": "Eco",
+        "Off": "Off"
+      }
+    }
+  }
+}

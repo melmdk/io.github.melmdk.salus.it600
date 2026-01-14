@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="50" height="50">
+  <!-- Plug body -->
+  <rect x="12" y="15" width="26" height="25" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
+  <!-- Plug prongs -->
+  <line x1="20" y1="5" x2="20" y2="15" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <line x1="30" y1="5" x2="30" y2="15" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <!-- Power indicator -->
+  <circle cx="25" cy="32" r="5" fill="none" stroke="currentColor" stroke-width="2"/>
+  <line x1="25" y1="29" x2="25" y2="35" stroke="currentColor" stroke-width="2"/>
+</svg>

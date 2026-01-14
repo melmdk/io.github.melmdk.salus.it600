@@ -1,0 +1,41 @@
+{
+  "type": "enum",
+  "title": {
+    "en": "Preset Mode"
+  },
+  "getable": true,
+  "setable": true,
+  "uiComponent": "picker",
+  "values": [
+    {
+      "id": "Follow Schedule",
+      "title": {
+        "en": "Follow Schedule"
+      }
+    },
+    {
+      "id": "Permanent Hold",
+      "title": {
+        "en": "Permanent Hold"
+      }
+    },
+    {
+      "id": "Temporary Hold",
+      "title": {
+        "en": "Temporary Hold"
+      }
+    },
+    {
+      "id": "Eco",
+      "title": {
+        "en": "Eco"
+      }
+    },
+    {
+      "id": "Off",
+      "title": {
+        "en": "Off"
+      }
+    }
+  ]
+}

@@ -1,3 +1,395 @@
 {
-  "_comment": "This file is generated. Please edit .homeycompose/app.json instead."
+  "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
+  "id": "io.github.melmdk.salus.it600",
+  "version": "1.0.0",
+  "compatibility": ">=12.4.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "brandColor": "#00A651",
+  "name": {
+    "en": "Salus IT600"
+  },
+  "description": {
+    "en": "Integrates the Salus IT600 smart heating system with Homey, allowing you to monitor and control your thermostat."
+  },
+  "category": [
+    "climate"
+  ],
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Martin Mogensen",
+    "email": "martin@melm.dk"
+  },
+  "source": "https://github.com/melmdk/io.github.melmdk.salus.it600",
+  "support": "https://github.com/melmdk/io.github.melmdk.salus.it600/issues",
+  "bugs": {
+    "url": "https://github.com/melmdk/io.github.melmdk.salus.it600/issues"
+  },
+  "drivers": [
+    {
+      "name": {
+        "en": "Door/Window Sensor"
+      },
+      "class": "sensor",
+      "capabilities": [
+        "alarm_contact"
+      ],
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "pair": [
+        {
+          "id": "gateway_credentials",
+          "template": "login_credentials",
+          "options": {
+            "title": {
+              "en": "Connect to Gateway"
+            },
+            "usernameLabel": {
+              "en": "Gateway IP Address"
+            },
+            "usernamePlaceholder": {
+              "en": "192.168.1.100"
+            },
+            "passwordLabel": {
+              "en": "Gateway EUID"
+            },
+            "passwordPlaceholder": {
+              "en": "001E5E0D32906128"
+            }
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "images": {
+        "small": "/drivers/binary-sensor/assets/images/small.png",
+        "large": "/drivers/binary-sensor/assets/images/large.png",
+        "xlarge": "/drivers/binary-sensor/assets/images/xlarge.png"
+      },
+      "id": "binary-sensor"
+    },
+    {
+      "name": {
+        "en": "Roller Shutter"
+      },
+      "class": "blinds",
+      "capabilities": [
+        "windowcoverings_state",
+        "windowcoverings_set"
+      ],
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "pair": [
+        {
+          "id": "gateway_credentials",
+          "template": "login_credentials",
+          "options": {
+            "title": {
+              "en": "Connect to Gateway"
+            },
+            "usernameLabel": {
+              "en": "Gateway IP Address"
+            },
+            "usernamePlaceholder": {
+              "en": "192.168.1.100"
+            },
+            "passwordLabel": {
+              "en": "Gateway EUID"
+            },
+            "passwordPlaceholder": {
+              "en": "001E5E0D32906128"
+            }
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "images": {
+        "small": "/drivers/cover/assets/images/small.png",
+        "large": "/drivers/cover/assets/images/large.png",
+        "xlarge": "/drivers/cover/assets/images/xlarge.png"
+      },
+      "id": "cover"
+    },
+    {
+      "name": {
+        "en": "Smart Plug"
+      },
+      "class": "socket",
+      "capabilities": [
+        "onoff"
+      ],
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "pair": [
+        {
+          "id": "gateway_credentials",
+          "template": "login_credentials",
+          "options": {
+            "title": {
+              "en": "Connect to Gateway"
+            },
+            "usernameLabel": {
+              "en": "Gateway IP Address"
+            },
+            "usernamePlaceholder": {
+              "en": "192.168.1.100"
+            },
+            "passwordLabel": {
+              "en": "Gateway EUID"
+            },
+            "passwordPlaceholder": {
+              "en": "001E5E0D32906128"
+            }
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "images": {
+        "small": "/drivers/switch/assets/images/small.png",
+        "large": "/drivers/switch/assets/images/large.png",
+        "xlarge": "/drivers/switch/assets/images/xlarge.png"
+      },
+      "id": "switch"
+    },
+    {
+      "name": {
+        "en": "Temperature Sensor"
+      },
+      "class": "sensor",
+      "capabilities": [
+        "measure_temperature"
+      ],
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "pair": [
+        {
+          "id": "gateway_credentials",
+          "template": "login_credentials",
+          "options": {
+            "title": {
+              "en": "Connect to Gateway"
+            },
+            "usernameLabel": {
+              "en": "Gateway IP Address"
+            },
+            "usernamePlaceholder": {
+              "en": "192.168.1.100"
+            },
+            "passwordLabel": {
+              "en": "Gateway EUID"
+            },
+            "passwordPlaceholder": {
+              "en": "001E5E0D32906128"
+            }
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "images": {
+        "small": "/drivers/temperature-sensor/assets/images/small.png",
+        "large": "/drivers/temperature-sensor/assets/images/large.png",
+        "xlarge": "/drivers/temperature-sensor/assets/images/xlarge.png"
+      },
+      "id": "temperature-sensor"
+    },
+    {
+      "name": {
+        "en": "Thermostat"
+      },
+      "class": "thermostat",
+      "capabilities": [
+        "target_temperature",
+        "measure_temperature",
+        "measure_humidity",
+        "salus_preset_mode",
+        "thermostat_mode"
+      ],
+      "capabilitiesOptions": {
+        "target_temperature": {
+          "min": 5,
+          "max": 35,
+          "step": 0.5
+        },
+        "thermostat_mode": {
+          "values": [
+            {
+              "id": "off",
+              "title": {
+                "en": "Off"
+              }
+            },
+            {
+              "id": "heat",
+              "title": {
+                "en": "Heat"
+              }
+            },
+            {
+              "id": "cool",
+              "title": {
+                "en": "Cool"
+              }
+            },
+            {
+              "id": "auto",
+              "title": {
+                "en": "Auto"
+              }
+            }
+          ]
+        }
+      },
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "pair": [
+        {
+          "id": "gateway_credentials",
+          "template": "login_credentials",
+          "options": {
+            "title": {
+              "en": "Connect to Gateway"
+            },
+            "usernameLabel": {
+              "en": "Gateway IP Address"
+            },
+            "usernamePlaceholder": {
+              "en": "192.168.1.100"
+            },
+            "passwordLabel": {
+              "en": "Gateway EUID"
+            },
+            "passwordPlaceholder": {
+              "en": "001E5E0D32906128"
+            }
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "images": {
+        "small": "/drivers/thermostat/assets/images/small.png",
+        "large": "/drivers/thermostat/assets/images/large.png",
+        "xlarge": "/drivers/thermostat/assets/images/xlarge.png"
+      },
+      "id": "thermostat"
+    }
+  ],
+  "capabilities": {
+    "salus_preset_mode": {
+      "type": "enum",
+      "title": {
+        "en": "Preset Mode"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker",
+      "values": [
+        {
+          "id": "Follow Schedule",
+          "title": {
+            "en": "Follow Schedule"
+          }
+        },
+        {
+          "id": "Permanent Hold",
+          "title": {
+            "en": "Permanent Hold"
+          }
+        },
+        {
+          "id": "Temporary Hold",
+          "title": {
+            "en": "Temporary Hold"
+          }
+        },
+        {
+          "id": "Eco",
+          "title": {
+            "en": "Eco"
+          }
+        },
+        {
+          "id": "Off",
+          "title": {
+            "en": "Off"
+          }
+        }
+      ]
+    }
+  }
 }

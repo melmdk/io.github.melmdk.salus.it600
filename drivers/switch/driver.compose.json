@@ -1,0 +1,54 @@
+{
+  "name": {
+    "en": "Smart Plug"
+  },
+  "class": "socket",
+  "capabilities": [
+    "onoff"
+  ],
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [
+    "lan"
+  ],
+  "pair": [
+    {
+      "id": "gateway_credentials",
+      "template": "login_credentials",
+      "options": {
+        "title": {
+          "en": "Connect to Gateway"
+        },
+        "usernameLabel": {
+          "en": "Gateway IP Address"
+        },
+        "usernamePlaceholder": {
+          "en": "192.168.1.100"
+        },
+        "passwordLabel": {
+          "en": "Gateway EUID"
+        },
+        "passwordPlaceholder": {
+          "en": "001E5E0D32906128"
+        }
+      }
+    },
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ],
+  "images": {
+    "small": "/drivers/switch/assets/images/small.png",
+    "large": "/drivers/switch/assets/images/large.png",
+    "xlarge": "/drivers/switch/assets/images/xlarge.png"
+  }
+}

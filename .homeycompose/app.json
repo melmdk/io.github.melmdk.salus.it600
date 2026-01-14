@@ -6,6 +6,7 @@
   "platforms": [
     "local"
   ],
+  "brandColor": "#00A651",
   "name": {
     "en": "Salus IT600"
   },
@@ -24,5 +25,10 @@
   "author": {
     "name": "Martin Mogensen",
     "email": "martin@melm.dk"
+  },
+  "source": "https://github.com/melmdk/io.github.melmdk.salus.it600",
+  "support": "https://github.com/melmdk/io.github.melmdk.salus.it600/issues",
+  "bugs": {
+    "url": "https://github.com/melmdk/io.github.melmdk.salus.it600/issues"
   }
 }

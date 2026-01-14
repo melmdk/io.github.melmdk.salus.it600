@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="50" height="50">
+  <!-- Door frame -->
+  <rect x="10" y="5" width="20" height="40" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+  <!-- Door (slightly open) -->
+  <path d="M 30 5 L 40 10 L 40 40 L 30 45" fill="none" stroke="currentColor" stroke-width="2"/>
+  <!-- Door handle -->
+  <circle cx="35" cy="27" r="2" fill="currentColor"/>
+  <!-- Sensor indicator -->
+  <circle cx="15" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+  <circle cx="15" cy="12" r="1" fill="currentColor"/>
+</svg>
