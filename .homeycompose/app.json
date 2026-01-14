@@ -11,7 +11,7 @@
     "en": "Salus IT600"
   },
   "description": {
-    "en": "Integrates the Salus IT600 smart heating system with Homey, allowing you to monitor and control your thermostat."
+    "en": "Control your Salus IT600 smart home devices locally via the UG600/UGE600 gateway. Supports thermostats, temperature sensors, door/window sensors, smart plugs, and roller shutters. No cloud required."
   },
   "category": [
     "climate"
@@ -30,5 +30,49 @@
   "support": "https://github.com/melmdk/io.github.melmdk.salus.it600/issues",
   "bugs": {
     "url": "https://github.com/melmdk/io.github.melmdk.salus.it600/issues"
+  },
+  "settings": [
+    {
+      "type": "group",
+      "title": {
+        "en": "Gateway Connection"
+      },
+      "children": [
+        {
+          "id": "host",
+          "type": "text",
+          "title": {
+            "en": "Gateway IP Address"
+          },
+          "hint": {
+            "en": "The local IP address of your Salus UG600/UGE600 gateway"
+          },
+          "value": ""
+        },
+        {
+          "id": "euid",
+          "type": "text",
+          "title": {
+            "en": "Gateway EUID"
+          },
+          "hint": {
+            "en": "The unique identifier printed on your gateway (16 hex characters)"
+          },
+          "value": ""
+        }
+      ]
+    }
+  ],
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "melmdk"
+      }
+    }
+  },
+  "credits": {
+    "text": {
+      "en": "Based on pyit600 and homeassistant_salus by Edgars Poplavskis (https://github.com/epoplavskis/pyit600)"
+    }
   }
 }

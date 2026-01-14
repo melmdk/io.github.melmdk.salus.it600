@@ -82,8 +82,8 @@ npx homey app publish
 
 ### API Communication
 - Local HTTP to gateway on port 80
-- AES-128-CBC encryption with PKCS7 padding
-- Key derived from: `MD5("Salus-{euid.toLowerCase()}")` + 16 zero bytes
+- AES-256-CBC encryption with PKCS7 padding
+- Key derived from: `MD5("Salus-{euid.toLowerCase()}")` + 16 zero bytes (32 bytes total = 256 bits)
 - Fixed IV: `[0x88, 0xa6, 0xb0, 0x79, 0x5d, 0x85, 0xdb, 0xfc, 0xe6, 0xe0, 0xb3, 0xe9, 0xa6, 0x29, 0x65, 0x4b]`
 - All requests serialized (gateway handles few concurrent connections)
 
@@ -104,9 +104,9 @@ npx homey app publish
 
 ```
 ├── lib/
-│   ├── salus-api.js      # API client (encryption, HTTP)
-│   ├── device-types.js   # Device type mappings
-│   └── constants.js      # Shared constants
+│   ├── salus-api.ts      # API client (encryption, HTTP)
+│   ├── device-types.ts   # Device type mappings
+│   └── constants.ts      # Shared constants
 ├── drivers/
 │   ├── thermostat/       # Climate control
 │   ├── temperature-sensor/

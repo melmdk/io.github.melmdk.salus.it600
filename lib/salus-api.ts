@@ -56,7 +56,6 @@ import {
 } from './constants';
 
 import type {
-  DeviceData,
   GatewayDevice,
   ClimateDevice,
   BinarySensorDevice,

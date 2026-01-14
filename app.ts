@@ -24,6 +24,10 @@ class SalusIT600App extends Homey.App {
     // Restore gateway connection from saved settings
     const settings = this.homey.settings.get('gateway') as GatewaySettings | null;
     if (settings?.host && settings?.euid) {
+      // Sync app settings UI with stored gateway settings
+      this.homey.settings.set('host', settings.host);
+      this.homey.settings.set('euid', settings.euid);
+
       this.log(`Restoring gateway connection to ${settings.host}`);
       try {
         await this.createGateway(settings.host, settings.euid);
@@ -34,6 +38,43 @@ class SalusIT600App extends Homey.App {
       } catch (err) {
         this.error('Failed to restore gateway connection:', err);
       }
+    }
+
+    // Listen for settings changes from the app settings page
+    this.homey.settings.on('set', (key: string) => {
+      if (key === 'host' || key === 'euid') {
+        this.onSettingsChanged().catch(this.error);
+      }
+    });
+  }
+
+  /**
+   * Handle settings changes from the app settings page.
+   */
+  private async onSettingsChanged(): Promise<void> {
+    const host = this.homey.settings.get('host') as string;
+    const euid = this.homey.settings.get('euid') as string;
+
+    if (!host || !euid) {
+      this.log('Settings incomplete, waiting for both host and euid');
+      return;
+    }
+
+    // Check if settings actually changed
+    const current = this.homey.settings.get('gateway') as GatewaySettings | null;
+    if (current?.host === host && current?.euid === euid) {
+      return;
+    }
+
+    this.log(`Settings changed, reconnecting to gateway at ${host}`);
+    try {
+      await this.createGateway(host, euid);
+      await this.pollNow();
+      this.startPolling();
+      this.log('Gateway reconnected successfully');
+    } catch (err) {
+      this.error('Failed to connect to gateway with new settings:', err);
+      throw err;
     }
   }
 

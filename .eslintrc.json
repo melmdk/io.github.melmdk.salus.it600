@@ -1,3 +1,51 @@
 {
-  "extends": "athom/homey-app"
+  "extends": "athom/homey-app",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "rules": {
+    "import/no-unresolved": "off",
+    "import/extensions": "off",
+    "import/no-cycle": "off",
+    "import/named": "off",
+    "import/no-extraneous-dependencies": "off",
+    "import/no-duplicates": "off",
+    "import/order": "off",
+    "import/no-self-import": "off",
+    "import/no-useless-path-segments": "off",
+    "node/no-missing-import": "off",
+    "node/no-unsupported-features/es-syntax": "off",
+    "camelcase": "off",
+    "no-nested-ternary": "off",
+    "max-classes-per-file": "off",
+    "consistent-return": "off",
+    "no-use-before-define": "off",
+    "@typescript-eslint/no-use-before-define": "error",
+    "object-curly-newline": "off",
+    "implicit-arrow-linebreak": "off",
+    "operator-linebreak": "off",
+    "function-paren-newline": "off",
+    "indent": "off",
+    "prefer-template": "off",
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-misused-promises": ["error", {
+      "checksVoidReturn": false
+    }]
+  },
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["test-*.ts", "debug-*.ts", "dump-*.ts"],
+      "rules": {
+        "no-console": "off",
+        "no-process-exit": "off",
+        "@typescript-eslint/no-floating-promises": "off"
+      }
+    }
+  ]
 }
