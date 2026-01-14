@@ -158,16 +158,16 @@ export class IT600Gateway {
     this.encryptionKey = Buffer.concat([hash, Buffer.alloc(16)]);
   }
 
-  /** Encrypt data using AES-128-CBC */
+  /** Encrypt data using AES-256-CBC */
   private encrypt(plain: string): Buffer {
-    const cipher = crypto.createCipheriv('aes-128-cbc', this.encryptionKey.subarray(0, 16), ENCRYPTION_IV);
+    const cipher = crypto.createCipheriv('aes-256-cbc', this.encryptionKey, ENCRYPTION_IV);
     const padded = Buffer.concat([cipher.update(plain, 'utf8'), cipher.final()]);
     return padded;
   }
 
-  /** Decrypt data using AES-128-CBC */
+  /** Decrypt data using AES-256-CBC */
   private decrypt(encrypted: Buffer): string {
-    const decipher = crypto.createDecipheriv('aes-128-cbc', this.encryptionKey.subarray(0, 16), ENCRYPTION_IV);
+    const decipher = crypto.createDecipheriv('aes-256-cbc', this.encryptionKey, ENCRYPTION_IV);
     const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
     return decrypted.toString('utf8');
   }

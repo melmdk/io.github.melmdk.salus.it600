@@ -2,3 +2,5 @@
 /node_modules/
 /.homeybuild/
 ref/
+test-config.json
+test-*.local.ts
