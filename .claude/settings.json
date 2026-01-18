@@ -4,7 +4,9 @@
       "Bash(inkscape:*)",
       "Bash(file:*)",
       "Bash(identify:*)",
-      "Read(//home/pa/projects/homey/io.github.melmdk.salus.it600/**)"
+      "Read(//home/pa/projects/homey/io.github.melmdk.salus.it600/**)",
+      "Bash(git tag:*)",
+      "Bash(# Create app images from Salus logo convert ref/images/salus.png -resize 175x175 -gravity center -background white -extent 250x175 assets/images/small.png convert ref/images/salus.png -resize 350x350 -gravity center -background white -extent 500x350 assets/images/large.png convert ref/images/salus.png -resize 700x700 -gravity center -background white -extent 1000x700 assets/images/xlarge.png ls -la assets/images/*.png && identify assets/images/*.png)"
     ]
   }
 }
