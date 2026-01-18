@@ -1,17 +1,59 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="50" height="50">
-  <!-- Thermostat body -->
-  <circle cx="25" cy="25" r="22" fill="none" stroke="currentColor" stroke-width="2"/>
-
-  <!-- Temperature indicator arc -->
-  <path d="M 10 25 A 15 15 0 0 1 40 25" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-
-  <!-- Temperature bulb -->
-  <circle cx="25" cy="35" r="6" fill="none" stroke="currentColor" stroke-width="2"/>
-  <rect x="23" y="18" width="4" height="12" rx="2" fill="currentColor"/>
-
-  <!-- Temperature marks -->
-  <line x1="25" y1="6" x2="25" y2="10" stroke="currentColor" stroke-width="1.5"/>
-  <line x1="38" y1="13" x2="35" y2="16" stroke="currentColor" stroke-width="1.5"/>
-  <line x1="12" y1="13" x2="15" y2="16" stroke="currentColor" stroke-width="1.5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Outer frame with rounded corners -->
+  <rect x="8" y="8" width="84" height="84" rx="6" ry="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
+  
+  <!-- Display screen area -->
+  <rect x="16" y="16" width="68" height="52" rx="3" ry="3" fill="none" stroke="currentColor" stroke-width="1"/>
+  
+  <!-- Temperature display - stylized "20.5" -->
+  <text x="50" y="48" font-family="Arial, sans-serif" font-size="18" font-weight="500" text-anchor="middle" fill="currentColor">20.5</text>
+  
+  <!-- Degree symbol and C -->
+  <text x="72" y="38" font-family="Arial, sans-serif" font-size="7" fill="currentColor">°C</text>
+  
+  <!-- Humidity icon area (top left) -->
+  <text x="24" y="32" font-family="Arial, sans-serif" font-size="8" fill="currentColor">58</text>
+  <!-- Water drop icon -->
+  <path d="M34 28 Q35 30 35 32 Q35 34 34 35 Q33 34 33 32 Q33 30 34 28Z" fill="none" stroke="currentColor" stroke-width="0.8"/>
+  
+  <!-- Heat waves icon (top right) -->
+  <g transform="translate(68, 26)">
+    <path d="M0 0 Q1 2 0 4" fill="none" stroke="currentColor" stroke-width="0.8"/>
+    <path d="M3 0 Q4 2 3 4" fill="none" stroke="currentColor" stroke-width="0.8"/>
+    <path d="M6 0 Q7 2 6 4" fill="none" stroke="currentColor" stroke-width="0.8"/>
+  </g>
+  
+  <!-- WiFi icon (bottom right of display) -->
+  <g transform="translate(62, 54)">
+    <circle cx="4" cy="6" r="1" fill="currentColor"/>
+    <path d="M1 4 Q4 1 7 4" fill="none" stroke="currentColor" stroke-width="0.8"/>
+    <path d="M-1 2 Q4 -2 9 2" fill="none" stroke="currentColor" stroke-width="0.8"/>
+  </g>
+  
+  <!-- Battery icon (bottom left of display) -->
+  <g transform="translate(20, 54)">
+    <rect x="0" y="0" width="10" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="0.8"/>
+    <rect x="10" y="1.5" width="2" height="3" fill="currentColor"/>
+  </g>
+  
+  <!-- Four buttons at bottom -->
+  <rect x="16" y="74" width="12" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="0.8"/>
+  <rect x="32" y="74" width="12" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="0.8"/>
+  <rect x="48" y="74" width="12" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="0.8"/>
+  <rect x="64" y="74" width="12" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="0.8"/>
+  
+  <!-- Button icons -->
+  <!-- Menu lines -->
+  <line x1="19" y1="78" x2="25" y2="78" stroke="currentColor" stroke-width="0.8"/>
+  <line x1="19" y1="80" x2="25" y2="80" stroke="currentColor" stroke-width="0.8"/>
+  <line x1="19" y1="82" x2="25" y2="82" stroke="currentColor" stroke-width="0.8"/>
+  
+  <!-- Down arrow -->
+  <path d="M38 77 L38 82 M35 79 L38 82 L41 79" fill="none" stroke="currentColor" stroke-width="0.8"/>
+  
+  <!-- Up arrow -->
+  <path d="M54 82 L54 77 M51 80 L54 77 L57 80" fill="none" stroke="currentColor" stroke-width="0.8"/>
+  
+  <!-- Check mark -->
+  <path d="M67 80 L69 82 L73 77" fill="none" stroke="currentColor" stroke-width="0.8"/>
 </svg>
