@@ -5,7 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2025-01-14
+## [0.9.1] - 2026-01-18
+
+### Changed
+- Updated thermostat device images with SQ610RF graphic
+- Improved documentation with setup instructions, supported devices, and troubleshooting
+
+### Fixed
+- ESLint configuration for TypeScript compatibility
+- Corrected AES-256-CBC encryption documentation (was incorrectly noted as AES-128)
+
+### Added
+- CHANGELOG.md for tracking releases
+- GPL-3.0 LICENSE file
+- App settings sync for gateway configuration UI
+
+## [0.9.0] - 2026-01-14
 
 ### Added
 - Initial release of Salus IT600 for Homey

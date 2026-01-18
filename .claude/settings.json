@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(inkscape:*)",
+      "Bash(file:*)",
+      "Bash(identify:*)",
+      "Read(//home/pa/projects/homey/io.github.melmdk.salus.it600/**)"
+    ]
+  }
+}
