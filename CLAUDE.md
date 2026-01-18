@@ -167,11 +167,24 @@ npx homey app publish
 - Use squash merge with conventional commit message
 
 ### Releases
+
+**Version files to update:**
+| File | Purpose |
+|------|---------|
+| `.homeycompose/app.json` | Homey app version (primary) |
+| `package.json` | npm package version |
+| `CHANGELOG.md` | Release notes |
+
+Note: `app.json` is auto-generated from `.homeycompose/app.json` via `npx homey app build`
+
+**Release steps:**
 1. Merge `develop` into `main`
-2. Update version in `.homeycompose/app.json`
-3. Create tag: `git tag v1.0.0`
-4. Push tag: `git push origin v1.0.0`
-5. GitHub Action publishes to Homey App Store
+2. Update version in all files listed above
+3. Run `npx homey app build` to regenerate `app.json`
+4. Commit: `git commit -m "chore: release vX.Y.Z"`
+5. Create tag: `git tag -a vX.Y.Z -m "vX.Y.Z - Description"`
+6. Push: `git push && git push origin vX.Y.Z`
+7. GitHub Action publishes to Homey App Store
 
 ---
 
