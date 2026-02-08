@@ -3,5 +3,10 @@
   "compilerOptions": {
     "allowJs": true,
     "outDir": ".homeybuild/"
-  }
+  },
+  "exclude": [
+    "debug-*.ts",
+    "dump-*.ts",
+    "test-*.ts"
+  ]
 }

@@ -1,6 +1,6 @@
 {
   "name": "io.github.melmdk.salus.it600",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "scripts": {
     "build": "tsc",
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore ."

@@ -1,0 +1,13 @@
+ref/
+plans/
+*.ts
+!*.d.ts
+tsconfig.json
+.eslintrc.json
+CLAUDE.md
+.claude/
+debug-*
+dump-*
+test-*
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
