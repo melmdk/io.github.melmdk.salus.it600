@@ -5,23 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.5] - 2026-02-08
+## [0.9.6] - 2026-02-08
+
+### Fixed
+- Reverted single-batch `deviceid` polling to per-device-type requests (gateway requires separate requests per type)
+- Error isolation per device type in polling (one type failing doesn't block others)
 
 ### Changed
 - Reduced app archive from 32.8 MB (230 files) to ~900 KB (47 files) via `.homeyignore`
 - Excluded debug/test scripts from TypeScript compilation via `tsconfig.json` exclude
-- Removed non-runtime files from archive: debug tools, test utilities, community docs
 
 ## [0.9.4] - 2026-02-08
 
 ### Fixed
-- Batched gateway API requests: reduced from 6 serial HTTP calls to 2 per poll cycle
 - Reuse initial `readall` response from connect, eliminating redundant request on startup
 - Parallel capability updates using `Promise.all` across all device drivers
 - Skip `setCapabilityValue` when value unchanged, preventing unnecessary UI re-renders
 - Include `setAvailable` in parallel batch instead of awaiting separately
-- Fixed binary sensor parser incorrectly matching non-binary devices in batch response
-- Added explicit `sLevelS` guard in cover device parser for batch response safety
 
 ## [0.9.3] - 2026-01-18
 

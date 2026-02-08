@@ -286,9 +286,20 @@ export class IT600Gateway {
     }
   }
 
+  /** Fetch deviceid details for a filtered set of devices */
+  private async fetchDeviceDetails(devices: ApiDeviceStatus[]): Promise<ApiDeviceStatus[]> {
+    if (devices.length === 0) return [];
+    const status = await this.makeRequest('read', {
+      requestAttr: 'deviceid',
+      id: devices.map((d) => ({ data: d.data })),
+    });
+    return status.id || [];
+  }
+
   /** Poll status of all devices */
   async pollStatus(): Promise<void> {
     // Reuse cached readall from connect() if available
+    const fromCache = this.pendingReadall !== null;
     const response = this.pendingReadall ?? await this.makeRequest('read', { requestAttr: 'readall' });
     this.pendingReadall = null;
 
@@ -298,27 +309,34 @@ export class IT600Gateway {
     const gatewayDevices = response.id.filter((d) => d.sGateway);
     this.refreshGatewayDevice(gatewayDevices);
 
-    // Collect all non-gateway device data for a single batch request
-    const allDeviceData = response.id
-      .filter((d) => !d.sGateway)
-      .map((d) => ({ data: d.data }));
+    // Separate deviceid request per device type (gateway requires this)
+    const climateDevices = response.id.filter((d) => d.sIT600TH || d.sTherS);
+    const binarySensors = response.id.filter((d) =>
+      d.sIASZS ||
+      (d.sBasicS?.ModelIdentifier && BINARY_SENSOR_MODELS.includes(d.sBasicS.ModelIdentifier)),
+    );
+    const tempSensors = response.id.filter((d) => d.sTempS);
+    const switches = response.id.filter((d) => d.sOnOffS);
+    const covers = response.id.filter((d) => d.sLevelS);
 
-    if (allDeviceData.length === 0) return;
+    if (this.debug) {
+      console.log(`Poll: ${fromCache ? 'cached' : 'fresh'} readall, ${response.id.length} devices: climate=${climateDevices.length} binary=${binarySensors.length} temp=${tempSensors.length} switch=${switches.length} cover=${covers.length}`);
+    }
 
-    // Single batch request for all device details
-    const status = await this.makeRequest('read', {
-      requestAttr: 'deviceid',
-      id: allDeviceData,
-    });
+    try { this.refreshClimateDevices(await this.fetchDeviceDetails(climateDevices)); }
+    catch (e) { console.error('Failed to poll climate devices:', e); }
 
-    const devices = status.id || [];
+    try { this.refreshBinarySensorDevices(await this.fetchDeviceDetails(binarySensors)); }
+    catch (e) { console.error('Failed to poll binary sensors:', e); }
 
-    // Parse each device type from the batch response
-    this.refreshClimateDevices(devices);
-    this.refreshBinarySensorDevices(devices);
-    this.refreshSensorDevices(devices);
-    this.refreshSwitchDevices(devices);
-    this.refreshCoverDevices(devices);
+    try { this.refreshSensorDevices(await this.fetchDeviceDetails(tempSensors)); }
+    catch (e) { console.error('Failed to poll sensors:', e); }
+
+    try { this.refreshSwitchDevices(await this.fetchDeviceDetails(switches)); }
+    catch (e) { console.error('Failed to poll switches:', e); }
+
+    try { this.refreshCoverDevices(await this.fetchDeviceDetails(covers)); }
+    catch (e) { console.error('Failed to poll covers:', e); }
   }
 
   /** Parse device name from JSON string */
