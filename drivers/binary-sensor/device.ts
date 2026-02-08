@@ -48,18 +48,24 @@ class BinarySensorSalusDevice extends Homey.Device {
       return;
     }
 
-    await this.setAvailable().catch(this.error);
+    const updates: Promise<void>[] = [this.setAvailable()];
+    const setIfChanged = (key: string, value: unknown): void => {
+      if (this.getCapabilityValue(key) !== value) {
+        updates.push(this.setCapabilityValue(key, value));
+      }
+    };
 
-    // Update the appropriate alarm capability
     if (this.hasCapability('alarm_contact')) {
-      await this.setCapabilityValue('alarm_contact', device.isOn).catch(this.error);
+      setIfChanged('alarm_contact', device.isOn);
     }
     if (this.hasCapability('alarm_water')) {
-      await this.setCapabilityValue('alarm_water', device.isOn).catch(this.error);
+      setIfChanged('alarm_water', device.isOn);
     }
     if (this.hasCapability('alarm_smoke')) {
-      await this.setCapabilityValue('alarm_smoke', device.isOn).catch(this.error);
+      setIfChanged('alarm_smoke', device.isOn);
     }
+
+    await Promise.all(updates).catch(this.error);
   }
 }
 

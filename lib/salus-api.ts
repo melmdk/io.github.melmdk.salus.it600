@@ -136,6 +136,7 @@ export class IT600Gateway {
   private switchDevices: Map<string, SwitchDevice> = new Map();
   private coverDevices: Map<string, CoverDevice> = new Map();
   private sensorDevices: Map<string, SensorDevice> = new Map();
+  private pendingReadall: ApiResponse | null = null;
 
   constructor(
     euid: string,
@@ -255,6 +256,9 @@ export class IT600Gateway {
         throw new IT600CommandError('Gateway response did not contain gateway information');
       }
 
+      // Cache readall response so first pollStatus() can reuse it
+      this.pendingReadall = response;
+
       return gateway.sGateway.NetworkLANMAC;
     } catch (err) {
       if (err instanceof IT600ConnectionError) {
@@ -284,36 +288,37 @@ export class IT600Gateway {
 
   /** Poll status of all devices */
   async pollStatus(): Promise<void> {
-    const response = await this.makeRequest('read', { requestAttr: 'readall' });
+    // Reuse cached readall from connect() if available
+    const response = this.pendingReadall ?? await this.makeRequest('read', { requestAttr: 'readall' });
+    this.pendingReadall = null;
 
     if (!response.id) return;
 
-    // Parse gateway
+    // Parse gateway (uses readall data directly)
     const gatewayDevices = response.id.filter((d) => d.sGateway);
     this.refreshGatewayDevice(gatewayDevices);
 
-    // Parse climate devices
-    const climateDevices = response.id.filter((d) => d.sIT600TH || d.sTherS);
-    await this.refreshClimateDevices(climateDevices);
+    // Collect all non-gateway device data for a single batch request
+    const allDeviceData = response.id
+      .filter((d) => !d.sGateway)
+      .map((d) => ({ data: d.data }));
 
-    // Parse binary sensors
-    const binarySensors = response.id.filter((d) =>
-      d.sIASZS ||
-      (d.sBasicS?.ModelIdentifier && BINARY_SENSOR_MODELS.includes(d.sBasicS.ModelIdentifier)),
-    );
-    await this.refreshBinarySensorDevices(binarySensors);
+    if (allDeviceData.length === 0) return;
 
-    // Parse temperature sensors
-    const tempSensors = response.id.filter((d) => d.sTempS);
-    await this.refreshSensorDevices(tempSensors);
+    // Single batch request for all device details
+    const status = await this.makeRequest('read', {
+      requestAttr: 'deviceid',
+      id: allDeviceData,
+    });
 
-    // Parse switches
-    const switches = response.id.filter((d) => d.sOnOffS);
-    await this.refreshSwitchDevices(switches);
+    const devices = status.id || [];
 
-    // Parse covers
-    const covers = response.id.filter((d) => d.sLevelS);
-    await this.refreshCoverDevices(covers);
+    // Parse each device type from the batch response
+    this.refreshClimateDevices(devices);
+    this.refreshBinarySensorDevices(devices);
+    this.refreshSensorDevices(devices);
+    this.refreshSwitchDevices(devices);
+    this.refreshCoverDevices(devices);
   }
 
   /** Parse device name from JSON string */
@@ -344,18 +349,11 @@ export class IT600Gateway {
     }
   }
 
-  /** Refresh climate devices */
-  private async refreshClimateDevices(devices: ApiDeviceStatus[]): Promise<void> {
-    if (devices.length === 0) return;
-
-    const status = await this.makeRequest('read', {
-      requestAttr: 'deviceid',
-      id: devices.map((d) => ({ data: d.data })),
-    });
-
+  /** Parse climate devices from batch response */
+  private refreshClimateDevices(devices: ApiDeviceStatus[]): void {
     const newDevices = new Map<string, ClimateDevice>();
 
-    for (const device of status.id || []) {
+    for (const device of devices) {
       const uniqueId = device.data?.UniID;
       if (!uniqueId) continue;
 
@@ -478,18 +476,11 @@ export class IT600Gateway {
     this.climateDevices = newDevices;
   }
 
-  /** Refresh binary sensor devices */
-  private async refreshBinarySensorDevices(devices: ApiDeviceStatus[]): Promise<void> {
-    if (devices.length === 0) return;
-
-    const status = await this.makeRequest('read', {
-      requestAttr: 'deviceid',
-      id: devices.map((d) => ({ data: d.data })),
-    });
-
+  /** Parse binary sensor devices from batch response */
+  private refreshBinarySensorDevices(devices: ApiDeviceStatus[]): void {
     const newDevices = new Map<string, BinarySensorDevice>();
 
-    for (const device of status.id || []) {
+    for (const device of devices) {
       const uniqueId = device.data?.UniID;
       if (!uniqueId) continue;
 
@@ -502,8 +493,8 @@ export class IT600Gateway {
         let isOn: boolean | null = null;
         if (model && BINARY_SENSOR_MODELS.includes(model)) {
           isOn = device.sIT600I?.RelayStatus === 1;
-        } else {
-          isOn = device.sIASZS?.ErrorIASZSAlarmed1 === 1;
+        } else if (device.sIASZS) {
+          isOn = device.sIASZS.ErrorIASZSAlarmed1 === 1;
         }
 
         if (isOn === null) continue;
@@ -542,18 +533,11 @@ export class IT600Gateway {
     this.binarySensorDevices = newDevices;
   }
 
-  /** Refresh temperature sensor devices */
-  private async refreshSensorDevices(devices: ApiDeviceStatus[]): Promise<void> {
-    if (devices.length === 0) return;
-
-    const status = await this.makeRequest('read', {
-      requestAttr: 'deviceid',
-      id: devices.map((d) => ({ data: d.data })),
-    });
-
+  /** Parse temperature sensor devices from batch response */
+  private refreshSensorDevices(devices: ApiDeviceStatus[]): void {
     const newDevices = new Map<string, SensorDevice>();
 
-    for (const device of status.id || []) {
+    for (const device of devices) {
       const uniqueId = device.data?.UniID;
       if (!uniqueId) continue;
 
@@ -586,18 +570,11 @@ export class IT600Gateway {
     this.sensorDevices = newDevices;
   }
 
-  /** Refresh switch devices */
-  private async refreshSwitchDevices(devices: ApiDeviceStatus[]): Promise<void> {
-    if (devices.length === 0) return;
-
-    const status = await this.makeRequest('read', {
-      requestAttr: 'deviceid',
-      id: devices.map((d) => ({ data: d.data })),
-    });
-
+  /** Parse switch devices from batch response */
+  private refreshSwitchDevices(devices: ApiDeviceStatus[]): void {
     const newDevices = new Map<string, SwitchDevice>();
 
-    for (const device of status.id || []) {
+    for (const device of devices) {
       const baseUniqueId = device.data?.UniID;
       if (!baseUniqueId) continue;
 
@@ -632,18 +609,12 @@ export class IT600Gateway {
     this.switchDevices = newDevices;
   }
 
-  /** Refresh cover devices */
-  private async refreshCoverDevices(devices: ApiDeviceStatus[]): Promise<void> {
-    if (devices.length === 0) return;
-
-    const status = await this.makeRequest('read', {
-      requestAttr: 'deviceid',
-      id: devices.map((d) => ({ data: d.data })),
-    });
-
+  /** Parse cover devices from batch response */
+  private refreshCoverDevices(devices: ApiDeviceStatus[]): void {
     const newDevices = new Map<string, CoverDevice>();
 
-    for (const device of status.id || []) {
+    for (const device of devices) {
+      if (!device.sLevelS) continue;
       const uniqueId = device.data?.UniID;
       if (!uniqueId) continue;
 

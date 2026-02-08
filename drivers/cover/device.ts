@@ -56,22 +56,26 @@ class CoverSalusDevice extends Homey.Device {
       return;
     }
 
-    await this.setAvailable().catch(this.error);
+    const updates: Promise<void>[] = [this.setAvailable()];
+    const setIfChanged = (key: string, value: unknown): void => {
+      if (this.getCapabilityValue(key) !== value) {
+        updates.push(this.setCapabilityValue(key, value));
+      }
+    };
 
-    // Update position (0-1 scale for Homey, 0-100 from device)
     if (device.currentPosition !== null) {
-      await this.setCapabilityValue('windowcoverings_set', device.currentPosition / 100)
-        .catch(this.error);
+      setIfChanged('windowcoverings_set', device.currentPosition / 100);
     }
 
-    // Update state
     let state: string = 'idle';
     if (device.isOpening) {
       state = 'up';
     } else if (device.isClosing) {
       state = 'down';
     }
-    await this.setCapabilityValue('windowcoverings_state', state).catch(this.error);
+    setIfChanged('windowcoverings_state', state);
+
+    await Promise.all(updates).catch(this.error);
   }
 
   async onWindowCoveringsState(value: string): Promise<void> {

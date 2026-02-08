@@ -75,43 +75,36 @@ class ThermostatDevice extends Homey.Device {
       return;
     }
 
-    await this.setAvailable().catch(this.error);
+    // Only update capabilities whose values have changed
+    const updates: Promise<void>[] = [this.setAvailable()];
+    const setIfChanged = (key: string, value: unknown): void => {
+      if (this.getCapabilityValue(key) !== value) {
+        updates.push(this.setCapabilityValue(key, value));
+      }
+    };
 
-    // Update capabilities
-    await this.setCapabilityValue('measure_temperature', device.currentTemperature)
-      .catch(this.error);
-
-    await this.setCapabilityValue('target_temperature', device.targetTemperature)
-      .catch(this.error);
+    setIfChanged('measure_temperature', device.currentTemperature);
+    setIfChanged('target_temperature', device.targetTemperature);
+    setIfChanged('thermostat_mode', device.hvacMode);
 
     if (this.hasCapability('measure_humidity') && device.currentHumidity !== null) {
-      await this.setCapabilityValue('measure_humidity', device.currentHumidity)
-        .catch(this.error);
+      setIfChanged('measure_humidity', device.currentHumidity);
     }
 
-    // Update battery level (API returns 0-5, convert to 0-100%)
     if (this.hasCapability('measure_battery') && device.batteryLevel !== null) {
       const batteryPercent = Math.round((device.batteryLevel / 5) * 100);
-      await this.setCapabilityValue('measure_battery', batteryPercent)
-        .catch(this.error);
+      setIfChanged('measure_battery', batteryPercent);
     }
 
-    // Set battery alarm when level is critically low (1 or below = 20% or less)
     if (this.hasCapability('alarm_battery') && device.batteryLevel !== null) {
-      const isLowBattery = device.batteryLevel <= 1;
-      await this.setCapabilityValue('alarm_battery', isLowBattery)
-        .catch((err) => this.error('Failed to set alarm_battery:', err));
+      setIfChanged('alarm_battery', device.batteryLevel <= 1);
     }
 
-    // Map HVAC mode to Homey thermostat_mode
-    await this.setCapabilityValue('thermostat_mode', device.hvacMode)
-      .catch(this.error);
-
-    // Update preset mode
     if (this.hasCapability('salus_preset_mode')) {
-      await this.setCapabilityValue('salus_preset_mode', device.presetMode)
-        .catch(this.error);
+      setIfChanged('salus_preset_mode', device.presetMode);
     }
+
+    await Promise.all(updates).catch(this.error);
   }
 
   async onTargetTemperature(value: number): Promise<void> {

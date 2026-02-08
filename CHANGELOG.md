@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.4] - 2026-02-08
+
+### Fixed
+- Batched gateway API requests: reduced from 6 serial HTTP calls to 2 per poll cycle
+- Reuse initial `readall` response from connect, eliminating redundant request on startup
+- Parallel capability updates using `Promise.all` across all device drivers
+- Skip `setCapabilityValue` when value unchanged, preventing unnecessary UI re-renders
+- Include `setAvailable` in parallel batch instead of awaiting separately
+- Fixed binary sensor parser incorrectly matching non-binary devices in batch response
+- Added explicit `sLevelS` guard in cover device parser for batch response safety
+
 ## [0.9.3] - 2026-01-18
 
 ### Fixed

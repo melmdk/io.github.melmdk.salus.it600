@@ -55,8 +55,11 @@ class SwitchSalusDevice extends Homey.Device {
       return;
     }
 
-    await this.setAvailable().catch(this.error);
-    await this.setCapabilityValue('onoff', device.isOn).catch(this.error);
+    const updates: Promise<void>[] = [this.setAvailable()];
+    if (this.getCapabilityValue('onoff') !== device.isOn) {
+      updates.push(this.setCapabilityValue('onoff', device.isOn));
+    }
+    await Promise.all(updates).catch(this.error);
   }
 
   async onOnOff(value: boolean): Promise<void> {

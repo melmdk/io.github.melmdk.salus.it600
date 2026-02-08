@@ -48,8 +48,11 @@ class TemperatureSensorDevice extends Homey.Device {
       return;
     }
 
-    await this.setAvailable().catch(this.error);
-    await this.setCapabilityValue('measure_temperature', device.state).catch(this.error);
+    const updates: Promise<void>[] = [this.setAvailable()];
+    if (this.getCapabilityValue('measure_temperature') !== device.state) {
+      updates.push(this.setCapabilityValue('measure_temperature', device.state));
+    }
+    await Promise.all(updates).catch(this.error);
   }
 }
 
