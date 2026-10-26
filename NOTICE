@@ -4,10 +4,40 @@ The gateway protocol algorithms (AES-256-CBC, AES-128-CBC and AES-256-CCM
 framing and key derivation) and the device parsing in this app are ported
 from:
 
-- salus-it600-client by Jordi-14 (MIT/Apache-2.0)
+- salus-it600-client by Jordi-14 (MIT OR Apache-2.0, used here under MIT)
   https://github.com/Jordi-14/salus-it600-client
 - pyit600 (MIT)
   https://github.com/epoplavskis/pyit600
 
 Test vectors in test/fixtures/protocol-vectors.json were generated with
 salus-it600-client 0.7.0.
+
+The ported code is covered by the following copyright and permission
+notice (from salus-it600-client's LICENSE-MIT, which preserves the pyit600
+notice):
+
+--------------------------------------------------------------------------
+
+MIT License
+
+Copyright (c) 2020 Julius Vitkauskas
+Copyright (c) 2026 Jordi Albareda Fortuny
+Copyright (c) 2026 Leonard Pitzu
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
