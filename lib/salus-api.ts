@@ -75,6 +75,14 @@ export class IT600ConnectionError extends IT600Error {
   }
 }
 
+/** connect() found nothing answering at the host; the message is user-facing. */
+export class IT600UnreachableError extends IT600ConnectionError {
+  constructor(message: string) {
+    super(message);
+    this.name = 'IT600UnreachableError';
+  }
+}
+
 export class IT600AuthenticationError extends IT600Error {
   constructor(message: string) {
     super(message);
@@ -264,7 +272,7 @@ export class IT600Gateway {
       if (!candidates.some((c) => c.name === candidate.name)) candidates.push(candidate);
     }
 
-    const unreachable = () => new IT600ConnectionError(`No gateway answering at ${this.host}`);
+    const unreachable = () => new IT600UnreachableError(`No gateway answering at ${this.host}`);
     // Under the shared lock too: the probe is a request to the same gateway.
     const rootAnswers = async (): Promise<boolean> => {
       await this.mutex.acquire();

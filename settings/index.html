@@ -92,7 +92,8 @@
           }, 45000);
 
           // One change: the app reconnects once, with the new IP and EUID together.
-          Homey.set('gateway_input', { host: host, euid: euid }, function(err) {
+          // `at` makes every save a new value, so re-saving the same pair still reconnects.
+          Homey.set('gateway_input', { host: host, euid: euid, at: Date.now() }, function(err) {
             if (err) {
               stopWaiting();
               showStatus('Failed to save: ' + err.message, false);

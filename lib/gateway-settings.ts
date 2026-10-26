@@ -8,7 +8,7 @@ import { normaliseEuid } from './protocol';
 import type { ProtocolName } from './protocol';
 import {
   IT600AuthenticationError,
-  IT600ConnectionError,
+  IT600UnreachableError,
   IT600UnsupportedFirmwareError,
 } from './salus-api';
 
@@ -26,6 +26,8 @@ export interface GatewaySettings {
 export interface GatewayInput {
   host: string;
   euid: string;
+  /** Nonce (`Date.now()`) so saving identical values still fires the settings event; not read. */
+  at?: number;
 }
 
 /** Written by the app under `gateway_status`. Never contains the EUID. */
@@ -104,13 +106,15 @@ export function connectedSettings(
   return settings;
 }
 
-/** Errors whose message is written for users and never contains the EUID. */
-const USER_FACING_ERRORS = [IT600ConnectionError, IT600AuthenticationError, IT600UnsupportedFirmwareError];
+/** connect()'s verdicts: messages written for users that never contain the EUID. */
+const USER_FACING_ERRORS = [IT600UnreachableError, IT600AuthenticationError, IT600UnsupportedFirmwareError];
 
 /**
- * Text to show the user for a failed connect: `No gateway answering at <ip>`,
- * `Wrong EUID: …` or the unsupported-firmware text. Anything else, such as an
- * internal API error or a raw Node `bad decrypt`, becomes a generic line.
+ * Text to show the user for a failed connect or poll: `No gateway answering at
+ * <ip>`, `Wrong EUID: …` or the unsupported-firmware text. Anything else, such
+ * as raw network text from a later request (`Gateway request timeout`,
+ * `connect EHOSTUNREACH …`), an internal API error or a raw Node `bad decrypt`,
+ * becomes a generic line.
  */
 export function connectionErrorMessage(err: unknown): string {
   return USER_FACING_ERRORS.some((type) => err instanceof type) ? (err as Error).message : GENERIC_CONNECTION_ERROR;

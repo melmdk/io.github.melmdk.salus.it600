@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { IT600Gateway } from '../lib/salus-api';
+import { IT600ConnectionError, IT600Gateway } from '../lib/salus-api';
 import { registerGatewayPairing, registerGatewayRepair, SalusAppApi } from '../lib/pairing';
 import type { GatewayPairSession } from '../lib/pairing';
 import type { PairingDeviceData } from '../lib/device-types';
@@ -194,4 +194,35 @@ test('repair maps connection errors', async () => {
     return true;
   });
   assert.equal(refreshCount(), 0);
+});
+
+test('pairing list falls back to last-seen devices when the fresh poll fails', async () => {
+  const timeout = () => Promise.reject(new IT600ConnectionError('Gateway request timeout'));
+  const { session, trigger } = fakeSession();
+  const { app } = fakeApp({ gateway: connectedGateway(), refreshDevices: timeout });
+  registerGatewayPairing(session, app, () => [device('mikkel', 'Mikkel')]);
+
+  const list = await trigger('list_devices') as PairingDeviceData[];
+  assert.deepEqual(list.map((d) => d.name), ['Mikkel']);
+
+  // Nothing seen before either: a user-facing error, never the raw transport text.
+  const empty = fakeSession();
+  registerGatewayPairing(empty.session, fakeApp({ gateway: connectedGateway(), refreshDevices: timeout }).app, () => []);
+  await assert.rejects(empty.trigger('list_devices'), (err: Error) => {
+    assert.equal(err.message, 'Could not connect to the gateway');
+    return true;
+  });
+});
+
+test('repair succeeds once connected even if the refresh fails', async () => {
+  const { session, trigger } = fakeSession();
+  const { app, connects } = fakeApp({
+    refreshDevices: () => Promise.reject(new IT600ConnectionError('Gateway request timeout')),
+  });
+  registerGatewayRepair(session, app);
+
+  // The connect was persisted; the poll loop retries the refresh.
+  assert.equal(await trigger('login', { username: HOST, password: EUID }), true);
+  assert.deepEqual(connects, [{ host: HOST, euid: EUID }]);
+  assert.ok(app.getGateway());
 });

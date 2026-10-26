@@ -60,7 +60,8 @@ function mergeLastSeen(fresh: PairingDeviceData[], lastSeen: PairingDeviceData[]
  * - When the app already has a gateway, the credentials view is skipped.
  * - `login` connects (or reconnects) the app-level gateway.
  * - `list_devices` polls afresh and merges with the devices seen before the
- *   poll, so a device that drops out of one poll is still offered.
+ *   poll, so a device that drops out of one poll is still offered. If the
+ *   poll fails, the devices seen before it are offered.
  *
  * @param listDevices maps the gateway's current devices to pairing entries
  */
@@ -86,7 +87,13 @@ export function registerGatewayPairing(
       throw new Error(`No gateway answering at ${app.getSavedHost() ?? 'the saved address'}`);
     }
     const lastSeen = listDevices(gateway);
-    await app.refreshDevices();
+    try {
+      await app.refreshDevices();
+    } catch (err) {
+      // A transient failure still offers what was seen; the poll loop retries.
+      if (lastSeen.length > 0) return lastSeen;
+      throw new Error(connectionErrorMessage(err));
+    }
     return mergeLastSeen(listDevices(app.getGateway() ?? gateway), lastSeen);
   });
 }
@@ -94,12 +101,16 @@ export function registerGatewayPairing(
 /**
  * Register the repair-session handlers for a driver. Repair always shows the
  * credentials, reconnects the app-level gateway that all devices share, and
- * polls so devices recover at once.
+ * polls so devices recover at once (a failed poll doesn't fail the repair).
  */
 export function registerGatewayRepair(session: GatewayPairSession, app: SalusAppApi): void {
   session.setHandler('login', async (data) => {
     await login(app, data);
-    await app.refreshDevices();
+    try {
+      await app.refreshDevices();
+    } catch {
+      // Connected and persisted: repair succeeded. The poll loop retries the refresh.
+    }
     return true;
   });
 }

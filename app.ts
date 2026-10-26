@@ -10,8 +10,8 @@ import type { SalusAppApi } from './lib/pairing';
 /**
  * Owns the one gateway connection all drivers and devices share. Settings:
  * `gateway` (persisted connection), `gateway_input` (written by the settings
- * page) and `gateway_status` (outcome of the last connect, user-facing text
- * only; never the EUID).
+ * page: host, EUID and an `at` nonce that is not read) and `gateway_status`
+ * (outcome of the last connect, user-facing text only; never the EUID).
  */
 class SalusIT600App extends Homey.App implements SalusAppApi {
   private gateway: IT600Gateway | null = null;

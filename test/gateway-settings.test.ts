@@ -5,6 +5,7 @@ import {
   IT600AuthenticationError,
   IT600CommandError,
   IT600ConnectionError,
+  IT600UnreachableError,
   IT600UnsupportedFirmwareError,
 } from '../lib/salus-api';
 
@@ -52,8 +53,13 @@ test('connection errors map to user-facing text only', () => {
     'Wrong EUID: check the 16 characters on the gateway label',
   );
   assert.equal(
-    connectionErrorMessage(new IT600ConnectionError('No gateway answering at 10.0.0.9')),
+    connectionErrorMessage(new IT600UnreachableError('No gateway answering at 10.0.0.9')),
     'No gateway answering at 10.0.0.9',
+  );
+  // A transport failure on a later request carries raw network text.
+  assert.equal(
+    connectionErrorMessage(new IT600ConnectionError('Error communicating with gateway: connect EHOSTUNREACH 10.0.0.9:80')),
+    'Could not connect to the gateway',
   );
   assert.equal(
     connectionErrorMessage(new IT600UnsupportedFirmwareError("Gateway firmware uses an encryption this app doesn't support")),
