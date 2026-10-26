@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Protocol auto-detection: AES-256-CBC, then AES-128-CBC, then AES-256-CCM (newer UG800 firmware). The detected protocol is stored and used on restart
 - SQ610 "Away" preset
-- Wiring-centre (it600WC) device with connectivity, problem alarm and signal (RSSI/LQI)
+- Wiring-centre (it600WC) device with a "Connected" indicator (`salus_connected`, also reflected in availability), problem alarm and signal (RSSI/LQI)
 - Thermostat problem alarm (`alarm_generic` and `salus_problems`) and a `problem_started` flow trigger
 - Signal capabilities `salus_rssi` and `salus_lqi`
 - Repair for every driver

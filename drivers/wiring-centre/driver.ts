@@ -20,7 +20,7 @@ class WiringCentreDriver extends Homey.Driver {
           name: device.name,
           data: { id: uniqueId },
           store: { deviceData: device.data },
-          capabilities: ['alarm_generic', 'salus_problems', 'salus_rssi', 'salus_lqi'],
+          capabilities: ['salus_connected', 'alarm_generic', 'salus_problems', 'salus_rssi', 'salus_lqi'],
         });
       });
 

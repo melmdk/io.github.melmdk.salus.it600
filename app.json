@@ -546,6 +546,7 @@
       },
       "class": "sensor",
       "capabilities": [
+        "salus_connected",
         "alarm_generic",
         "salus_problems",
         "salus_rssi",
@@ -627,6 +628,15 @@
     }
   ],
   "capabilities": {
+    "salus_connected": {
+      "type": "boolean",
+      "title": {
+        "en": "Connected"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor"
+    },
     "salus_lqi": {
       "type": "number",
       "title": {
