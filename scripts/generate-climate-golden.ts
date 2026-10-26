@@ -1,10 +1,10 @@
 /**
  * Regenerates test/fixtures/climate-golden.json: the climate fields the parser
- * produced BEFORE v0.10 (base commit ae63bd2) for every thermostat in
+ * produced BEFORE v0.10 (base commit 51679e2) for every thermostat in
  * deviceid-climate.json. The golden test compares the current parser to it.
  *
  * Usage (in a scratch dir outside the repo, so old and new code never mix):
- *   mkdir /tmp/base && git archive ae63bd2 lib tsconfig.json | tar -x -C /tmp/base
+ *   mkdir /tmp/base && git archive 51679e2 lib tsconfig.json | tar -x -C /tmp/base
  *   mkdir /tmp/base/scripts && cp scripts/generate-climate-golden.ts /tmp/base/scripts/
  *   ln -s "$PWD/node_modules" /tmp/base/node_modules
  *   (cd /tmp/base && npx tsc --outDir out --rootDir . --skipLibCheck --esModuleInterop \

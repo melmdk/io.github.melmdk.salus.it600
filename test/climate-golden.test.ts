@@ -6,7 +6,7 @@ import { parseClimateDevice } from '../lib/parsers/climate';
 import type { ApiDeviceStatus, ClimateDevice } from '../lib/device-types';
 import { loadFixture } from './helpers/fixtures';
 
-// Climate output of the pre-v0.10 parser (commit ae63bd2); see scripts/generate-climate-golden.ts.
+// Climate output of the pre-v0.10 parser (commit 51679e2); see scripts/generate-climate-golden.ts.
 const golden = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '../../test/fixtures/climate-golden.json'), 'utf8'),
 ) as Array<Record<string, unknown>>;
