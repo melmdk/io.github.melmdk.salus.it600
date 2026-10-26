@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { connectedSettings, connectionErrorMessage, migrateGatewaySettings } from '../lib/gateway-settings';
+import {
+  connectedSettings, connectionErrorMessage, inputCombinedDetails, migrateGatewaySettings,
+} from '../lib/gateway-settings';
 import {
   IT600AuthenticationError,
   IT600CommandError,
@@ -87,4 +89,28 @@ test('connectedSettings reuses the stored protocol only for the same gateway', (
   });
   // After connecting, the detected protocol is what gets stored.
   assert.equal(connectedSettings(previous, '10.0.0.1', '0123456789ABCDEF', 'aes-256-cbc').protocol, 'aes-256-cbc');
+});
+
+test('connectedSettings takes the settings page choice for combined requests', () => {
+  const previous = { host: '10.0.0.1', euid: '0123456789ABCDEF', protocol: 'aes-256-cbc' as const, combinedDetails: true };
+  assert.equal(connectedSettings(previous, '10.0.0.1', '0123456789ABCDEF', undefined, false).combinedDetails, false);
+  assert.equal(connectedSettings(previous, '10.0.0.1', '0123456789ABCDEF', 'aes-256-cbc', false).combinedDetails, false);
+  assert.equal(
+    connectedSettings({ ...previous, combinedDetails: false }, '10.0.0.1', '0123456789ABCDEF', 'aes-256-cbc', true).combinedDetails,
+    true,
+  );
+  assert.equal(connectedSettings(null, '10.0.0.1', '0123456789ABCDEF', undefined, false).combinedDetails, false);
+  // No choice sent (pairing, repair, older settings page): the stored preference stays.
+  assert.equal(
+    connectedSettings({ ...previous, combinedDetails: false }, '10.0.0.1', '0123456789ABCDEF', 'aes-256-cbc').combinedDetails,
+    false,
+  );
+});
+
+test('inputCombinedDetails reads only an explicit boolean', () => {
+  assert.equal(inputCombinedDetails({ host: 'h', euid: 'e', combinedDetails: false }), false);
+  assert.equal(inputCombinedDetails({ host: 'h', euid: 'e', combinedDetails: true }), true);
+  assert.equal(inputCombinedDetails({ host: 'h', euid: 'e', at: 1 }), undefined);
+  assert.equal(inputCombinedDetails({ combinedDetails: 'false' }), undefined);
+  assert.equal(inputCombinedDetails(null), undefined);
 });

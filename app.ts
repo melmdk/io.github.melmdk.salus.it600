@@ -2,7 +2,9 @@
 
 import Homey from 'homey';
 import { IT600Gateway } from './lib/salus-api';
-import { connectedSettings, connectionErrorMessage, migrateGatewaySettings } from './lib/gateway-settings';
+import {
+  connectedSettings, connectionErrorMessage, inputCombinedDetails, migrateGatewaySettings,
+} from './lib/gateway-settings';
 import type { GatewaySettings, GatewayStatus } from './lib/gateway-settings';
 import type { ProtocolName } from './lib/protocol';
 import type { SalusAppApi } from './lib/pairing';
@@ -55,7 +57,8 @@ class SalusIT600App extends Homey.App implements SalusAppApi {
   /** The settings page saved IP and EUID as one change: reconnect once with the pair. */
   private async onGatewayInput(): Promise<void> {
     // Same validation and normalisation as stored settings.
-    const input = migrateGatewaySettings(this.homey.settings.get('gateway_input'));
+    const raw = this.homey.settings.get('gateway_input');
+    const input = migrateGatewaySettings(raw);
     if (!input) {
       this.error('Ignoring incomplete gateway settings from the settings page');
       return;
@@ -63,7 +66,7 @@ class SalusIT600App extends Homey.App implements SalusAppApi {
 
     this.log(`Gateway settings changed, connecting to ${input.host}`);
     try {
-      await this.connectGateway(input.host, input.euid);
+      await this.connectGateway(input.host, input.euid, inputCombinedDetails(raw));
       await this.refreshDevices();
       this.log('Gateway reconnected with new settings');
     } catch (err) {
@@ -92,10 +95,12 @@ class SalusIT600App extends Homey.App implements SalusAppApi {
    * Connect (or reconnect) the app-level gateway. Normalises the EUID, tries
    * the stored protocol first (connect() re-detects if it fails), persists
    * `{host, euid, protocol, combinedDetails}` and writes `gateway_status`.
-   * On failure the API error is thrown and the previous gateway stays in use.
+   * `combinedDetails` is the settings page choice; without it the stored
+   * preference is kept. On failure the API error is thrown and the previous
+   * gateway stays in use.
    */
-  async connectGateway(host: string, euid: string): Promise<IT600Gateway> {
-    return this.queueConnect(host, euid, true);
+  async connectGateway(host: string, euid: string, combinedDetails?: boolean): Promise<IT600Gateway> {
+    return this.queueConnect(host, euid, true, combinedDetails);
   }
 
   /** @deprecated Use connectGateway. */
@@ -103,18 +108,20 @@ class SalusIT600App extends Homey.App implements SalusAppApi {
     return this.connectGateway(host, euid);
   }
 
-  private queueConnect(host: string, euid: string, alwaysReport: boolean): Promise<IT600Gateway> {
+  private queueConnect(host: string, euid: string, alwaysReport: boolean, combinedDetails?: boolean): Promise<IT600Gateway> {
     this.pendingConnects += 1;
-    const run = this.connectQueue.then(() => this.openGateway(host, euid, alwaysReport));
+    const run = this.connectQueue.then(() => this.openGateway(host, euid, alwaysReport, combinedDetails));
     this.connectQueue = run.catch(() => undefined);
     return run.finally(() => {
       this.pendingConnects -= 1;
     });
   }
 
-  private async openGateway(host: string, euid: string, alwaysReport: boolean): Promise<IT600Gateway> {
+  private async openGateway(
+    host: string, euid: string, alwaysReport: boolean, combinedDetails?: boolean,
+  ): Promise<IT600Gateway> {
     const previous = this.loadSettings();
-    const attempt = connectedSettings(previous, host, euid);
+    const attempt = connectedSettings(previous, host, euid, undefined, combinedDetails);
     const gateway = new IT600Gateway(attempt.euid, attempt.host, { protocol: attempt.protocol });
 
     let detected: ProtocolName;
@@ -127,7 +134,7 @@ class SalusIT600App extends Homey.App implements SalusAppApi {
       throw err;
     }
 
-    const settings = connectedSettings(previous, attempt.host, attempt.euid, detected);
+    const settings = connectedSettings(previous, attempt.host, attempt.euid, detected, combinedDetails);
     // The in-session fallback (rejected / left out / dropped) is never persisted.
     gateway.setCombinedDetailRequests(settings.combinedDetails !== false);
     this.gateway = gateway;

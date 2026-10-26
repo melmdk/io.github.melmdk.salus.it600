@@ -26,6 +26,8 @@ export interface GatewaySettings {
 export interface GatewayInput {
   host: string;
   euid: string;
+  /** "Use combined device requests" checkbox; absent from older settings pages. */
+  combinedDetails?: boolean;
   /** Nonce (`Date.now()`) so saving identical values still fires the settings event; not read. */
   at?: number;
 }
@@ -90,20 +92,28 @@ export function migrateGatewaySettings(
  * Settings for connecting to `host` / `euid` (raw user input is fine).
  * Without `protocol` it returns what to try: the stored protocol is reused
  * only for the same gateway (same EUID; a new IP alone keeps it). With the
- * `protocol` that connect() detected it returns what to persist. The combined
- * details preference carries over; first setup gets the default.
+ * `protocol` that connect() detected it returns what to persist. An explicit
+ * `combinedDetails` (the settings page checkbox) wins; otherwise the stored
+ * preference carries over and first setup gets the default.
  */
 export function connectedSettings(
   previous: GatewaySettings | null,
   host: string,
   euid: string,
   protocol?: ProtocolName,
+  combinedDetails?: boolean,
 ): GatewaySettings {
   const settings: GatewaySettings = { host: host.trim(), euid: normaliseEuid(euid) };
   const known = protocol ?? (previous?.euid === settings.euid ? previous.protocol : undefined);
   if (known) settings.protocol = known;
-  settings.combinedDetails = previous?.combinedDetails ?? DEFAULT_COMBINED_DETAILS;
+  settings.combinedDetails = combinedDetails ?? previous?.combinedDetails ?? DEFAULT_COMBINED_DETAILS;
   return settings;
+}
+
+/** The combined-requests choice in a `gateway_input` save, or undefined when the page did not send one. */
+export function inputCombinedDetails(raw: unknown): boolean | undefined {
+  const value = raw && typeof raw === 'object' ? (raw as Record<string, unknown>).combinedDetails : undefined;
+  return typeof value === 'boolean' ? value : undefined;
 }
 
 /** connect()'s verdicts: messages written for users that never contain the EUID. */

@@ -100,6 +100,7 @@ npx homey app publish
 ### Polling
 - Default interval: 30 seconds
 - State sync on capability changes
+- Combined `deviceid` requests (one request for all device types) are on by default (`combinedDetails` in the `gateway` setting). On a rejection, left-out devices or repeated failures the session falls back to per-type requests automatically. Users can switch them off with "Use combined device requests" in the app settings
 
 ## File Structure
 

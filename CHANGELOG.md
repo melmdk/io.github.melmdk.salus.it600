@@ -14,13 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Thermostat problem alarm (`alarm_generic` and `salus_problems`) and a `problem_started` flow trigger
 - Signal capabilities `salus_rssi` and `salus_lqi`
 - Repair for every driver
-- Combined device-detail requests with automatic fallback to per-type requests (verified on a real gateway)
+- Combined device-detail requests, on by default (verified on a real gateway). They fall back to per-type requests automatically and can be switched off with "Use combined device requests" in the app settings
 - Test suite (`node:test`) with sanitised gateway fixtures
 
 ### Changed
 - Pairing reuses the app's existing gateway connection; the credentials screen only appears on first setup or when the gateway can't be reached
 - One shared gateway-credentials flow for all drivers
 - The settings page saves IP and EUID in one step and shows the connection status
+- Device details are fetched in one combined request by default instead of one request per device type (the 0.9.6 behaviour). If the gateway rejects it, leaves devices out or keeps failing, the app switches back to per-type requests for the session
 - Clear error messages: "No gateway answering at <ip>", "Wrong EUID: check the 16 characters on the gateway label" and "Gateway firmware uses an encryption this app doesn't support"
 - One shared request lock across all gateway instances
 - EUID input is normalised

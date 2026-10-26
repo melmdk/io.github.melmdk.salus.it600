@@ -23,6 +23,15 @@
         <input class="homey-form-input" id="euid" type="text" placeholder="16 characters from the gateway label" />
         <small class="homey-form-hint">Identifier printed on the gateway label</small>
       </div>
+
+      <div class="homey-form-group">
+        <label class="homey-form-checkbox">
+          <input class="homey-form-checkbox-input" id="combined" type="checkbox" checked />
+          <span class="homey-form-checkbox-checkmark"></span>
+          <span class="homey-form-checkbox-text">Use combined device requests</span>
+        </label>
+        <small class="homey-form-hint">Fetches all device details in one request. If the gateway doesn't answer it, the app falls back to one request per device type on its own.</small>
+      </div>
     </fieldset>
 
     <button id="save" class="homey-button-primary-full">Save &amp; Connect</button>
@@ -33,6 +42,7 @@
       function onHomeyReady(Homey) {
         var hostEl = document.getElementById('host');
         var euidEl = document.getElementById('euid');
+        var combinedEl = document.getElementById('combined');
         var saveEl = document.getElementById('save');
         var statusEl = document.getElementById('status');
         var waiting = null;
@@ -71,6 +81,8 @@
           if (!err && gateway) {
             if (gateway.host) hostEl.value = gateway.host;
             if (gateway.euid) euidEl.value = gateway.euid;
+            // On unless switched off; older versions stored no preference.
+            combinedEl.checked = gateway.combinedDetails !== false;
           }
           loadStatus();
           Homey.ready();
@@ -91,9 +103,10 @@
             showStatus('Saved. Still waiting for the gateway to answer.', false);
           }, 45000);
 
-          // One change: the app reconnects once, with the new IP and EUID together.
+          // One change: the app reconnects once, with the new IP, EUID and request mode together.
           // `at` makes every save a new value, so re-saving the same pair still reconnects.
-          Homey.set('gateway_input', { host: host, euid: euid, at: Date.now() }, function(err) {
+          var input = { host: host, euid: euid, combinedDetails: combinedEl.checked, at: Date.now() };
+          Homey.set('gateway_input', input, function(err) {
             if (err) {
               stopWaiting();
               showStatus('Failed to save: ' + err.message, false);
