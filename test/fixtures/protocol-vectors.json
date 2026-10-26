@@ -1,0 +1,31 @@
+{
+  "plaintext": "{\"requestAttr\":\"readall\"}",
+  "euids": {
+    "euid16": {
+      "euid": "0123456789ABCDEF",
+      "cbc256Hex": "ffe700b88655ab6d02dd271c5c482895be39e43f8ef078a1d6bb713d0bc2e768",
+      "cbc128Hex": "c47d2aed91bbc17e43483c370bce751b010649c8d76b14aee91aca5284f867e9",
+      "ccmNonceHex": "a1b2c30001765432",
+      "ccmWireHex": "875a93e01a5778b395f389903e478f7bb5bb8b7e6b701dad1eac470b1e89f9dfafa1b2c30001765432"
+    },
+    "euid12": {
+      "euid": "0123456789AB",
+      "cbc256Hex": "46c422066c581ffd61ef817a675ae41bc30d678548282aeaec50a17094dbde78",
+      "cbc128Hex": "f1955ef66f401ef5bdcb8917c7e725c883327861c3adb591e00528583c1cf80a",
+      "ccmNonceHex": "a1b2c30001765432",
+      "ccmWireHex": "0d9975bf21af98d92d8eab8348413132f071a08aa41bdb3c76041c1a47c39fa041a1b2c30001765432"
+    }
+  },
+  "cbcTrailerCase": {
+    "note": "Synthesised: no live response was non-block-aligned. Valid CBC ciphertext plus 5 junk trailing bytes.",
+    "euid": "0123456789ABCDEF",
+    "plaintext": "{\"requestAttr\":\"readall\"}",
+    "wireHex": "ffe700b88655ab6d02dd271c5c482895be39e43f8ef078a1d6bb713d0bc2e7680102030405"
+  },
+  "rejectFrameCase": {
+    "note": "Live reject frame (wrong key) decrypted under the real EUID; plaintext re-encrypted under the dummy EUID.",
+    "euid": "0123456789ABCDEF",
+    "plaintext": "{\"status\":\"fail\"}",
+    "wireHex": "f6818bedb254d181a05143a808b29b9cbd34263465bb195118f6f01fa98d41e8"
+  }
+}

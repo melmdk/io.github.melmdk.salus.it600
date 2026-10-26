@@ -1,0 +1,13 @@
+Salus IT600 for Homey
+
+The gateway protocol algorithms (AES-256-CBC, AES-128-CBC and AES-256-CCM
+framing and key derivation) and the device parsing in this app are ported
+from:
+
+- salus-it600-client by Jordi-14 (MIT/Apache-2.0)
+  https://github.com/Jordi-14/salus-it600-client
+- pyit600 (MIT)
+  https://github.com/epoplavskis/pyit600
+
+Test vectors in test/fixtures/protocol-vectors.json were generated with
+salus-it600-client 0.7.0.
