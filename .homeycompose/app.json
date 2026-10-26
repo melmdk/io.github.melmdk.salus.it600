@@ -31,38 +31,6 @@
   "bugs": {
     "url": "https://github.com/melmdk/io.github.melmdk.salus.it600/issues"
   },
-  "settings": [
-    {
-      "type": "group",
-      "title": {
-        "en": "Gateway Connection"
-      },
-      "children": [
-        {
-          "id": "host",
-          "type": "text",
-          "title": {
-            "en": "Gateway IP Address"
-          },
-          "hint": {
-            "en": "The local IP address of your Salus UG600/UGE600 gateway"
-          },
-          "value": ""
-        },
-        {
-          "id": "euid",
-          "type": "text",
-          "title": {
-            "en": "Gateway EUID"
-          },
-          "hint": {
-            "en": "The unique identifier printed on your gateway (16 hex characters)"
-          },
-          "value": ""
-        }
-      ]
-    }
-  ],
   "contributing": {
     "donate": {
       "paypal": {

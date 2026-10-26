@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+  </head>
+  <body>
+    <header class="homey-header">
+      <h1 class="homey-title">Salus IT600</h1>
+      <p class="homey-subtitle">Gateway Connection</p>
+    </header>
+
+    <fieldset class="homey-form-fieldset">
+      <legend class="homey-form-legend">Gateway</legend>
+
+      <div class="homey-form-group">
+        <label class="homey-form-label" for="host">Gateway IP Address</label>
+        <input class="homey-form-input" id="host" type="text" placeholder="192.168.1.100" />
+        <small class="homey-form-hint">Local IP address of your UG600/UGE600 gateway</small>
+      </div>
+
+      <div class="homey-form-group">
+        <label class="homey-form-label" for="euid">Gateway EUID</label>
+        <input class="homey-form-input" id="euid" type="text" placeholder="0000000000000000" maxlength="16" />
+        <small class="homey-form-hint">16-character identifier printed on the gateway label</small>
+      </div>
+    </fieldset>
+
+    <button id="save" class="homey-button-primary-full">Save &amp; Connect</button>
+
+    <div id="status" style="margin-top:16px; display:none;"></div>
+
+    <script type="text/javascript">
+      function onHomeyReady(Homey) {
+        var hostEl = document.getElementById('host');
+        var euidEl = document.getElementById('euid');
+        var saveEl = document.getElementById('save');
+        var statusEl = document.getElementById('status');
+
+        function showStatus(msg, ok) {
+          statusEl.textContent = msg;
+          statusEl.className = ok ? 'homey-form-success' : 'homey-form-error';
+          statusEl.style.display = 'block';
+        }
+
+        Homey.get('host', function(err, val) {
+          if (!err && val) hostEl.value = val;
+        });
+
+        Homey.get('euid', function(err, val) {
+          if (!err && val) euidEl.value = val;
+          Homey.ready();
+        });
+
+        saveEl.addEventListener('click', function() {
+          var host = hostEl.value.trim();
+          var euid = euidEl.value.trim();
+
+          if (!host) return showStatus('Gateway IP address is required.', false);
+          if (!euid || euid.length !== 16) return showStatus('EUID must be 16 characters.', false);
+
+          saveEl.disabled = true;
+          saveEl.textContent = 'Connecting…';
+
+          Homey.set('host', host, function(err) {
+            if (err) {
+              saveEl.disabled = false;
+              saveEl.textContent = 'Save & Connect';
+              return showStatus('Failed to save: ' + err.message, false);
+            }
+
+            Homey.set('euid', euid, function(err) {
+              saveEl.disabled = false;
+              saveEl.textContent = 'Save & Connect';
+              if (err) return showStatus('Failed to save: ' + err.message, false);
+              showStatus('Settings saved. Reconnecting to gateway…', true);
+            });
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

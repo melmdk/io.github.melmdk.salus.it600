@@ -369,6 +369,7 @@ export class IT600Gateway {
 
   /** Parse climate devices from batch response */
   private refreshClimateDevices(devices: ApiDeviceStatus[]): void {
+    if (devices.length === 0) return;
     const newDevices = new Map<string, ClimateDevice>();
 
     for (const device of devices) {
@@ -383,7 +384,7 @@ export class IT600Gateway {
         const sfans = device.sFanS;
 
         const baseProps = {
-          available: device.sZDOInfo?.OnlineStatus_i === 1,
+          available: (device.sZDOInfo?.OnlineStatus_i ?? 1) === 1,
           name: this.parseDeviceName(device.sZDO?.DeviceName, 'Unknown'),
           uniqueId,
           temperatureUnit: TEMP_CELSIUS,
@@ -496,6 +497,7 @@ export class IT600Gateway {
 
   /** Parse binary sensor devices from batch response */
   private refreshBinarySensorDevices(devices: ApiDeviceStatus[]): void {
+    if (devices.length === 0) return;
     const newDevices = new Map<string, BinarySensorDevice>();
 
     for (const device of devices) {
@@ -531,7 +533,7 @@ export class IT600Gateway {
         }
 
         const binarySensor: BinarySensorDevice = {
-          available: device.sZDOInfo?.OnlineStatus_i === 1,
+          available: (device.sZDOInfo?.OnlineStatus_i ?? 1) === 1,
           name: this.parseDeviceName(device.sZDO?.DeviceName, 'Unknown'),
           uniqueId,
           isOn,
@@ -553,6 +555,7 @@ export class IT600Gateway {
 
   /** Parse temperature sensor devices from batch response */
   private refreshSensorDevices(devices: ApiDeviceStatus[]): void {
+    if (devices.length === 0) return;
     const newDevices = new Map<string, SensorDevice>();
 
     for (const device of devices) {
@@ -567,7 +570,7 @@ export class IT600Gateway {
         const model = device.DeviceL?.ModelIdentifier_i || null;
 
         const sensor: SensorDevice = {
-          available: device.sZDOInfo?.OnlineStatus_i === 1,
+          available: (device.sZDOInfo?.OnlineStatus_i ?? 1) === 1,
           name: this.parseDeviceName(device.sZDO?.DeviceName, 'Unknown'),
           uniqueId: sensorId,
           state: temperature / 100,
@@ -590,6 +593,7 @@ export class IT600Gateway {
 
   /** Parse switch devices from batch response */
   private refreshSwitchDevices(devices: ApiDeviceStatus[]): void {
+    if (devices.length === 0) return;
     const newDevices = new Map<string, SwitchDevice>();
 
     for (const device of devices) {
@@ -607,7 +611,7 @@ export class IT600Gateway {
         const model = device.DeviceL?.ModelIdentifier_i || null;
 
         const switchDevice: SwitchDevice = {
-          available: device.sZDOInfo?.OnlineStatus_i === 1,
+          available: (device.sZDOInfo?.OnlineStatus_i ?? 1) === 1,
           name: this.parseDeviceName(device.sZDO?.DeviceName, uniqueId),
           uniqueId,
           isOn: isOn === 1,
@@ -629,6 +633,7 @@ export class IT600Gateway {
 
   /** Parse cover devices from batch response */
   private refreshCoverDevices(devices: ApiDeviceStatus[]): void {
+    if (devices.length === 0) return;
     const newDevices = new Map<string, CoverDevice>();
 
     for (const device of devices) {
@@ -651,7 +656,7 @@ export class IT600Gateway {
         const model = device.DeviceL?.ModelIdentifier_i || null;
 
         const coverDevice: CoverDevice = {
-          available: device.sZDOInfo?.OnlineStatus_i === 1,
+          available: (device.sZDOInfo?.OnlineStatus_i ?? 1) === 1,
           name: this.parseDeviceName(device.sZDO?.DeviceName, 'Unknown'),
           uniqueId,
           currentPosition,
