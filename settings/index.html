@@ -20,8 +20,8 @@
 
       <div class="homey-form-group">
         <label class="homey-form-label" for="euid">Gateway EUID</label>
-        <input class="homey-form-input" id="euid" type="text" placeholder="0000000000000000" maxlength="16" />
-        <small class="homey-form-hint">16-character identifier printed on the gateway label</small>
+        <input class="homey-form-input" id="euid" type="text" placeholder="16 characters from the gateway label" />
+        <small class="homey-form-hint">Identifier printed on the gateway label</small>
       </div>
     </fieldset>
 
@@ -35,6 +35,7 @@
         var euidEl = document.getElementById('euid');
         var saveEl = document.getElementById('save');
         var statusEl = document.getElementById('status');
+        var waiting = null;
 
         function showStatus(msg, ok) {
           statusEl.textContent = msg;
@@ -42,38 +43,60 @@
           statusEl.style.display = 'block';
         }
 
-        Homey.get('host', function(err, val) {
-          if (!err && val) hostEl.value = val;
+        function setBusy(busy) {
+          saveEl.disabled = busy;
+          saveEl.textContent = busy ? 'Connecting…' : 'Save & Connect';
+        }
+
+        function stopWaiting() {
+          if (waiting) clearTimeout(waiting);
+          waiting = null;
+          setBusy(false);
+        }
+
+        // The app writes the outcome of every connect to gateway_status.
+        function loadStatus() {
+          Homey.get('gateway_status', function(err, status) {
+            if (err || !status || !status.message) return;
+            showStatus(status.message, status.ok);
+            if (waiting) stopWaiting();
+          });
+        }
+
+        Homey.on('settings.set', function(key) {
+          if (key === 'gateway_status') loadStatus();
         });
 
-        Homey.get('euid', function(err, val) {
-          if (!err && val) euidEl.value = val;
+        Homey.get('gateway', function(err, gateway) {
+          if (!err && gateway) {
+            if (gateway.host) hostEl.value = gateway.host;
+            if (gateway.euid) euidEl.value = gateway.euid;
+          }
+          loadStatus();
           Homey.ready();
         });
 
         saveEl.addEventListener('click', function() {
           var host = hostEl.value.trim();
-          var euid = euidEl.value.trim();
+          var euid = euidEl.value.replace(/\s+/g, '');
 
           if (!host) return showStatus('Gateway IP address is required.', false);
-          if (!euid || euid.length !== 16) return showStatus('EUID must be 16 characters.', false);
+          if (!euid) return showStatus('Gateway EUID is required.', false);
 
-          saveEl.disabled = true;
-          saveEl.textContent = 'Connecting…';
+          setBusy(true);
+          statusEl.style.display = 'none';
+          // Started before saving: the app may answer before the save callback runs.
+          waiting = setTimeout(function() {
+            stopWaiting();
+            showStatus('Saved. Still waiting for the gateway to answer.', false);
+          }, 45000);
 
-          Homey.set('host', host, function(err) {
+          // One change: the app reconnects once, with the new IP and EUID together.
+          Homey.set('gateway_input', { host: host, euid: euid }, function(err) {
             if (err) {
-              saveEl.disabled = false;
-              saveEl.textContent = 'Save & Connect';
-              return showStatus('Failed to save: ' + err.message, false);
+              stopWaiting();
+              showStatus('Failed to save: ' + err.message, false);
             }
-
-            Homey.set('euid', euid, function(err) {
-              saveEl.disabled = false;
-              saveEl.textContent = 'Save & Connect';
-              if (err) return showStatus('Failed to save: ' + err.message, false);
-              showStatus('Settings saved. Reconnecting to gateway…', true);
-            });
           });
         });
       }

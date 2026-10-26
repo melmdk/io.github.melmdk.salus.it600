@@ -74,7 +74,7 @@
           "en": "Gateway EUID"
         },
         "passwordPlaceholder": {
-          "en": "001E5E0D32906128"
+          "en": "16 characters from the gateway label"
         }
       }
     },
@@ -88,6 +88,33 @@
     {
       "id": "add_devices",
       "template": "add_devices"
+    }
+  ],
+  "repair": [
+    {
+      "id": "gateway_credentials",
+      "template": "login_credentials",
+      "options": {
+        "title": {
+          "en": "Connect to Gateway"
+        },
+        "usernameLabel": {
+          "en": "Gateway IP Address"
+        },
+        "usernamePlaceholder": {
+          "en": "192.168.1.100"
+        },
+        "passwordLabel": {
+          "en": "Gateway EUID"
+        },
+        "passwordPlaceholder": {
+          "en": "16 characters from the gateway label"
+        }
+      }
+    },
+    {
+      "id": "done",
+      "template": "done"
     }
   ],
   "images": {

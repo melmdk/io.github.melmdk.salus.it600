@@ -2,15 +2,9 @@
 
 import Homey from 'homey';
 import type { PairSession } from 'homey/lib/Driver';
-import type { IT600Gateway } from '../../lib/salus-api';
 import type { ClimateDevice, PairingDeviceData } from '../../lib/device-types';
-
-interface SalusIT600App extends Homey.App {
-  getGateway(): IT600Gateway | null;
-  createGateway(host: string, euid: string): Promise<IT600Gateway>;
-  startPolling(intervalMs?: number): void;
-  pollNow(): Promise<void>;
-}
+import { registerGatewayPairing, registerGatewayRepair } from '../../lib/pairing';
+import type { SalusAppApi } from '../../lib/pairing';
 
 class ThermostatDriver extends Homey.Driver {
   async onInit(): Promise<void> {
@@ -18,36 +12,7 @@ class ThermostatDriver extends Homey.Driver {
   }
 
   async onPair(session: PairSession): Promise<void> {
-    let gateway: IT600Gateway | null = null;
-
-    session.setHandler('login', async (data: { username: string; password: string }) => {
-      const host = data.username.trim();
-      const euid = data.password.trim();
-
-      this.log(`Connecting to gateway at ${host}`);
-
-      try {
-        const app = this.homey.app as SalusIT600App;
-        gateway = await app.createGateway(host, euid);
-        await gateway.pollStatus();
-
-        // Start polling
-        app.startPolling();
-
-        return true;
-      } catch (err) {
-        this.error('Connection failed:', err);
-        throw new Error(
-          err instanceof Error ? err.message : 'Failed to connect to gateway',
-        );
-      }
-    });
-
-    session.setHandler('list_devices', async () => {
-      if (!gateway) {
-        throw new Error('Not connected to gateway');
-      }
-
+    registerGatewayPairing(session, this.homey.app as Homey.App & SalusAppApi, (gateway) => {
       const climateDevices = gateway.getClimateDevices();
       const devices: PairingDeviceData[] = [];
 
@@ -113,24 +78,7 @@ class ThermostatDriver extends Homey.Driver {
   }
 
   async onRepair(session: PairSession): Promise<void> {
-    session.setHandler('login', async (data: { username: string; password: string }) => {
-      const host = data.username.trim();
-      const euid = data.password.trim();
-
-      this.log(`Reconnecting to gateway at ${host}`);
-
-      try {
-        const app = this.homey.app as SalusIT600App;
-        await app.createGateway(host, euid);
-        app.startPolling();
-        return true;
-      } catch (err) {
-        this.error('Repair failed:', err);
-        throw new Error(
-          err instanceof Error ? err.message : 'Failed to connect to gateway',
-        );
-      }
-    });
+    registerGatewayRepair(session, this.homey.app as Homey.App & SalusAppApi);
   }
 }
 
