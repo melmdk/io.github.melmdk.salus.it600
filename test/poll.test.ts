@@ -36,8 +36,10 @@ test('per-type by default', async () => {
   const { transport, gateway, climateCount } = setup();
   assert.equal(gateway.combinedDetailRequests, false);
   await gateway.pollStatus();
-  assert.deepEqual(transport.attrs, ['readall', 'deviceid']);
+  // One deviceid request per family: climate, then wiring centres.
+  assert.deepEqual(transport.attrs, ['readall', 'deviceid', 'deviceid']);
   assert.equal(transport.detailRequests[0].length, 11);
+  assert.equal(transport.detailRequests[1].length, 2);
   assert.equal(climateCount(), EXPECTED_CLIMATE);
 });
 
@@ -90,15 +92,15 @@ for (const [name, outcome] of [['rejection', 'reject'], ['when devices are left 
     await gateway.pollStatus();
     assert.equal(gateway.combinedDetailRequests, false);
     assert.equal(gateway.lastPollUsedCombined, false);
-    assert.equal(transport.detailRequests.length, 2, 'combined request, then per-type');
+    assert.equal(transport.detailRequests.length, 3, 'combined request, then per-type for climate and wiring centres');
     assert.equal(climateCount(), EXPECTED_CLIMATE);
   });
 }
 
 test('combined falls back after 3 drops', async () => {
-  // Combined requests are the even calls; each poll's per-type fallback is the odd one.
+  // A dropped poll is 3 calls: the combined request, then one per-type request per family.
   const { transport, gateway, climateCount } = setup({
-    onDetails: (_ids, call) => (call < 6 && call % 2 === 0 ? 'drop' : 'ok'),
+    onDetails: (_ids, call) => (call < 9 && call % 3 === 0 ? 'drop' : 'ok'),
   });
   gateway.setCombinedDetailRequests(true);
   for (let poll = 1; poll <= 3; poll += 1) {
@@ -107,19 +109,35 @@ test('combined falls back after 3 drops', async () => {
     assert.equal(climateCount(), EXPECTED_CLIMATE);
   }
   assert.equal(gateway.combinedDetailRequests, false);
-  assert.equal(transport.detailRequests.length, 6);
+  assert.equal(transport.detailRequests.length, 9);
 
   await gateway.pollStatus();
-  assert.equal(transport.detailRequests.length, 7, 'per-type only from now on');
+  assert.equal(transport.detailRequests.length, 11, 'per-type only from now on');
 });
 
 test('a successful combined request resets the drop counter', async () => {
-  const drops = new Set([0, 2, 5]);
+  const drops = new Set([0, 3, 7]);
   const { gateway } = setup({ onDetails: (_ids, call) => (drops.has(call) ? 'drop' : 'ok') });
   gateway.setCombinedDetailRequests(true);
-  await gateway.pollStatus(); // call 0 dropped, call 1 per-type
-  await gateway.pollStatus(); // call 2 dropped, call 3 per-type
-  await gateway.pollStatus(); // call 4 combined ok
-  await gateway.pollStatus(); // call 5 dropped, call 6 per-type
+  await gateway.pollStatus(); // call 0 dropped, calls 1-2 per-type
+  await gateway.pollStatus(); // call 3 dropped, calls 4-5 per-type
+  await gateway.pollStatus(); // call 6 combined ok
+  await gateway.pollStatus(); // call 7 dropped, calls 8-9 per-type
   assert.equal(gateway.combinedDetailRequests, true);
+});
+
+test('one combined request covers climate and wiring centres, each refreshed from its slice', async () => {
+  const { transport, gateway, climateCount } = setup();
+  gateway.setCombinedDetailRequests(true);
+  await gateway.pollStatus();
+  assert.deepEqual(transport.attrs, ['readall', 'deviceid']);
+  assert.equal(transport.detailRequests[0].length, 13, '11 thermostats + 2 wiring centres in one request');
+  assert.equal(gateway.lastPollUsedCombined, true);
+  assert.equal(climateCount(), EXPECTED_CLIMATE);
+  const centres = [...gateway.getWiringCentreDevices().values()];
+  assert.deepEqual(centres.map((c) => c.name).sort(), ['Depotrum', 'Kældertrappe']);
+  assert.ok(gateway.getWiringCentreDevice(centres[0].uniqueId));
+  // Neither family picked up the other's devices.
+  const climateIds = new Set((gateway as unknown as { climateDevices: Map<string, unknown> }).climateDevices.keys());
+  assert.ok(centres.every((c) => !climateIds.has(c.uniqueId)));
 });

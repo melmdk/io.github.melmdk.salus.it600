@@ -51,13 +51,15 @@ export const PRESET_PERMANENT_HOLD = 'Permanent Hold';
 export const PRESET_TEMPORARY_HOLD = 'Temporary Hold';
 export const PRESET_ECO = 'Eco';
 export const PRESET_OFF = 'Off';
+export const PRESET_AWAY = 'Away';
 
 export type PresetMode =
   | typeof PRESET_FOLLOW_SCHEDULE
   | typeof PRESET_PERMANENT_HOLD
   | typeof PRESET_TEMPORARY_HOLD
   | typeof PRESET_ECO
-  | typeof PRESET_OFF;
+  | typeof PRESET_OFF
+  | typeof PRESET_AWAY;
 
 // Fan modes
 export const FAN_MODE_AUTO = 'Auto';
@@ -96,3 +98,42 @@ export const WINDOW_SENSOR_MODELS = ['SW600', 'OS600'];
 export const MOISTURE_SENSOR_MODELS = ['WLS600'];
 export const SMOKE_SENSOR_MODELS = ['SmokeSensor-EM'];
 export const OUTLET_MODELS = ['SP600', 'SPE600'];
+
+/**
+ * Thermostat and wiring-centre fault flags (`ErrorNN` === 1) and what they mean.
+ * Ported verbatim from salus-it600-client 0.7.0 (MIT/Apache-2.0), const.py.
+ */
+export const THERMOSTAT_ERROR_CODES: Record<string, string> = {
+  Error01: 'Paired TRV hardware issue',
+  Error02: 'Floor sensor overheating',
+  Error03: 'Floor sensor open',
+  Error04: 'Floor sensor short',
+  Error05: 'Lost link with ZigBee Coordinator',
+  Error06: 'Lost link with Wiring Center KL08RF',
+  Error07: 'Lost link with TRV',
+  Error08: 'Lost link with RX10RF (RX1)',
+  Error09: 'Lost link with RX10RF (RX2)',
+  Error10: 'Lost link with Hot Water Timer',
+  Error11: 'Lost link with Zone 1 thermostat',
+  Error12: 'Lost link with Zone 2 thermostat',
+  Error13: 'Lost link with Zone 3 thermostat',
+  Error14: 'Lost link with Zone 4 thermostat',
+  Error15: 'Lost link with Zone 5 thermostat',
+  Error16: 'Lost link with Zone 6 thermostat',
+  Error17: 'Lost link with Zone 7 thermostat',
+  Error18: 'Lost link with Zone 8 thermostat',
+  Error19: 'Lost link with Gateway',
+  Error20: 'Lost link with RX30RF/RX10RF (RX1)',
+  Error21: 'Paired TRV lost link with Coordinator',
+  Error22: 'Paired TRV low battery',
+  Error23: 'Message from unpaired TRV',
+  Error24: 'Rejected by Wiring Centre',
+  Error25: 'Lost link with Parent',
+  Error26: 'Lost link with Zone 9 thermostat',
+  Error27: 'Lost link with Zone 10 thermostat',
+  Error28: 'Lost link with Zone 11 thermostat',
+  Error29: 'Lost link with Zone 12 thermostat',
+  Error30: 'Paired TRV gear issue',
+  Error31: 'Paired TRV adaptation issue',
+  Error32: 'Low battery',
+};

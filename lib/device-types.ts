@@ -51,6 +51,24 @@ export interface ClimateDevice extends BaseDevice {
   fanModes: FanMode[] | null;
   locked: boolean | null;
   supportedFeatures: number;
+  /** Last reported signal strength; null until the gateway has reported one. */
+  rssi: number | null;
+  lqi: number | null;
+  /** Descriptions of the active fault flags; empty when healthy. */
+  problems: string[];
+}
+
+/** Wiring centre (it600WC): diagnostics only, it has no setpoint or relay state of its own. */
+export interface WiringCentreDevice {
+  available: boolean;
+  name: string;
+  uniqueId: string;
+  data: DeviceData;
+  model: string | null;
+  connected: boolean;
+  problems: string[];
+  rssi: number | null;
+  lqi: number | null;
 }
 
 /** Binary sensor device (door/window, moisture, smoke) */
@@ -131,6 +149,8 @@ export interface ApiDeviceStatus {
     RunningState: number;
     SunnySetpoint_x100?: number;
     BatteryLevel?: number;
+    /** ErrorNN fault flags (1 = active), see THERMOSTAT_ERROR_CODES. */
+    [errorFlag: `Error${number}`]: number | undefined;
   };
   sTherS?: {
     LocalTemperature_x100: number;
@@ -157,7 +177,11 @@ export interface ApiDeviceStatus {
   };
   sIT600I?: {
     RelayStatus?: number;
+    LastMessageRSSI_d?: number;
+    LastMessageLQI_d?: number;
   };
+  /** Wiring centre fault register: ErrorNN flags plus the ErrorCodeWC_d hex string. */
+  sIT600WC?: Record<string, number | string | undefined>;
   sOnOffS?: {
     OnOff?: number;
   };

@@ -37,6 +37,8 @@ export type FakeTransport = Transport & {
   attrs: string[];
   /** UniIDs asked for in every `deviceid` request, in order. */
   detailRequests: string[][];
+  /** Decoded body of every `write` request, in order. */
+  writes: Array<{ id?: Array<Record<string, unknown>> }>;
 };
 
 /**
@@ -57,7 +59,7 @@ export function fakeGateway(opts: FakeGatewayOptions): FakeTransport {
       throw new TransportError('Error communicating with gateway: ECONNRESET');
     }
 
-    let request: { requestAttr?: string; id?: Array<{ data?: { UniID?: string } }> };
+    let request: { requestAttr?: string; id?: Array<{ data?: { UniID?: string } } & Record<string, unknown>> };
     try {
       request = JSON.parse(gateway.unwrapResponse(body)) as typeof request;
     } catch {
@@ -65,6 +67,7 @@ export function fakeGateway(opts: FakeGatewayOptions): FakeTransport {
     }
     if (opts.reject) return failFrame();
     transport.attrs.push(request.requestAttr ?? '');
+    if (request.requestAttr === 'write') transport.writes.push(request);
 
     if (request.requestAttr === 'deviceid') {
       const ids = (request.id ?? []).map((item) => item.data?.UniID ?? '');
@@ -88,6 +91,7 @@ export function fakeGateway(opts: FakeGatewayOptions): FakeTransport {
   transport.requests = [];
   transport.attrs = [];
   transport.detailRequests = [];
+  transport.writes = [];
   transport.probeRoot = async () => {
     if (opts.unreachable) throw new TransportError('Gateway request timeout');
   };

@@ -36,6 +36,12 @@
       "title": {
         "en": "Off"
       }
+    },
+    {
+      "id": "Away",
+      "title": {
+        "en": "Away"
+      }
     }
   ]
 }
