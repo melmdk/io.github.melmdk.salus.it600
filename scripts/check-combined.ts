@@ -14,6 +14,7 @@ import { PRESET_FOLLOW_SCHEDULE, PRESET_PERMANENT_HOLD, PresetMode } from '../li
 const TARGET_NAME = 'Gæsteværelse';
 const POLL_EVERY_MS = 5000;
 const POLL_FOR_MS = 60000;
+const REQUIRED_STREAK = 3;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const root = path.resolve(__dirname, '../..');
@@ -44,14 +45,15 @@ async function main(): Promise<void> {
 
   gateway.setCombinedDetailRequests(true);
   const newSetpoint = originalSetpoint + 0.5;
-  let result = 'COMBINED FAIL: new setpoint never appeared within 60 s';
-  let written = false;
+  let result = 'COMBINED FAIL: no 3 consecutive polls served by the combined request with the new setpoint within 60 s';
+  // Set before the write: a write that times out may still have reached the gateway.
+  let written = true;
   try {
     await gateway.setClimateTemperature(id, newSetpoint);
-    written = true;
     console.log(`wrote setpoint ${newSetpoint}`);
 
     const deadline = Date.now() + POLL_FOR_MS;
+    let streak = 0;
     while (Date.now() < deadline) {
       await sleep(POLL_EVERY_MS);
       await gateway.pollStatus();
@@ -60,7 +62,9 @@ async function main(): Promise<void> {
       console.log(`poll: combined=${gateway.combinedDetailRequests} devices=${count} setpoint=${seen}`);
       if (!gateway.combinedDetailRequests) { result = 'COMBINED FAIL: gateway switched combined requests off (rejected, left devices out or dropped)'; break; }
       if (count !== baselineCount) { result = `COMBINED FAIL: ${count} climate devices, expected ${baselineCount}`; break; }
-      if (Math.abs(seen - newSetpoint) < 0.01) { result = 'COMBINED OK'; break; }
+      // A fallback poll also returns everything, so count only polls the combined request served.
+      streak = gateway.lastPollUsedCombined && Math.abs(seen - newSetpoint) < 0.01 ? streak + 1 : 0;
+      if (streak >= REQUIRED_STREAK) { result = 'COMBINED OK'; break; }
     }
   } catch (err) {
     result = `COMBINED FAIL: ${(err as Error).message}`;
@@ -68,9 +72,18 @@ async function main(): Promise<void> {
     console.log(result);
     if (written) {
       let ok = false;
+      // Each restore is attempted on its own, so a failed setpoint does not skip the preset.
       try {
         await gateway.setClimateTemperature(id, originalSetpoint);
+      } catch (err) {
+        console.log(`setpoint restore error: ${(err as Error).message}`);
+      }
+      try {
         await gateway.setClimatePreset(id, originalPreset);
+      } catch (err) {
+        console.log(`preset restore error: ${(err as Error).message}`);
+      }
+      try {
         gateway.setCombinedDetailRequests(false);
         // The gateway needs a moment to report the restored values.
         for (let attempt = 0; attempt < 6 && !ok; attempt += 1) {
@@ -84,6 +97,7 @@ async function main(): Promise<void> {
         console.log(`restore error: ${(err as Error).message}`);
       }
       console.log(ok ? 'restored' : 'NOT RESTORED: check the thermostat by hand');
+      if (!ok) process.exitCode = 1;
     } else {
       console.log('restored (nothing was written)');
     }

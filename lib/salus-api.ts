@@ -165,6 +165,7 @@ export class IT600Gateway {
   private pendingReadall: ApiResponse | null = null;
   private combinedDetails = false;
   private combinedFailures = 0;
+  private usedCombined = false;
 
   constructor(
     euid: string,
@@ -336,6 +337,11 @@ export class IT600Gateway {
     return this.combinedDetails;
   }
 
+  /** True when the last poll's details came from a fully validated combined answer. */
+  get lastPollUsedCombined(): boolean {
+    return this.usedCombined;
+  }
+
   /** Opt in or out of combined `deviceid` requests (a failure switches them off again). */
   setCombinedDetailRequests(enabled: boolean): void {
     this.combinedDetails = enabled;
@@ -387,8 +393,8 @@ export class IT600Gateway {
     for (const item of answer) {
       if (item.data?.UniID) indexed.set(detailKey(item), item);
     }
-    const answeredIds = new Set([...indexed.values()].map((d) => d.data.UniID));
-    const missing = [...requested.values()].filter((d) => !answeredIds.has(d.data.UniID));
+    // Same key as the lookup in pollStatus, so nothing validated is later dropped.
+    const missing = [...requested.keys()].filter((key) => !indexed.has(key));
     if (missing.length > 0) {
       this.disableCombinedDetailRequests(`answer left out ${missing.length} of ${requested.size} devices`);
       return null;
@@ -449,13 +455,21 @@ export class IT600Gateway {
       console.log(`Poll: ${fromCache ? 'cached' : 'fresh'} readall, ${response.id.length} devices: ${counts}`);
     }
 
+    this.usedCombined = false;
     const combined = this.combinedDetails ? await this.fetchCombinedDetails(families) : null;
+    this.usedCombined = combined !== null;
 
     for (const family of families) {
       try {
-        const details = combined
-          ? family.devices.map((d) => combined.get(detailKey(d))).filter((d): d is ApiDeviceStatus => !!d)
-          : await this.fetchDeviceDetails(family.devices);
+        let details: ApiDeviceStatus[];
+        if (combined) {
+          details = family.devices.map((d) => combined.get(detailKey(d))).filter((d): d is ApiDeviceStatus => !!d);
+          // Devices without a UniID cannot be in the combined request: ask per type.
+          const unkeyed = family.devices.filter((d) => !d.data?.UniID);
+          if (unkeyed.length > 0) details = details.concat(await this.fetchDeviceDetails(unkeyed));
+        } else {
+          details = await this.fetchDeviceDetails(family.devices);
+        }
         family.refresh(details);
       } catch (e) {
         console.error(`Failed to poll ${family.name}:`, e);

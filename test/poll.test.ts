@@ -49,6 +49,35 @@ test('combined when enabled', async () => {
   assert.deepEqual(transport.attrs, ['readall', 'deviceid']);
   assert.equal(climateCount(), EXPECTED_CLIMATE);
   assert.equal(gateway.combinedDetailRequests, true);
+  assert.equal(gateway.lastPollUsedCombined, true);
+});
+
+test('lastPollUsedCombined is false for a per-type poll', async () => {
+  const { gateway } = setup();
+  await gateway.pollStatus();
+  assert.equal(gateway.lastPollUsedCombined, false);
+});
+
+test('a single dropped combined request falls back for that poll only', async () => {
+  const { gateway, climateCount } = setup({ onDetails: (_ids, call) => (call === 0 ? 'drop' : 'ok') });
+  gateway.setCombinedDetailRequests(true);
+  await gateway.pollStatus();
+  assert.equal(gateway.combinedDetailRequests, true);
+  assert.equal(gateway.lastPollUsedCombined, false);
+  assert.equal(climateCount(), EXPECTED_CLIMATE);
+  await gateway.pollStatus();
+  assert.equal(gateway.lastPollUsedCombined, true);
+});
+
+test('an answer with a different Endpoint counts as left out', async () => {
+  const shifted = JSON.parse(JSON.stringify(detailPool[0])) as typeof detailPool[0];
+  for (const entry of shifted.id ?? []) entry.data.Endpoint = 99;
+  const { gateway, climateCount } = setup({ detailPool: [shifted] });
+  gateway.setCombinedDetailRequests(true);
+  await gateway.pollStatus();
+  assert.equal(gateway.combinedDetailRequests, false);
+  assert.equal(gateway.lastPollUsedCombined, false);
+  assert.ok(climateCount() > 0);
 });
 
 for (const [name, outcome] of [['rejection', 'reject'], ['when devices are left out', 'omit']] as const) {
@@ -60,6 +89,7 @@ for (const [name, outcome] of [['rejection', 'reject'], ['when devices are left 
     gateway.setCombinedDetailRequests(true);
     await gateway.pollStatus();
     assert.equal(gateway.combinedDetailRequests, false);
+    assert.equal(gateway.lastPollUsedCombined, false);
     assert.equal(transport.detailRequests.length, 2, 'combined request, then per-type');
     assert.equal(climateCount(), EXPECTED_CLIMATE);
   });
@@ -68,7 +98,7 @@ for (const [name, outcome] of [['rejection', 'reject'], ['when devices are left 
 test('combined falls back after 3 drops', async () => {
   // Combined requests are the even calls; each poll's per-type fallback is the odd one.
   const { transport, gateway, climateCount } = setup({
-    onDetails: (_ids, call) => (call % 2 === 0 ? 'drop' : 'ok'),
+    onDetails: (_ids, call) => (call < 6 && call % 2 === 0 ? 'drop' : 'ok'),
   });
   gateway.setCombinedDetailRequests(true);
   for (let poll = 1; poll <= 3; poll += 1) {
