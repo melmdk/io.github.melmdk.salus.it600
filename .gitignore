@@ -4,3 +4,5 @@
 ref/
 test-config.json
 test-*.local.ts
+/.test-build/
+/test/local/

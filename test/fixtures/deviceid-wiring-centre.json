@@ -1,0 +1,163 @@
+{
+  "status": "success",
+  "id": [
+    {
+      "data": {
+        "DeviceType": 100,
+        "Endpoint": 8,
+        "UniID": "00000000000000a8"
+      },
+      "sAWSReg": {
+        "DailyTH": 500,
+        "DailyTHOver": 0
+      },
+      "sOTA": {
+        "OTAStatus_d": 0
+      },
+      "sGenSche": {
+        "UpdateGenScheStatus": 0
+      },
+      "DeviceL": {
+        "DeviceType": 100,
+        "DeviceSubType": 0,
+        "UnquieID": "00000000000000a8",
+        "AttributeList": "000100100008000b000300110005000a00280033003400370014",
+        "ModelIdentifier_i": "it600WC",
+        "getModelIdentifierFlag_i": 1,
+        "DeviceEndpointNum_i": 1
+      },
+      "sZDO": {
+        "ProtocalType_i": 1,
+        "LeaveNetwork": 0,
+        "FirmwareVersion": "20230222",
+        "MACAddress": "00000000000000a8",
+        "ShortID_d": 63683,
+        "LeaveRequest_d": 0,
+        "DeviceName": "{\"deviceName\": \"Kældertrappe\", \"ShortID_d\": 63683}",
+        "JoinConfigVersion_i": "211006"
+      },
+      "sBasicS": {
+        "ManufactureName": "Computime",
+        "ModelIdentifier": "it600WC",
+        "HardwareVersion": "197"
+      },
+      "sIT600I": {
+        "CommandResponse_d": "423730000000000008f57608bf2508708500c30108960908a04d00a04d00f3c400ffff00ffff00ffff00ffff00fdb3007eaaaaa8800000003078",
+        "LastMessageLQI_d": 253,
+        "LastMessageRSSI_d": -77
+      },
+      "sZDOInfo": {
+        "JoinConfigEnd": 1,
+        "OnlineStatus_i": 1,
+        "OnlineState": 1
+      },
+      "sEndpt": {
+        "DeviceType": 0,
+        "Endpoint_i": 8
+      },
+      "sIT600D": {
+        "DeviceIndex": 2,
+        "ConnectType_i": 255,
+        "SyncResponseVersion_d": "20230222"
+      },
+      "sIT600WC": {
+        "ErrorCodeWC_d": "0000",
+        "Error20": 0,
+        "Error12": 0,
+        "Error10": 0,
+        "Error11": 0,
+        "Error29": 0,
+        "Error13": 0,
+        "Error14": 0,
+        "Error15": 0,
+        "Error16": 0,
+        "Error17": 0,
+        "Error18": 0,
+        "Error19": 0,
+        "Error26": 0,
+        "Error27": 0,
+        "Error28": 0
+      },
+      "status": "success"
+    },
+    {
+      "data": {
+        "DeviceType": 100,
+        "Endpoint": 8,
+        "UniID": "00000000000000ae"
+      },
+      "sAWSReg": {
+        "DailyTH": 500,
+        "DailyTHOver": 0
+      },
+      "sOTA": {
+        "OTAStatus_d": 0
+      },
+      "sGenSche": {
+        "UpdateGenScheStatus": 0
+      },
+      "DeviceL": {
+        "DeviceType": 100,
+        "DeviceSubType": 0,
+        "UnquieID": "00000000000000ae",
+        "AttributeList": "000100100008000b000300110005000a00280033003400370014",
+        "ModelIdentifier_i": "it600WC",
+        "getModelIdentifierFlag_i": 1,
+        "DeviceEndpointNum_i": 1
+      },
+      "sZDO": {
+        "ProtocalType_i": 1,
+        "LeaveNetwork": 0,
+        "FirmwareVersion": "20230222",
+        "MACAddress": "00000000000000ae",
+        "ShortID_d": 3549,
+        "LeaveRequest_d": 0,
+        "DeviceName": "{\"deviceName\": \"Depotrum\", \"ShortID_d\": 3549}",
+        "JoinConfigVersion_i": "211006"
+      },
+      "sBasicS": {
+        "ManufactureName": "Computime",
+        "ModelIdentifier": "it600WC",
+        "HardwareVersion": "197"
+      },
+      "sIT600I": {
+        "CommandResponse_d": "4237300000000000083f4700cf0800f28b0839f908ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffbe007eaaaaa8800000003078",
+        "LastMessageLQI_d": 255,
+        "LastMessageRSSI_d": -66
+      },
+      "sZDOInfo": {
+        "JoinConfigEnd": 1,
+        "OnlineStatus_i": 1,
+        "OnlineState": 1
+      },
+      "sEndpt": {
+        "DeviceType": 0,
+        "Endpoint_i": 8
+      },
+      "sIT600D": {
+        "DeviceIndex": 1,
+        "ConnectType_i": 255,
+        "SyncResponseVersion_d": "20230222"
+      },
+      "sIT600WC": {
+        "ErrorCodeWC_d": "0000",
+        "Error20": 0,
+        "Error12": 0,
+        "Error10": 0,
+        "Error11": 0,
+        "Error29": 0,
+        "Error13": 0,
+        "Error14": 0,
+        "Error15": 0,
+        "Error16": 0,
+        "Error17": 0,
+        "Error18": 0,
+        "Error19": 0,
+        "Error26": 0,
+        "Error27": 0,
+        "Error28": 0
+      },
+      "status": "success"
+    }
+  ]
+}

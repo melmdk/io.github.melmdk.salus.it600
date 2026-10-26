@@ -11,3 +11,6 @@ dump-*
 test-*
 CODE_OF_CONDUCT.md
 CONTRIBUTING.md
+test/
+scripts/
+.test-build/

@@ -1,0 +1,1229 @@
+{
+  "status": "success",
+  "id": [
+    {
+      "data": {
+        "DeviceType": 100,
+        "Endpoint": 9,
+        "UniID": "00000000000000a1"
+      },
+      "sAWSReg": {
+        "DailyTH": 500,
+        "DailyTHOver": 0
+      },
+      "sOTA": {
+        "OTAStatus_d": 0
+      },
+      "sGenSche": {
+        "UpdateGenScheStatus": 0
+      },
+      "DeviceL": {
+        "DeviceType": 100,
+        "DeviceSubType": 66,
+        "UnquieID": "00000000000000a1",
+        "AttributeList": "000100100008000b000300110005000a00280033003400370012002a",
+        "ModelIdentifier_i": "SQ610RFNH",
+        "getModelIdentifierFlag_i": 1,
+        "DeviceEndpointNum_i": 1
+      },
+      "sZDO": {
+        "ProtocalType_i": 1,
+        "LeaveNetwork": 0,
+        "FirmwareVersion": "00000054",
+        "MACAddress": "00000000000000a1",
+        "ShortID_d": 28805,
+        "LeaveRequest_d": 0,
+        "DeviceName": "{\"deviceName\": \"Soveværelse\", \"ShortID_d\": 28805}",
+        "JoinConfigVersion_i": "240910"
+      },
+      "sBasicS": {
+        "ModelIdentifier": "SQ610RFNH",
+        "HardwareVersion": "0"
+      },
+      "sZDOInfo": {
+        "JoinConfigEnd": 1,
+        "OnlineStatus_i": 1,
+        "OnlineState": 1
+      },
+      "sEndpt": {
+        "DeviceType": 66,
+        "Endpoint_i": 9
+      },
+      "sIT600D": {
+        "DeviceIndex": 32,
+        "ConnectType_i": 1,
+        "SyncResponseVersion_d": "00000054"
+      },
+      "sIT600TH": {
+        "Status_2_d": "720c010000010500405000000001040027001000060035000500400005000100000001018000000017fc010000000100ffffffffffffffffffffffffffffffffffffffffffffffffffffff0000",
+        "CoolingControl": 0,
+        "ScheduleType": 1,
+        "Schedule": "720c010000010500405000000001040027001000060035000500400005000100000001018000000017fc010000000100ffffffffffffffffffffffffffffffffffffffffffffffffffffff0000",
+        "LockKey": 0,
+        "Error08": 0,
+        "HeatingControl": 1,
+        "Error22": 0,
+        "Error24": 0,
+        "Error06": 0,
+        "RunningState": 0,
+        "OUTSensorProbe": 0,
+        "OUTSensorType": 0,
+        "Error01": 0,
+        "SunnySetpoint_x100": 46,
+        "CloudOverride": 0,
+        "Error03": 0,
+        "MinHeatSetpoint_x100": 500,
+        "Error30": 0,
+        "MaxHeatSetpoint_x100": 3500,
+        "MaxHeatSetpoint_x100_a": 3500,
+        "ProgramOperationMode": 0,
+        "Status_d": "f1ab0d0223500000012000210024000400003030303000004605ffffffffffffffffffffffff010604190605004050000105ffaaf8c30402000000ffffffffffffff02010200ff00000000012c",
+        "MaxCoolSetpoint_x100": 4000,
+        "Error25": 0,
+        "MinCoolSetpoint_x100_a": 500,
+        "MinCoolSetpoint_x100": 500,
+        "Error07": 0,
+        "TemperatureDisplayMode": 0,
+        "Error02": 0,
+        "Error23": 0,
+        "Error04": 0,
+        "Error21": 0,
+        "Error09": 0,
+        "Error31": 0,
+        "Error32": 0,
+        "CoolingSetpoint_x100_a": 2000,
+        "LocalTemperature_x100": 2350,
+        "CoolingSetpoint_x100": 2000,
+        "HeatingSetpoint_x100": 2000,
+        "AutoCoolingSetpoint_x100": 2400,
+        "AutoHeatingSetpoint_x100": 2100,
+        "IRConfig": "7507FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+        "SystemMode": 4,
+        "SystemMode_a": 4,
+        "PairedWCNumber": 2,
+        "HoldType": 2,
+        "TimeFormat24Hour": 1,
+        "HeatingSetpoint_x100_a": 2000,
+        "PairedTRVShortID": "FFFFFFFFFFFFFFFFFFFFFFFF",
+        "HoldType_a": 2,
+        "LockKey_a": 0,
+        "ACMode": 0,
+        "BatteryLevel": 5
+      },
+      "sScheS": {
+        "ScheduleEnable": 2,
+        "HeatSchedule2": "00ffffffffffffffffffffffffffffffffffffffffffffffffddffffffffffffffffffffffffffffffffffffffffffffffffdd",
+        "HeatSchedule1": "00010600210023001900ffff2100ffff2100ffff1800ffff2100dd0600210023001900ffff2100ffff2100ffff1800ffff2100ffffffffffffffffffffffff",
+        "HeatSchedule3": "00ffffffffffffffffffffffffffffffffffffffffffffffffddffffffffffffffffffffffffffffffffffffffffffffffffdd"
+      },
+      "status": "success"
+    },
+    {
+      "data": {
+        "DeviceType": 100,
+        "Endpoint": 9,
+        "UniID": "00000000000000a2"
+      },
+      "sAWSReg": {
+        "DailyTH": 500,
+        "DailyTHOver": 0
+      },
+      "sOTA": {
+        "OTAStatus_d": 0
+      },
+      "sGenSche": {
+        "UpdateGenScheStatus": 0
+      },
+      "DeviceL": {
+        "DeviceType": 100,
+        "DeviceSubType": 66,
+        "UnquieID": "00000000000000a2",
+        "AttributeList": "000100100008000b000300110005000a00280033003400370012002a",
+        "ModelIdentifier_i": "SQ610RFNH",
+        "getModelIdentifierFlag_i": 1,
+        "DeviceEndpointNum_i": 1
+      },
+      "sZDO": {
+        "ProtocalType_i": 1,
+        "LeaveNetwork": 0,
+        "FirmwareVersion": "00000054",
+        "MACAddress": "00000000000000a2",
+        "ShortID_d": 49921,
+        "LeaveRequest_d": 0,
+        "DeviceName": "{\"deviceName\": \"Malthe\", \"ShortID_d\": 49921}",
+        "JoinConfigVersion_i": "240910"
+      },
+      "sBasicS": {
+        "ModelIdentifier": "SQ610RFNH",
+        "HardwareVersion": "0"
+      },
+      "sZDOInfo": {
+        "OnlineStatus_i": 1,
+        "JoinConfigEnd": 1,
+        "OnlineState": 1
+      },
+      "sEndpt": {
+        "DeviceType": 66,
+        "Endpoint_i": 9
+      },
+      "sIT600D": {
+        "DeviceIndex": 32,
+        "ConnectType_i": 1,
+        "SyncResponseVersion_d": "00000054"
+      },
+      "sIT600TH": {
+        "MaxCoolSetpoint_x100": 4000,
+        "Error25": 0,
+        "Status_d": "f1bc0d0224000000012400210024000404013030303000004705ffffffffffffffffffffffff010004200105004050000105ffbfe3d20502000000ffffffffffffff02010200ff00080400012c",
+        "ProgramOperationMode": 0,
+        "MinCoolSetpoint_x100_a": 500,
+        "MinCoolSetpoint_x100": 500,
+        "Error07": 0,
+        "SunnySetpoint_x100": 47,
+        "Error01": 0,
+        "Error02": 0,
+        "Error09": 0,
+        "AutoHeatingSetpoint_x100": 2100,
+        "IRConfig": "7506FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+        "Error04": 0,
+        "Error21": 0,
+        "Error23": 0,
+        "MinHeatSetpoint_x100": 500,
+        "Error30": 0,
+        "Error03": 0,
+        "Error24": 0,
+        "Error06": 0,
+        "RunningState": 1,
+        "HeatingControl": 1,
+        "Error22": 0,
+        "Error08": 0,
+        "LockKey": 0,
+        "Error31": 0,
+        "CoolingSetpoint_x100_a": 2400,
+        "Error32": 0,
+        "SystemMode_a": 4,
+        "LocalTemperature_x100": 2400,
+        "TimeFormat24Hour": 1,
+        "HeatingSetpoint_x100_a": 2400,
+        "CoolingSetpoint_x100": 2400,
+        "HeatingSetpoint_x100": 2400,
+        "AutoCoolingSetpoint_x100": 2400,
+        "SystemMode": 4,
+        "PairedWCNumber": 2,
+        "ScheduleType": 1,
+        "Schedule": "7209010000010500405000000001040027001000060035000500400005000100000001018000000011fd010000000100ffffffffffffffffffffffffffffffffffffffffffffffffffffff0000",
+        "HoldType": 2,
+        "PairedTRVShortID": "FFFFFFFFFFFFFFFFFFFFFFFF",
+        "HoldType_a": 2,
+        "LockKey_a": 0,
+        "ACMode": 0,
+        "BatteryLevel": 5,
+        "Status_2_d": "7209010000010500405000000001040027001000060035000500400005000100000001018000000011fd010000000100ffffffffffffffffffffffffffffffffffffffffffffffffffffff0000",
+        "OUTSensorProbe": 0,
+        "OUTSensorType": 0,
+        "CoolingControl": 0,
+        "MaxHeatSetpoint_x100": 3500,
+        "MaxHeatSetpoint_x100_a": 3500,
+        "TemperatureDisplayMode": 0,
+        "CloudOverride": 0
+      },
+      "sScheS": {
+        "ScheduleEnable": 2,
+        "HeatSchedule2": "00ffffffffffffffffffffffffffffffffffffffffffffffffddffffffffffffffffffffffffffffffffffffffffffffffffdd",
+        "HeatSchedule1": "00010600210023001900ffff2100ffff2100ffff1800ffff2100dd0600210023001900ffff2100ffff2100ffff1800ffff2100ffffffffffffffffffffffff",
+        "HeatSchedule3": "00ffffffffffffffffffffffffffffffffffffffffffffffffddffffffffffffffffffffffffffffffffffffffffffffffffdd"
+      },
+      "status": "success"
+    },
+    {
+      "data": {
+        "DeviceType": 100,
+        "Endpoint": 9,
+        "UniID": "00000000000000a3"
+      },
+      "sAWSReg": {
+        "DailyTH": 500,
+        "DailyTHOver": 0
+      },
+      "sOTA": {
+        "OTAStatus_d": 0
+      },
+      "sGenSche": {
+        "UpdateGenScheStatus": 0
+      },
+      "DeviceL": {
+        "DeviceType": 100,
+        "DeviceSubType": 66,
+        "UnquieID": "00000000000000a3",
+        "AttributeList": "000100100008000b000300110005000a00280033003400370012002a",
+        "ModelIdentifier_i": "SQ610RFNH",
+        "getModelIdentifierFlag_i": 1,
+        "DeviceEndpointNum_i": 1
+      },
+      "sZDO": {
+        "ProtocalType_i": 1,
+        "LeaveNetwork": 0,
+        "FirmwareVersion": "00000054",
+        "MACAddress": "00000000000000a3",
+        "ShortID_d": 62091,
+        "LeaveRequest_d": 0,
+        "DeviceName": "{\"deviceName\": \"Mikkel\", \"ShortID_d\": 62091}",
+        "JoinConfigVersion_i": "240910"
+      },
+      "sBasicS": {
+        "ModelIdentifier": "SQ610RFNH",
+        "HardwareVersion": "0"
+      },
+      "sZDOInfo": {
+        "JoinConfigEnd": 1,
+        "OnlineStatus_i": 1,
+        "OnlineState": 1
+      },
+      "sEndpt": {
+        "DeviceType": 66,
+        "Endpoint_i": 9
+      },
+      "sIT600D": {
+        "DeviceIndex": 32,
+        "ConnectType_i": 1,
+        "SyncResponseVersion_d": "00000054"
+      },
+      "sIT600TH": {
+        "Error25": 0,
+        "Status_d": "f1bb0d0223000000012400210024000404013030303000005004ffffffffffffffffffffffff010004200105004050000105ffb4e3d20502000000ffffffffffffff02010200ff00000100012a",
+        "ProgramOperationMode": 0,
+        "Error07": 0,
+        "Error01": 0,
+        "SunnySetpoint_x100": 50,
+        "Error02": 0,
+        "Error09": 0,
+        "AutoHeatingSetpoint_x100": 2100,
+        "Error04": 0,
+        "Error21": 0,
+        "Error23": 0,
+        "Error03": 0,
+        "Error30": 0,
+        "Error06": 0,
+        "Error24": 0,
+        "RunningState": 1,
+        "Error22": 0,
+        "Error08": 0,
+        "LockKey": 0,
+        "Error31": 0,
+        "CoolingSetpoint_x100_a": 2400,
+        "Error32": 0,
+        "SystemMode_a": 4,
+        "LocalTemperature_x100": 2300,
+        "CoolingSetpoint_x100": 2400,
+        "HeatingSetpoint_x100_a": 2400,
+        "TimeFormat24Hour": 1,
+        "HeatingSetpoint_x100": 2400,
+        "AutoCoolingSetpoint_x100": 2400,
+        "SystemMode": 4,
+        "PairedWCNumber": 1,
+        "ScheduleType": 1,
+        "HoldType": 2,
+        "PairedTRVShortID": "FFFFFFFFFFFFFFFFFFFFFFFF",
+        "HoldType_a": 2,
+        "LockKey_a": 0,
+        "ACMode": 0,
+        "BatteryLevel": 5
+      },
+      "status": "success"
+    },
+    {
+      "data": {
+        "DeviceType": 100,
+        "Endpoint": 9,
+        "UniID": "00000000000000a4"
+      },
+      "sAWSReg": {
+        "DailyTH": 500,
+        "DailyTHOver": 0
+      },
+      "sOTA": {
+        "OTAStatus_d": 0
+      },
+      "sGenSche": {
+        "UpdateGenScheStatus": 0
+      },
+      "DeviceL": {
+        "DeviceType": 100,
+        "DeviceSubType": 66,
+        "UnquieID": "00000000000000a4",
+        "AttributeList": "000100100008000b000300110005000a00280033003400370012002a",
+        "ModelIdentifier_i": "SQ610RFNH",
+        "getModelIdentifierFlag_i": 1,
+        "DeviceEndpointNum_i": 1
+      },
+      "sZDO": {
+        "ProtocalType_i": 1,
+        "LeaveNetwork": 0,
+        "FirmwareVersion": "00000054",
+        "MACAddress": "00000000000000a4",
+        "ShortID_d": 62404,
+        "LeaveRequest_d": 0,
+        "DeviceName": "{\"deviceName\": \"Gang & Køkken\", \"ShortID_d\": 62404}",
+        "JoinConfigVersion_i": "240910"
+      },
+      "sBasicS": {
+        "ModelIdentifier": "SQ610RFNH",
+        "HardwareVersion": "0"
+      },
+      "sZDOInfo": {
+        "JoinConfigEnd": 1,
+        "OnlineStatus_i": 1,
+        "OnlineState": 1
+      },
+      "sEndpt": {
+        "DeviceType": 66,
+        "Endpoint_i": 9
+      },
+      "sIT600D": {
+        "DeviceIndex": 32,
+        "ConnectType_i": 1,
+        "SyncResponseVersion_d": "00000054"
+      },
+      "sIT600TH": {
+        "MaxCoolSetpoint_x100": 4000,
+        "Error25": 0,
+        "Status_d": "f1820d0223500000012300210024000400003030303000004505ffffffffffffffffffffffff010504080605004050000105ffb9e3d20401000000ffffffffffffff02010200ff00000600012c",
+        "ProgramOperationMode": 0,
+        "MinCoolSetpoint_x100_a": 500,
+        "MinCoolSetpoint_x100": 500,
+        "Error07": 0,
+        "SunnySetpoint_x100": 45,
+        "Error01": 0,
+        "Error02": 0,
+        "Error09": 0,
+        "AutoHeatingSetpoint_x100": 2100,
+        "IRConfig": "7506FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+        "Error04": 0,
+        "Error21": 0,
+        "Error23": 0,
+        "MinHeatSetpoint_x100": 500,
+        "Error30": 0,
+        "Error03": 0,
+        "Error24": 0,
+        "Error06": 0,
+        "RunningState": 0,
+        "HeatingControl": 1,
+        "Error22": 0,
+        "Error08": 0,
+        "LockKey": 0,
+        "Error31": 0,
+        "CoolingSetpoint_x100_a": 2300,
+        "Error32": 0,
+        "SystemMode_a": 4,
+        "LocalTemperature_x100": 2350,
+        "TimeFormat24Hour": 1,
+        "HeatingSetpoint_x100_a": 2300,
+        "CoolingSetpoint_x100": 2300,
+        "HeatingSetpoint_x100": 2300,
+        "AutoCoolingSetpoint_x100": 2400,
+        "SystemMode": 4,
+        "PairedWCNumber": 2,
+        "ScheduleType": 1,
+        "Schedule": "720d010000010500405000000001040027001000060035000500400005000100000001018000000019fc010000000100ffffffffffffffffffffffffffffffffffffffffffffffffffffff0000",
+        "HoldType": 2,
+        "PairedTRVShortID": "FFFFFFFFFFFFFFFFFFFFFFFF",
+        "HoldType_a": 2,
+        "LockKey_a": 0,
+        "ACMode": 0,
+        "BatteryLevel": 5,
+        "Status_2_d": "720d010000010500405000000001040027001000060035000500400005000100000001018000000019fc010000000100ffffffffffffffffffffffffffffffffffffffffffffffffffffff0000",
+        "OUTSensorProbe": 0,
+        "OUTSensorType": 0,
+        "CoolingControl": 0,
+        "MaxHeatSetpoint_x100": 3500,
+        "MaxHeatSetpoint_x100_a": 3500,
+        "TemperatureDisplayMode": 0,
+        "CloudOverride": 0
+      },
+      "sScheS": {
+        "ScheduleEnable": 2,
+        "HeatSchedule2": "00ffffffffffffffffffffffffffffffffffffffffffffffffddffffffffffffffffffffffffffffffffffffffffffffffffdd",
+        "HeatSchedule1": "00010600210023001900ffff2100ffff2100ffff1800ffff2100dd0600210023001900ffff2100ffff2100ffff1800ffff2100ffffffffffffffffffffffff",
+        "HeatSchedule3": "00ffffffffffffffffffffffffffffffffffffffffffffffffddffffffffffffffffffffffffffffffffffffffffffffffffdd"
+      },
+      "status": "success"
+    },
+    {
+      "data": {
+        "DeviceType": 100,
+        "Endpoint": 9,
+        "UniID": "00000000000000a5"
+      },
+      "sAWSReg": {
+        "DailyTH": 500,
+        "DailyTHOver": 0
+      },
+      "sOTA": {
+        "OTAStatus_d": 0
+      },
+      "sGenSche": {
+        "UpdateGenScheStatus": 0
+      },
+      "DeviceL": {
+        "DeviceType": 100,
+        "DeviceSubType": 66,
+        "UnquieID": "00000000000000a5",
+        "AttributeList": "000100100008000b000300110005000a00280033003400370012002a",
+        "ModelIdentifier_i": "SQ610RFNH",
+        "getModelIdentifierFlag_i": 1,
+        "DeviceEndpointNum_i": 1
+      },
+      "sZDO": {
+        "ProtocalType_i": 1,
+        "LeaveNetwork": 0,
+        "FirmwareVersion": "00000054",
+        "MACAddress": "00000000000000a5",
+        "ShortID_d": 62838,
+        "LeaveRequest_d": 0,
+        "DeviceName": "{\"deviceName\": \"Toilet\", \"ShortID_d\": 62838}",
+        "JoinConfigVersion_i": "240910"
+      },
+      "sBasicS": {
+        "ModelIdentifier": "SQ610RFNH",
+        "HardwareVersion": "0"
+      },
+      "sZDOInfo": {
+        "JoinConfigEnd": 1,
+        "OnlineStatus_i": 1,
+        "OnlineState": 1
+      },
+      "sEndpt": {
+        "DeviceType": 66,
+        "Endpoint_i": 9
+      },
+      "sIT600D": {
+        "DeviceIndex": 32,
+        "ConnectType_i": 1,
+        "SyncResponseVersion_d": "00000054"
+      },
+      "sIT600TH": {
+        "Status_2_d": "720801000001050040500000000104002700100006003500050040000500010000000101800000000ffd010000000100ffffffffffffffffffffffffffffffffffffffffffffffffffffff0000",
+        "CoolingControl": 0,
+        "ScheduleType": 1,
+        "Schedule": "720801000001050040500000000104002700100006003500050040000500010000000101800000000ffd010000000100ffffffffffffffffffffffffffffffffffffffffffffffffffffff0000",
+        "LockKey": 0,
+        "Error08": 0,
+        "HeatingControl": 1,
+        "Error22": 0,
+        "Error24": 0,
+        "Error06": 0,
+        "RunningState": 1,
+        "OUTSensorProbe": 0,
+        "OUTSensorType": 0,
+        "Error01": 0,
+        "SunnySetpoint_x100": 48,
+        "CloudOverride": 0,
+        "Error03": 0,
+        "MinHeatSetpoint_x100": 500,
+        "Error30": 0,
+        "MaxHeatSetpoint_x100": 3500,
+        "MaxHeatSetpoint_x100_a": 3500,
+        "ProgramOperationMode": 0,
+        "Status_d": "f1390d0223000000012400210024000404013030303000004805ffffffffffffffffffffffff010004200105004050000105ffb1f8c30626000000ffffffffffffff02010200ff00000600012c",
+        "MaxCoolSetpoint_x100": 4000,
+        "Error25": 0,
+        "MinCoolSetpoint_x100_a": 500,
+        "MinCoolSetpoint_x100": 500,
+        "Error07": 0,
+        "TemperatureDisplayMode": 0,
+        "Error02": 0,
+        "Error23": 0,
+        "Error04": 0,
+        "Error21": 0,
+        "Error09": 0,
+        "Error31": 0,
+        "Error32": 0,
+        "CoolingSetpoint_x100_a": 2400,
+        "LocalTemperature_x100": 2300,
+        "CoolingSetpoint_x100": 2400,
+        "HeatingSetpoint_x100": 2400,
+        "AutoCoolingSetpoint_x100": 2400,
+        "AutoHeatingSetpoint_x100": 2100,
+        "IRConfig": "7508FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+        "SystemMode": 4,
+        "SystemMode_a": 4,
+        "PairedWCNumber": 2,
+        "HoldType": 2,
+        "TimeFormat24Hour": 1,
+        "HeatingSetpoint_x100_a": 2400,
+        "PairedTRVShortID": "FFFFFFFFFFFFFFFFFFFFFFFF",
+        "HoldType_a": 2,
+        "LockKey_a": 0,
+        "ACMode": 0,
+        "BatteryLevel": 5
+      },
+      "sScheS": {
+        "ScheduleEnable": 2,
+        "HeatSchedule2": "00ffffffffffffffffffffffffffffffffffffffffffffffffddffffffffffffffffffffffffffffffffffffffffffffffffdd",
+        "HeatSchedule1": "00010600210023001900ffff2100ffff2100ffff1800ffff2100dd0600210023001900ffff2100ffff2100ffff1800ffff2100ffffffffffffffffffffffff",
+        "HeatSchedule3": "00ffffffffffffffffffffffffffffffffffffffffffffffffddffffffffffffffffffffffffffffffffffffffffffffffffdd"
+      },
+      "status": "success"
+    },
+    {
+      "data": {
+        "DeviceType": 100,
+        "Endpoint": 9,
+        "UniID": "00000000000000a6"
+      },
+      "sAWSReg": {
+        "DailyTH": 500,
+        "DailyTHOver": 0
+      },
+      "sOTA": {
+        "OTAStatus_d": 0
+      },
+      "sGenSche": {
+        "UpdateGenScheStatus": 0
+      },
+      "DeviceL": {
+        "DeviceType": 100,
+        "DeviceSubType": 66,
+        "UnquieID": "00000000000000a6",
+        "AttributeList": "000100100008000b000300110005000a00280033003400370012002a",
+        "ModelIdentifier_i": "SQ610RFNH",
+        "getModelIdentifierFlag_i": 1,
+        "DeviceEndpointNum_i": 1
+      },
+      "sZDO": {
+        "ProtocalType_i": 1,
+        "LeaveNetwork": 0,
+        "FirmwareVersion": "00000054",
+        "MACAddress": "00000000000000a6",
+        "ShortID_d": 48933,
+        "LeaveRequest_d": 0,
+        "DeviceName": "{\"deviceName\": \"Gæsteværelse\", \"ShortID_d\": 48933}",
+        "JoinConfigVersion_i": "240910"
+      },
+      "sBasicS": {
+        "ModelIdentifier": "SQ610RFNH",
+        "HardwareVersion": "0"
+      },
+      "sZDOInfo": {
+        "JoinConfigEnd": 1,
+        "OnlineStatus_i": 1,
+        "OnlineState": 1
+      },
+      "sEndpt": {
+        "DeviceType": 66,
+        "Endpoint_i": 9
+      },
+      "sIT600D": {
+        "DeviceIndex": 32,
+        "ConnectType_i": 1,
+        "SyncResponseVersion_d": "00000054"
+      },
+      "sIT600TH": {
+        "LockKey": 0,
+        "Error08": 0,
+        "HeatingControl": 1,
+        "Error22": 0,
+        "OUTSensorProbe": 0,
+        "RunningState": 1,
+        "Error06": 0,
+        "Error24": 0,
+        "OUTSensorType": 0,
+        "Error01": 0,
+        "SunnySetpoint_x100": 45,
+        "CloudOverride": 0,
+        "CoolingControl": 0,
+        "Error03": 0,
+        "Error30": 0,
+        "MinHeatSetpoint_x100": 500,
+        "MaxHeatSetpoint_x100": 3500,
+        "MaxHeatSetpoint_x100_a": 3500,
+        "ProgramOperationMode": 0,
+        "Status_d": "f1650d0224000000012400210024000404013030303000004505ffffffffffffffffffffffff010004150105004050000105ffc6e3d20500000000ffffffffffffff02010200ff00000800012c",
+        "MaxCoolSetpoint_x100": 4000,
+        "Error25": 0,
+        "MinCoolSetpoint_x100_a": 500,
+        "MinCoolSetpoint_x100": 500,
+        "Error07": 0,
+        "TemperatureDisplayMode": 0,
+        "Status_2_d": "720b010000010500405000000001040027001000060035000500400005000100000001018000000015fd010000000100ffffffffffffffffffffffffffffffffffffffffffffffffffffff0000",
+        "ScheduleType": 1,
+        "Schedule": "720b010000010500405000000001040027001000060035000500400005000100000001018000000015fd010000000100ffffffffffffffffffffffffffffffffffffffffffffffffffffff0000",
+        "Error02": 0,
+        "Error23": 0,
+        "Error04": 0,
+        "Error21": 0,
+        "Error09": 0,
+        "Error31": 0,
+        "Error32": 0,
+        "CoolingSetpoint_x100_a": 2400,
+        "LocalTemperature_x100": 2400,
+        "CoolingSetpoint_x100": 2400,
+        "HeatingSetpoint_x100": 2400,
+        "AutoCoolingSetpoint_x100": 2400,
+        "AutoHeatingSetpoint_x100": 2100,
+        "IRConfig": "7506FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+        "SystemMode": 4,
+        "SystemMode_a": 4,
+        "PairedWCNumber": 2,
+        "HoldType": 2,
+        "TimeFormat24Hour": 1,
+        "HeatingSetpoint_x100_a": 2400,
+        "PairedTRVShortID": "FFFFFFFFFFFFFFFFFFFFFFFF",
+        "HoldType_a": 2,
+        "LockKey_a": 0,
+        "ACMode": 0,
+        "BatteryLevel": 5
+      },
+      "sScheS": {
+        "ScheduleEnable": 2,
+        "HeatSchedule2": "00ffffffffffffffffffffffffffffffffffffffffffffffffddffffffffffffffffffffffffffffffffffffffffffffffffdd",
+        "HeatSchedule1": "00010600210023001900ffff2100ffff2100ffff1800ffff2100dd0600210023001900ffff2100ffff2100ffff1800ffff2100ffffffffffffffffffffffff",
+        "HeatSchedule3": "00ffffffffffffffffffffffffffffffffffffffffffffffffddffffffffffffffffffffffffffffffffffffffffffffffffdd"
+      },
+      "status": "success"
+    },
+    {
+      "data": {
+        "DeviceType": 100,
+        "Endpoint": 9,
+        "UniID": "00000000000000a7"
+      },
+      "sAWSReg": {
+        "DailyTH": 500,
+        "DailyTHOver": 0
+      },
+      "sOTA": {
+        "OTAStatus_d": 0
+      },
+      "sGenSche": {
+        "UpdateGenScheStatus": 0
+      },
+      "DeviceL": {
+        "DeviceType": 100,
+        "DeviceSubType": 66,
+        "UnquieID": "00000000000000a7",
+        "AttributeList": "000100100008000b000300110005000a00280033003400370012002a",
+        "ModelIdentifier_i": "SQ610RFNH",
+        "getModelIdentifierFlag_i": 1,
+        "DeviceEndpointNum_i": 1
+      },
+      "sZDO": {
+        "ProtocalType_i": 1,
+        "LeaveNetwork": 0,
+        "FirmwareVersion": "00000054",
+        "MACAddress": "00000000000000a7",
+        "ShortID_d": 16199,
+        "LeaveRequest_d": 0,
+        "DeviceName": "{\"deviceName\": \"Multirum\", \"ShortID_d\": 16199}",
+        "JoinConfigVersion_i": "240910"
+      },
+      "sBasicS": {
+        "ModelIdentifier": "SQ610RFNH",
+        "HardwareVersion": "0"
+      },
+      "sZDOInfo": {
+        "JoinConfigEnd": 1,
+        "OnlineStatus_i": 1,
+        "OnlineState": 1
+      },
+      "sEndpt": {
+        "DeviceType": 66,
+        "Endpoint_i": 9
+      },
+      "sIT600D": {
+        "DeviceIndex": 32,
+        "ConnectType_i": 1,
+        "SyncResponseVersion_d": "00000054"
+      },
+      "sIT600TH": {
+        "Error25": 0,
+        "Status_d": "f17d0d0224000000012400190024000400003030303000004704ffffffffffffffffffffffff010004200605004050000105ff9f0ddd0502000000ffffffffffffff02010200ff00000000012a",
+        "ProgramOperationMode": 0,
+        "Error07": 0,
+        "Error01": 0,
+        "SunnySetpoint_x100": 47,
+        "Error02": 0,
+        "Error09": 0,
+        "AutoHeatingSetpoint_x100": 1900,
+        "Error04": 0,
+        "Error21": 0,
+        "Error23": 0,
+        "Error03": 0,
+        "Error30": 0,
+        "Error06": 0,
+        "Error24": 0,
+        "RunningState": 0,
+        "Error22": 0,
+        "Error08": 0,
+        "LockKey": 0,
+        "Error31": 0,
+        "CoolingSetpoint_x100_a": 2400,
+        "Error32": 0,
+        "SystemMode_a": 4,
+        "LocalTemperature_x100": 2400,
+        "CoolingSetpoint_x100": 2400,
+        "HeatingSetpoint_x100_a": 2400,
+        "TimeFormat24Hour": 1,
+        "HeatingSetpoint_x100": 2400,
+        "AutoCoolingSetpoint_x100": 2400,
+        "SystemMode": 4,
+        "PairedWCNumber": 1,
+        "ScheduleType": 1,
+        "HoldType": 2,
+        "PairedTRVShortID": "FFFFFFFFFFFFFFFFFFFFFFFF",
+        "HoldType_a": 2,
+        "LockKey_a": 0,
+        "ACMode": 0,
+        "BatteryLevel": 5
+      },
+      "status": "success"
+    },
+    {
+      "data": {
+        "DeviceType": 100,
+        "Endpoint": 9,
+        "UniID": "00000000000000a9"
+      },
+      "sAWSReg": {
+        "DailyTH": 500,
+        "DailyTHOver": 0
+      },
+      "sOTA": {
+        "OTAStatus_d": 0
+      },
+      "sGenSche": {
+        "UpdateGenScheStatus": 0
+      },
+      "DeviceL": {
+        "DeviceType": 100,
+        "DeviceSubType": 66,
+        "UnquieID": "00000000000000a9",
+        "AttributeList": "000100100008000b000300110005000a00280033003400370012002a",
+        "ModelIdentifier_i": "SQ610RFNH",
+        "getModelIdentifierFlag_i": 1,
+        "DeviceEndpointNum_i": 1
+      },
+      "sZDO": {
+        "ProtocalType_i": 1,
+        "LeaveNetwork": 0,
+        "FirmwareVersion": "00000054",
+        "MACAddress": "00000000000000a9",
+        "ShortID_d": 14841,
+        "LeaveRequest_d": 0,
+        "DeviceName": "{\"deviceName\": \"Bad Børn\", \"ShortID_d\": 14841}",
+        "JoinConfigVersion_i": "240910"
+      },
+      "sBasicS": {
+        "ModelIdentifier": "SQ610RFNH",
+        "HardwareVersion": "0"
+      },
+      "sZDOInfo": {
+        "JoinConfigEnd": 1,
+        "OnlineStatus_i": 1,
+        "OnlineState": 1
+      },
+      "sEndpt": {
+        "DeviceType": 66,
+        "Endpoint_i": 9
+      },
+      "sIT600D": {
+        "DeviceIndex": 32,
+        "ConnectType_i": 1,
+        "SyncResponseVersion_d": "00000054"
+      },
+      "sIT600TH": {
+        "Error25": 0,
+        "Status_d": "f1ea0d0224500000012400210024000404013030303000004904ffffffffffffffffffffffff010004200105004050000105ffbfe3d20401000000ffffffffffffff02010200ff00000100012a",
+        "ProgramOperationMode": 0,
+        "Error07": 0,
+        "Error01": 0,
+        "SunnySetpoint_x100": 49,
+        "Error02": 0,
+        "Error09": 0,
+        "AutoHeatingSetpoint_x100": 2100,
+        "Error04": 0,
+        "Error21": 0,
+        "Error23": 0,
+        "Error03": 0,
+        "Error30": 0,
+        "Error06": 0,
+        "Error24": 0,
+        "RunningState": 1,
+        "Error22": 0,
+        "Error08": 0,
+        "LockKey": 0,
+        "Error31": 0,
+        "CoolingSetpoint_x100_a": 2400,
+        "Error32": 0,
+        "SystemMode_a": 4,
+        "LocalTemperature_x100": 2450,
+        "CoolingSetpoint_x100": 2400,
+        "HeatingSetpoint_x100_a": 2400,
+        "TimeFormat24Hour": 1,
+        "HeatingSetpoint_x100": 2400,
+        "AutoCoolingSetpoint_x100": 2400,
+        "SystemMode": 4,
+        "PairedWCNumber": 1,
+        "ScheduleType": 1,
+        "HoldType": 2,
+        "PairedTRVShortID": "FFFFFFFFFFFFFFFFFFFFFFFF",
+        "HoldType_a": 2,
+        "LockKey_a": 0,
+        "ACMode": 0,
+        "BatteryLevel": 5
+      },
+      "status": "success"
+    },
+    {
+      "data": {
+        "DeviceType": 100,
+        "Endpoint": 9,
+        "UniID": "00000000000000aa"
+      },
+      "sAWSReg": {
+        "DailyTH": 500,
+        "DailyTHOver": 0
+      },
+      "sOTA": {
+        "OTAStatus_d": 0
+      },
+      "sGenSche": {
+        "UpdateGenScheStatus": 0
+      },
+      "DeviceL": {
+        "DeviceType": 100,
+        "DeviceSubType": 66,
+        "UnquieID": "00000000000000aa",
+        "AttributeList": "000100100008000b000300110005000a00280033003400370012002a",
+        "ModelIdentifier_i": "SQ610RFNH",
+        "getModelIdentifierFlag_i": 1,
+        "DeviceEndpointNum_i": 1
+      },
+      "sZDO": {
+        "ProtocalType_i": 1,
+        "LeaveNetwork": 0,
+        "FirmwareVersion": "00000054",
+        "MACAddress": "00000000000000aa",
+        "ShortID_d": 41037,
+        "LeaveRequest_d": 0,
+        "DeviceName": "{\"deviceName\": \"Stue\", \"ShortID_d\": 41037}",
+        "JoinConfigVersion_i": "240910"
+      },
+      "sBasicS": {
+        "ModelIdentifier": "SQ610RFNH",
+        "HardwareVersion": "0"
+      },
+      "sZDOInfo": {
+        "JoinConfigEnd": 1,
+        "OnlineStatus_i": 1,
+        "OnlineState": 1
+      },
+      "sEndpt": {
+        "DeviceType": 66,
+        "Endpoint_i": 9
+      },
+      "sIT600D": {
+        "DeviceIndex": 32,
+        "ConnectType_i": 1,
+        "SyncResponseVersion_d": "00000054"
+      },
+      "sIT600TH": {
+        "Status_2_d": "7209010000010500405000000001040027001000060035000500400005000100000001018000000011fd010000000100ffffffffffffffffffffffffffffffffffffffffffffffffffffff0000",
+        "CoolingControl": 0,
+        "ScheduleType": 1,
+        "Schedule": "7209010000010500405000000001040027001000060035000500400005000100000001018000000011fd010000000100ffffffffffffffffffffffffffffffffffffffffffffffffffffff0000",
+        "LockKey": 0,
+        "Error08": 0,
+        "HeatingControl": 1,
+        "Error22": 0,
+        "Error24": 0,
+        "Error06": 0,
+        "RunningState": 0,
+        "OUTSensorProbe": 0,
+        "OUTSensorType": 0,
+        "Error01": 0,
+        "SunnySetpoint_x100": 44,
+        "CloudOverride": 0,
+        "Error03": 0,
+        "MinHeatSetpoint_x100": 500,
+        "Error30": 0,
+        "MaxHeatSetpoint_x100": 3500,
+        "MaxHeatSetpoint_x100_a": 3500,
+        "ProgramOperationMode": 0,
+        "Status_d": "f14f0d0223500000012300210024000400003030303000004405ffffffffffffffffffffffff010004180605004050000105ffb4f8c30522000000ffffffffffffff02010200ff00000400012c",
+        "MaxCoolSetpoint_x100": 4000,
+        "Error25": 0,
+        "MinCoolSetpoint_x100_a": 500,
+        "MinCoolSetpoint_x100": 500,
+        "Error07": 0,
+        "TemperatureDisplayMode": 0,
+        "Error02": 0,
+        "Error23": 0,
+        "Error04": 0,
+        "Error21": 0,
+        "Error09": 0,
+        "Error31": 0,
+        "Error32": 0,
+        "CoolingSetpoint_x100_a": 2300,
+        "LocalTemperature_x100": 2350,
+        "CoolingSetpoint_x100": 2300,
+        "HeatingSetpoint_x100": 2300,
+        "AutoCoolingSetpoint_x100": 2400,
+        "AutoHeatingSetpoint_x100": 2100,
+        "IRConfig": "7507FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+        "SystemMode": 4,
+        "SystemMode_a": 4,
+        "PairedWCNumber": 2,
+        "HoldType": 2,
+        "TimeFormat24Hour": 1,
+        "HeatingSetpoint_x100_a": 2300,
+        "PairedTRVShortID": "FFFFFFFFFFFFFFFFFFFFFFFF",
+        "HoldType_a": 2,
+        "LockKey_a": 0,
+        "ACMode": 0,
+        "BatteryLevel": 5
+      },
+      "sScheS": {
+        "ScheduleEnable": 2,
+        "HeatSchedule2": "00ffffffffffffffffffffffffffffffffffffffffffffffffddffffffffffffffffffffffffffffffffffffffffffffffffdd",
+        "HeatSchedule1": "00010600210023001900ffff2100ffff2100ffff1800ffff2100dd0600210023001900ffff2100ffff2100ffff1800ffff2100ffffffffffffffffffffffff",
+        "HeatSchedule3": "00ffffffffffffffffffffffffffffffffffffffffffffffffddffffffffffffffffffffffffffffffffffffffffffffffffdd"
+      },
+      "status": "success"
+    },
+    {
+      "data": {
+        "DeviceType": 100,
+        "Endpoint": 9,
+        "UniID": "00000000000000ad"
+      },
+      "sAWSReg": {
+        "DailyTH": 500,
+        "DailyTHOver": 0
+      },
+      "sOTA": {
+        "OTAStatus_d": 0
+      },
+      "sGenSche": {
+        "UpdateGenScheStatus": 0
+      },
+      "DeviceL": {
+        "DeviceType": 100,
+        "DeviceSubType": 66,
+        "UnquieID": "00000000000000ad",
+        "AttributeList": "000100100008000b000300110005000a00280033003400370012002a",
+        "ModelIdentifier_i": "SQ610RFNH",
+        "getModelIdentifierFlag_i": 1,
+        "DeviceEndpointNum_i": 1
+      },
+      "sZDO": {
+        "ProtocalType_i": 1,
+        "LeaveNetwork": 0,
+        "FirmwareVersion": "00000054",
+        "MACAddress": "00000000000000ad",
+        "ShortID_d": 53000,
+        "LeaveRequest_d": 0,
+        "DeviceName": "{\"deviceName\": \"Magnus\", \"ShortID_d\": 53000}",
+        "JoinConfigVersion_i": "240910"
+      },
+      "sBasicS": {
+        "ModelIdentifier": "SQ610RFNH",
+        "HardwareVersion": "0"
+      },
+      "sZDOInfo": {
+        "JoinConfigEnd": 1,
+        "OnlineStatus_i": 1,
+        "OnlineState": 1
+      },
+      "sEndpt": {
+        "DeviceType": 66,
+        "Endpoint_i": 9
+      },
+      "sIT600D": {
+        "DeviceIndex": 32,
+        "ConnectType_i": 1,
+        "SyncResponseVersion_d": "00000054"
+      },
+      "sIT600TH": {
+        "Status_2_d": "720801000001050040500000000104002700100006003500050040000500010000000101800000000ffd010000000100ffffffffffffffffffffffffffffffffffffffffffffffffffffff0000",
+        "CoolingControl": 0,
+        "ScheduleType": 1,
+        "Schedule": "720801000001050040500000000104002700100006003500050040000500010000000101800000000ffd010000000100ffffffffffffffffffffffffffffffffffffffffffffffffffffff0000",
+        "LockKey": 0,
+        "Error08": 0,
+        "HeatingControl": 1,
+        "Error22": 0,
+        "Error24": 0,
+        "Error06": 0,
+        "RunningState": 0,
+        "OUTSensorProbe": 0,
+        "OUTSensorType": 0,
+        "Error01": 0,
+        "SunnySetpoint_x100": 48,
+        "CloudOverride": 0,
+        "Error03": 0,
+        "MinHeatSetpoint_x100": 500,
+        "Error30": 0,
+        "MaxHeatSetpoint_x100": 3500,
+        "MaxHeatSetpoint_x100_a": 3500,
+        "ProgramOperationMode": 0,
+        "Status_d": "f1900d0223000000012200210024000400003030303000004804ffffffffffffffffffffffff010604200605004050000105ffc100000502000000ffffffffffffff02010200ff00004900012a",
+        "MaxCoolSetpoint_x100": 4000,
+        "Error25": 0,
+        "MinCoolSetpoint_x100_a": 500,
+        "MinCoolSetpoint_x100": 500,
+        "Error07": 0,
+        "TemperatureDisplayMode": 0,
+        "Error02": 0,
+        "Error23": 0,
+        "Error04": 0,
+        "Error21": 0,
+        "Error09": 0,
+        "Error31": 0,
+        "Error32": 0,
+        "CoolingSetpoint_x100_a": 2200,
+        "LocalTemperature_x100": 2300,
+        "CoolingSetpoint_x100": 2200,
+        "HeatingSetpoint_x100": 2200,
+        "AutoCoolingSetpoint_x100": 2400,
+        "AutoHeatingSetpoint_x100": 2100,
+        "IRConfig": "7506FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+        "SystemMode": 4,
+        "SystemMode_a": 4,
+        "PairedWCNumber": 1,
+        "HoldType": 2,
+        "TimeFormat24Hour": 1,
+        "HeatingSetpoint_x100_a": 2200,
+        "PairedTRVShortID": "FFFFFFFFFFFFFFFFFFFFFFFF",
+        "HoldType_a": 2,
+        "LockKey_a": 0,
+        "ACMode": 0,
+        "BatteryLevel": 5
+      },
+      "sScheS": {
+        "ScheduleEnable": 2,
+        "HeatSchedule2": "00ffffffffffffffffffffffffffffffffffffffffffffffffddffffffffffffffffffffffffffffffffffffffffffffffffdd",
+        "HeatSchedule1": "00010600210023001900ffff2100ffff2100ffff1800ffff2100dd0600210023001900ffff2100ffff2100ffff1800ffff2100ffffffffffffffffffffffff",
+        "HeatSchedule3": "00ffffffffffffffffffffffffffffffffffffffffffffffffddffffffffffffffffffffffffffffffffffffffffffffffffdd"
+      },
+      "status": "success"
+    },
+    {
+      "data": {
+        "DeviceType": 100,
+        "Endpoint": 9,
+        "UniID": "00000000000000b0"
+      },
+      "sAWSReg": {
+        "DailyTH": 500,
+        "DailyTHOver": 0
+      },
+      "sOTA": {
+        "OTAStatus_d": 0
+      },
+      "sGenSche": {
+        "UpdateGenScheStatus": 0
+      },
+      "DeviceL": {
+        "DeviceType": 100,
+        "DeviceSubType": 66,
+        "UnquieID": "00000000000000b0",
+        "AttributeList": "000100100008000b000300110005000a00280033003400370012002a",
+        "ModelIdentifier_i": "SQ610RFNH",
+        "getModelIdentifierFlag_i": 1,
+        "DeviceEndpointNum_i": 1
+      },
+      "sZDO": {
+        "ProtocalType_i": 1,
+        "LeaveNetwork": 0,
+        "FirmwareVersion": "00000054",
+        "MACAddress": "00000000000000b0",
+        "ShortID_d": 38409,
+        "LeaveRequest_d": 0,
+        "DeviceName": "{\"deviceName\": \"Bad\", \"ShortID_d\": 38409}",
+        "JoinConfigVersion_i": "240910"
+      },
+      "sBasicS": {
+        "ModelIdentifier": "SQ610RFNH",
+        "HardwareVersion": "0"
+      },
+      "sZDOInfo": {
+        "JoinConfigEnd": 1,
+        "OnlineStatus_i": 1,
+        "OnlineState": 1
+      },
+      "sEndpt": {
+        "DeviceType": 66,
+        "Endpoint_i": 9
+      },
+      "sIT600D": {
+        "DeviceIndex": 32,
+        "ConnectType_i": 1,
+        "SyncResponseVersion_d": "00000054"
+      },
+      "sIT600TH": {
+        "Status_2_d": "720701000001050040500000000104002700100006003500050040000500010000000101800000000dfe010000000100ffffffffffffffffffffffffffffffffffffffffffffffffffffff0000",
+        "CoolingControl": 0,
+        "ScheduleType": 1,
+        "Schedule": "720701000001050040500000000104002700100006003500050040000500010000000101800000000dfe010000000100ffffffffffffffffffffffffffffffffffffffffffffffffffffff0000",
+        "LockKey": 0,
+        "Error08": 0,
+        "HeatingControl": 1,
+        "Error22": 0,
+        "Error24": 0,
+        "Error06": 0,
+        "RunningState": 1,
+        "OUTSensorProbe": 0,
+        "OUTSensorType": 0,
+        "Error01": 0,
+        "SunnySetpoint_x100": 46,
+        "CloudOverride": 0,
+        "Error03": 0,
+        "MinHeatSetpoint_x100": 500,
+        "Error30": 0,
+        "MaxHeatSetpoint_x100": 3500,
+        "MaxHeatSetpoint_x100_a": 3500,
+        "ProgramOperationMode": 0,
+        "Status_d": "f19f0d0223500000012500210024000404013030303000004605ffffffffffffffffffffffff010004190105004050000105ffc9e3d20602000000ffffffffffffff02010200ff00000200012c",
+        "MaxCoolSetpoint_x100": 4000,
+        "Error25": 0,
+        "MinCoolSetpoint_x100_a": 500,
+        "MinCoolSetpoint_x100": 500,
+        "Error07": 0,
+        "TemperatureDisplayMode": 0,
+        "Error02": 0,
+        "Error23": 0,
+        "Error04": 0,
+        "Error21": 0,
+        "Error09": 0,
+        "Error31": 0,
+        "Error32": 0,
+        "CoolingSetpoint_x100_a": 2500,
+        "LocalTemperature_x100": 2350,
+        "CoolingSetpoint_x100": 2500,
+        "HeatingSetpoint_x100": 2500,
+        "AutoCoolingSetpoint_x100": 2400,
+        "AutoHeatingSetpoint_x100": 2100,
+        "IRConfig": "7509FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+        "SystemMode": 4,
+        "SystemMode_a": 4,
+        "PairedWCNumber": 2,
+        "HoldType": 2,
+        "TimeFormat24Hour": 1,
+        "HeatingSetpoint_x100_a": 2500,
+        "PairedTRVShortID": "FFFFFFFFFFFFFFFFFFFFFFFF",
+        "HoldType_a": 2,
+        "LockKey_a": 0,
+        "ACMode": 0,
+        "BatteryLevel": 5
+      },
+      "sScheS": {
+        "ScheduleEnable": 2,
+        "HeatSchedule2": "00ffffffffffffffffffffffffffffffffffffffffffffffffddffffffffffffffffffffffffffffffffffffffffffffffffdd",
+        "HeatSchedule1": "00010600210023001900ffff2100ffff2100ffff1800ffff2100dd0600210023001900ffff2100ffff2100ffff1800ffff2100ffffffffffffffffffffffff",
+        "HeatSchedule3": "00ffffffffffffffffffffffffffffffffffffffffffffffffddffffffffffffffffffffffffffffffffffffffffffffffffdd"
+      },
+      "status": "success"
+    }
+  ]
+}

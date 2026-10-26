@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": ".test-build/",
+    "rootDir": ".",
+    "allowJs": false,
+    "types": ["node"]
+  },
+  "include": ["lib/**/*.ts", "test/**/*.ts", "scripts/**/*.ts"],
+  "exclude": ["node_modules", ".test-build", ".homeybuild"]
+}

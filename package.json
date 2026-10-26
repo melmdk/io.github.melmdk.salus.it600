@@ -3,7 +3,9 @@
   "version": "0.9.6",
   "scripts": {
     "build": "tsc",
-    "lint": "eslint --ext .js,.ts --ignore-path .gitignore ."
+    "lint": "eslint --ext .js,.ts --ignore-path .gitignore .",
+    "test": "tsc -p tsconfig.test.json && node --test \".test-build/test/**/*.test.js\"",
+    "capture": "tsc -p tsconfig.test.json && node .test-build/scripts/capture-fixtures.js"
   },
   "devDependencies": {
     "@tsconfig/node16": "^16.1.8",
