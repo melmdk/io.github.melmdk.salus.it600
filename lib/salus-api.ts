@@ -138,6 +138,13 @@ class Mutex {
   }
 }
 
+/**
+ * One lock for every IT600Gateway instance: there is one physical gateway, and
+ * the app keeps the old instance polling and writing while a replacement
+ * connects (repair, settings save). Only one request may be in flight.
+ */
+const gatewayMutex = new Mutex();
+
 /** IT600 Gateway API client */
 export class IT600Gateway {
   private euid: string;
@@ -175,7 +182,7 @@ export class IT600Gateway {
     this.euid = normaliseEuid(euid);
     this.host = host;
     this.debug = opts.debug ?? false;
-    this.mutex = new Mutex();
+    this.mutex = gatewayMutex;
     this.transport = opts.transport
       ?? httpTransport(host, opts.port ?? DEFAULT_PORT, opts.requestTimeout ?? DEFAULT_REQUEST_TIMEOUT);
 
@@ -258,12 +265,16 @@ export class IT600Gateway {
     }
 
     const unreachable = () => new IT600ConnectionError(`No gateway answering at ${this.host}`);
+    // Under the shared lock too: the probe is a request to the same gateway.
     const rootAnswers = async (): Promise<boolean> => {
+      await this.mutex.acquire();
       try {
         await this.transport.probeRoot?.();
         return true;
       } catch {
         return false;
+      } finally {
+        this.mutex.release();
       }
     };
 
