@@ -476,11 +476,6 @@ export class IT600Gateway {
     }
   }
 
-  /** Parse device name from JSON string */
-  private parseDeviceName(deviceNameJson: string | undefined, fallback: string): string {
-    return parseDeviceName(deviceNameJson, fallback);
-  }
-
   /** Refresh gateway device */
   private refreshGatewayDevice(devices: ApiDeviceStatus[]): void {
     for (const device of devices) {
@@ -577,7 +572,7 @@ export class IT600Gateway {
 
         const binarySensor: BinarySensorDevice = {
           available: (device.sZDOInfo?.OnlineStatus_i ?? 1) === 1,
-          name: this.parseDeviceName(device.sZDO?.DeviceName, 'Unknown'),
+          name: parseDeviceName(device.sZDO?.DeviceName, 'Unknown'),
           uniqueId,
           isOn,
           deviceClass,
@@ -614,7 +609,7 @@ export class IT600Gateway {
 
         const sensor: SensorDevice = {
           available: (device.sZDOInfo?.OnlineStatus_i ?? 1) === 1,
-          name: this.parseDeviceName(device.sZDO?.DeviceName, 'Unknown'),
+          name: parseDeviceName(device.sZDO?.DeviceName, 'Unknown'),
           uniqueId: sensorId,
           state: temperature / 100,
           unitOfMeasurement: TEMP_CELSIUS,
@@ -655,7 +650,7 @@ export class IT600Gateway {
 
         const switchDevice: SwitchDevice = {
           available: (device.sZDOInfo?.OnlineStatus_i ?? 1) === 1,
-          name: this.parseDeviceName(device.sZDO?.DeviceName, uniqueId),
+          name: parseDeviceName(device.sZDO?.DeviceName, uniqueId),
           uniqueId,
           isOn: isOn === 1,
           deviceClass: model && OUTLET_MODELS.includes(model) ? DEVICE_CLASS_OUTLET : DEVICE_CLASS_SWITCH,
@@ -700,7 +695,7 @@ export class IT600Gateway {
 
         const coverDevice: CoverDevice = {
           available: (device.sZDOInfo?.OnlineStatus_i ?? 1) === 1,
-          name: this.parseDeviceName(device.sZDO?.DeviceName, 'Unknown'),
+          name: parseDeviceName(device.sZDO?.DeviceName, 'Unknown'),
           uniqueId,
           currentPosition,
           isOpening: setPosition !== null && currentPosition !== null ? currentPosition < setPosition : null,

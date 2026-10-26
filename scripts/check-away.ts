@@ -43,8 +43,6 @@ async function main(): Promise<void> {
   }
 
   let result = `AWAY FAIL: presetMode did not become Away within ${POLL_FOR_MS / 1000} s`;
-  // Set before the write: a write that times out may still have reached the gateway.
-  let written = true;
   try {
     await gateway.setClimatePreset(id, PRESET_AWAY);
     console.log('wrote preset Away');
@@ -61,7 +59,8 @@ async function main(): Promise<void> {
   } finally {
     console.log(result);
     if (result !== 'AWAY OK') process.exitCode = 1;
-    if (written) {
+    // The write is always attempted (and may have reached the gateway even on error), so always restore.
+    {
       let ok = false;
       // Each restore is attempted on its own, so a failed one does not skip the other.
       try {

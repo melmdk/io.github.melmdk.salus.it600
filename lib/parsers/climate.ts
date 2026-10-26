@@ -33,14 +33,15 @@ import {
   FanMode,
 } from '../constants';
 import type { ApiDeviceStatus, ClimateDevice } from '../device-types';
-import { activeErrors, modelOf, parseDeviceName, signalOf } from './common';
+import { activeErrors, parseDeviceName, signalOf } from './common';
 
 /** Parse one thermostat payload; null when it is not a thermostat or has no UniID. */
 export function parseClimateDevice(device: ApiDeviceStatus, previous?: ClimateDevice): ClimateDevice | null {
   const uniqueId = device.data?.UniID;
   if (!uniqueId) return null;
 
-  const model = modelOf(device);
+  // Deliberately not modelOf(): the sBasicS fallback would change humidity and the FC600 write path.
+  const model = device.DeviceL?.ModelIdentifier_i || null;
   const th = device.sIT600TH;
   const ther = device.sTherS;
   const scomm = device.sComm;

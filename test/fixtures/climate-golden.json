@@ -1,0 +1,420 @@
+[
+  {
+    "available": true,
+    "name": "Soveværelse",
+    "uniqueId": "00000000000000a1",
+    "temperatureUnit": "°C",
+    "precision": 0.1,
+    "data": {
+      "DeviceType": 100,
+      "Endpoint": 9,
+      "UniID": "00000000000000a1"
+    },
+    "manufacturer": "SALUS",
+    "model": "SQ610RFNH",
+    "swVersion": "00000054",
+    "currentHumidity": 46,
+    "batteryLevel": 5,
+    "currentTemperature": 23.5,
+    "targetTemperature": 20,
+    "maxTemp": 35,
+    "minTemp": 5,
+    "hvacMode": "heat",
+    "hvacAction": "idle",
+    "hvacModes": [
+      "off",
+      "heat",
+      "auto"
+    ],
+    "presetMode": "Permanent Hold",
+    "presetModes": [
+      "Follow Schedule",
+      "Permanent Hold",
+      "Off"
+    ],
+    "fanMode": null,
+    "fanModes": null,
+    "locked": null,
+    "supportedFeatures": 17
+  },
+  {
+    "available": true,
+    "name": "Malthe",
+    "uniqueId": "00000000000000a2",
+    "temperatureUnit": "°C",
+    "precision": 0.1,
+    "data": {
+      "DeviceType": 100,
+      "Endpoint": 9,
+      "UniID": "00000000000000a2"
+    },
+    "manufacturer": "SALUS",
+    "model": "SQ610RFNH",
+    "swVersion": "00000054",
+    "currentHumidity": 47,
+    "batteryLevel": 5,
+    "currentTemperature": 24,
+    "targetTemperature": 24,
+    "maxTemp": 35,
+    "minTemp": 5,
+    "hvacMode": "heat",
+    "hvacAction": "heating",
+    "hvacModes": [
+      "off",
+      "heat",
+      "auto"
+    ],
+    "presetMode": "Permanent Hold",
+    "presetModes": [
+      "Follow Schedule",
+      "Permanent Hold",
+      "Off"
+    ],
+    "fanMode": null,
+    "fanModes": null,
+    "locked": null,
+    "supportedFeatures": 17
+  },
+  {
+    "available": true,
+    "name": "Mikkel",
+    "uniqueId": "00000000000000a3",
+    "temperatureUnit": "°C",
+    "precision": 0.1,
+    "data": {
+      "DeviceType": 100,
+      "Endpoint": 9,
+      "UniID": "00000000000000a3"
+    },
+    "manufacturer": "SALUS",
+    "model": "SQ610RFNH",
+    "swVersion": "00000054",
+    "currentHumidity": 50,
+    "batteryLevel": 5,
+    "currentTemperature": 23,
+    "targetTemperature": 24,
+    "maxTemp": 35,
+    "minTemp": 5,
+    "hvacMode": "heat",
+    "hvacAction": "heating",
+    "hvacModes": [
+      "off",
+      "heat",
+      "auto"
+    ],
+    "presetMode": "Permanent Hold",
+    "presetModes": [
+      "Follow Schedule",
+      "Permanent Hold",
+      "Off"
+    ],
+    "fanMode": null,
+    "fanModes": null,
+    "locked": null,
+    "supportedFeatures": 17
+  },
+  {
+    "available": true,
+    "name": "Gang & Køkken",
+    "uniqueId": "00000000000000a4",
+    "temperatureUnit": "°C",
+    "precision": 0.1,
+    "data": {
+      "DeviceType": 100,
+      "Endpoint": 9,
+      "UniID": "00000000000000a4"
+    },
+    "manufacturer": "SALUS",
+    "model": "SQ610RFNH",
+    "swVersion": "00000054",
+    "currentHumidity": 45,
+    "batteryLevel": 5,
+    "currentTemperature": 23.5,
+    "targetTemperature": 23,
+    "maxTemp": 35,
+    "minTemp": 5,
+    "hvacMode": "heat",
+    "hvacAction": "idle",
+    "hvacModes": [
+      "off",
+      "heat",
+      "auto"
+    ],
+    "presetMode": "Permanent Hold",
+    "presetModes": [
+      "Follow Schedule",
+      "Permanent Hold",
+      "Off"
+    ],
+    "fanMode": null,
+    "fanModes": null,
+    "locked": null,
+    "supportedFeatures": 17
+  },
+  {
+    "available": true,
+    "name": "Toilet",
+    "uniqueId": "00000000000000a5",
+    "temperatureUnit": "°C",
+    "precision": 0.1,
+    "data": {
+      "DeviceType": 100,
+      "Endpoint": 9,
+      "UniID": "00000000000000a5"
+    },
+    "manufacturer": "SALUS",
+    "model": "SQ610RFNH",
+    "swVersion": "00000054",
+    "currentHumidity": 48,
+    "batteryLevel": 5,
+    "currentTemperature": 23,
+    "targetTemperature": 24,
+    "maxTemp": 35,
+    "minTemp": 5,
+    "hvacMode": "heat",
+    "hvacAction": "heating",
+    "hvacModes": [
+      "off",
+      "heat",
+      "auto"
+    ],
+    "presetMode": "Permanent Hold",
+    "presetModes": [
+      "Follow Schedule",
+      "Permanent Hold",
+      "Off"
+    ],
+    "fanMode": null,
+    "fanModes": null,
+    "locked": null,
+    "supportedFeatures": 17
+  },
+  {
+    "available": true,
+    "name": "Gæsteværelse",
+    "uniqueId": "00000000000000a6",
+    "temperatureUnit": "°C",
+    "precision": 0.1,
+    "data": {
+      "DeviceType": 100,
+      "Endpoint": 9,
+      "UniID": "00000000000000a6"
+    },
+    "manufacturer": "SALUS",
+    "model": "SQ610RFNH",
+    "swVersion": "00000054",
+    "currentHumidity": 45,
+    "batteryLevel": 5,
+    "currentTemperature": 24,
+    "targetTemperature": 24,
+    "maxTemp": 35,
+    "minTemp": 5,
+    "hvacMode": "heat",
+    "hvacAction": "heating",
+    "hvacModes": [
+      "off",
+      "heat",
+      "auto"
+    ],
+    "presetMode": "Permanent Hold",
+    "presetModes": [
+      "Follow Schedule",
+      "Permanent Hold",
+      "Off"
+    ],
+    "fanMode": null,
+    "fanModes": null,
+    "locked": null,
+    "supportedFeatures": 17
+  },
+  {
+    "available": true,
+    "name": "Multirum",
+    "uniqueId": "00000000000000a7",
+    "temperatureUnit": "°C",
+    "precision": 0.1,
+    "data": {
+      "DeviceType": 100,
+      "Endpoint": 9,
+      "UniID": "00000000000000a7"
+    },
+    "manufacturer": "SALUS",
+    "model": "SQ610RFNH",
+    "swVersion": "00000054",
+    "currentHumidity": 47,
+    "batteryLevel": 5,
+    "currentTemperature": 24,
+    "targetTemperature": 24,
+    "maxTemp": 35,
+    "minTemp": 5,
+    "hvacMode": "heat",
+    "hvacAction": "idle",
+    "hvacModes": [
+      "off",
+      "heat",
+      "auto"
+    ],
+    "presetMode": "Permanent Hold",
+    "presetModes": [
+      "Follow Schedule",
+      "Permanent Hold",
+      "Off"
+    ],
+    "fanMode": null,
+    "fanModes": null,
+    "locked": null,
+    "supportedFeatures": 17
+  },
+  {
+    "available": true,
+    "name": "Bad Børn",
+    "uniqueId": "00000000000000a9",
+    "temperatureUnit": "°C",
+    "precision": 0.1,
+    "data": {
+      "DeviceType": 100,
+      "Endpoint": 9,
+      "UniID": "00000000000000a9"
+    },
+    "manufacturer": "SALUS",
+    "model": "SQ610RFNH",
+    "swVersion": "00000054",
+    "currentHumidity": 49,
+    "batteryLevel": 5,
+    "currentTemperature": 24.5,
+    "targetTemperature": 24,
+    "maxTemp": 35,
+    "minTemp": 5,
+    "hvacMode": "heat",
+    "hvacAction": "heating",
+    "hvacModes": [
+      "off",
+      "heat",
+      "auto"
+    ],
+    "presetMode": "Permanent Hold",
+    "presetModes": [
+      "Follow Schedule",
+      "Permanent Hold",
+      "Off"
+    ],
+    "fanMode": null,
+    "fanModes": null,
+    "locked": null,
+    "supportedFeatures": 17
+  },
+  {
+    "available": true,
+    "name": "Stue",
+    "uniqueId": "00000000000000aa",
+    "temperatureUnit": "°C",
+    "precision": 0.1,
+    "data": {
+      "DeviceType": 100,
+      "Endpoint": 9,
+      "UniID": "00000000000000aa"
+    },
+    "manufacturer": "SALUS",
+    "model": "SQ610RFNH",
+    "swVersion": "00000054",
+    "currentHumidity": 44,
+    "batteryLevel": 5,
+    "currentTemperature": 23.5,
+    "targetTemperature": 23,
+    "maxTemp": 35,
+    "minTemp": 5,
+    "hvacMode": "heat",
+    "hvacAction": "idle",
+    "hvacModes": [
+      "off",
+      "heat",
+      "auto"
+    ],
+    "presetMode": "Permanent Hold",
+    "presetModes": [
+      "Follow Schedule",
+      "Permanent Hold",
+      "Off"
+    ],
+    "fanMode": null,
+    "fanModes": null,
+    "locked": null,
+    "supportedFeatures": 17
+  },
+  {
+    "available": true,
+    "name": "Magnus",
+    "uniqueId": "00000000000000ad",
+    "temperatureUnit": "°C",
+    "precision": 0.1,
+    "data": {
+      "DeviceType": 100,
+      "Endpoint": 9,
+      "UniID": "00000000000000ad"
+    },
+    "manufacturer": "SALUS",
+    "model": "SQ610RFNH",
+    "swVersion": "00000054",
+    "currentHumidity": 48,
+    "batteryLevel": 5,
+    "currentTemperature": 23,
+    "targetTemperature": 22,
+    "maxTemp": 35,
+    "minTemp": 5,
+    "hvacMode": "heat",
+    "hvacAction": "idle",
+    "hvacModes": [
+      "off",
+      "heat",
+      "auto"
+    ],
+    "presetMode": "Permanent Hold",
+    "presetModes": [
+      "Follow Schedule",
+      "Permanent Hold",
+      "Off"
+    ],
+    "fanMode": null,
+    "fanModes": null,
+    "locked": null,
+    "supportedFeatures": 17
+  },
+  {
+    "available": true,
+    "name": "Bad",
+    "uniqueId": "00000000000000b0",
+    "temperatureUnit": "°C",
+    "precision": 0.1,
+    "data": {
+      "DeviceType": 100,
+      "Endpoint": 9,
+      "UniID": "00000000000000b0"
+    },
+    "manufacturer": "SALUS",
+    "model": "SQ610RFNH",
+    "swVersion": "00000054",
+    "currentHumidity": 46,
+    "batteryLevel": 5,
+    "currentTemperature": 23.5,
+    "targetTemperature": 25,
+    "maxTemp": 35,
+    "minTemp": 5,
+    "hvacMode": "heat",
+    "hvacAction": "heating",
+    "hvacModes": [
+      "off",
+      "heat",
+      "auto"
+    ],
+    "presetMode": "Permanent Hold",
+    "presetModes": [
+      "Follow Schedule",
+      "Permanent Hold",
+      "Off"
+    ],
+    "fanMode": null,
+    "fanModes": null,
+    "locked": null,
+    "supportedFeatures": 17
+  }
+]
