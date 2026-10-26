@@ -22,14 +22,15 @@ export interface FakeGatewayOptions {
   detailPool?: ApiResponse[];
   /**
    * Decide per `deviceid` request: answer it, reject it, leave the last
-   * requested device out of the answer, or drop the connection.
+   * requested device out of the answer, drop the connection, or send only
+   * the first half of the answer frame.
    * `callIndex` counts `deviceid` requests from 0.
    */
   onDetails?: (ids: string[], callIndex: number) => DetailsOutcome;
 }
 
 /** What the gateway does with one `deviceid` request. */
-export type DetailsOutcome = 'ok' | 'reject' | 'omit' | 'drop';
+export type DetailsOutcome = 'ok' | 'reject' | 'omit' | 'drop' | 'truncate';
 
 export type FakeTransport = Transport & {
   requests: string[];
@@ -78,7 +79,8 @@ export function fakeGateway(opts: FakeGatewayOptions): FakeTransport {
       if (opts.detailPool) {
         const wanted = outcome === 'omit' ? ids.slice(0, -1) : ids;
         const entries = opts.detailPool.flatMap((r) => r.id ?? []).filter((e) => wanted.includes(e.data?.UniID));
-        return gateway.wrapRequest(JSON.stringify({ status: 'success', id: entries }));
+        const frame = gateway.wrapRequest(JSON.stringify({ status: 'success', id: entries }));
+        return outcome === 'truncate' ? frame.subarray(0, Math.floor(frame.length / 2)) : frame;
       }
     }
 

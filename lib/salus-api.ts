@@ -231,6 +231,8 @@ export class IT600Gateway {
         if (err instanceof TransportError) throw new IT600ConnectionError(err.message);
         throw err;
       }
+      // Nothing to decrypt says nothing about the key: a closed connection, not a wrong EUID.
+      if (raw.length === 0) throw new IT600ConnectionError('Gateway sent an empty response');
 
       // Throws when the frame cannot be decrypted or is not valid JSON.
       const decrypted = protocol.unwrapResponse(raw);
@@ -267,7 +269,8 @@ export class IT600Gateway {
    */
   async connect(): Promise<{ gatewayMac: string; protocol: ProtocolName }> {
     const candidates: GatewayProtocol[] = [];
-    if (this.detected) candidates.push(this.protocol);
+    const stored = this.detected ? this.protocol : null;
+    if (stored) candidates.push(stored);
     for (const candidate of protocolCandidates(this.euid)) {
       if (!candidates.some((c) => c.name === candidate.name)) candidates.push(candidate);
     }
@@ -303,6 +306,10 @@ export class IT600Gateway {
           // Network failure: stop at once if nothing answers, so a dead host
           // costs one timeout instead of one per candidate.
           if (!(await rootAnswers())) throw unreachable();
+          // The stored protocol worked before and a network failure says nothing
+          // about it: retry it on the next reconnect instead of probing the others.
+          // Only undecryptable frames or rejections re-detect.
+          if (candidate === stored) throw err;
         } else if (err instanceof IT600RejectedError) {
           sawReject = true;
         } else {
@@ -345,7 +352,7 @@ export class IT600Gateway {
     return status.id || [];
   }
 
-  /** Whether polls fetch all device details in one `deviceid` request. Off by default. */
+  /** Whether polls fetch all device details in one `deviceid` request. Off until enabled (the app enables it unless switched off). */
   get combinedDetailRequests(): boolean {
     return this.combinedDetails;
   }
@@ -368,8 +375,9 @@ export class IT600Gateway {
 
   /**
    * Fetch every family's details in one `deviceid` request. Returns null (so
-   * callers go per type) when the gateway rejects it, leaves a device out, or
-   * drops the connection COMBINED_FAILURE_LIMIT times in a row.
+   * callers go per type) when the gateway rejects it or leaves a device out,
+   * and for a failed request; COMBINED_FAILURE_LIMIT failures in a row
+   * (dropped connections or unreadable answers) switch combined requests off.
    */
   private async fetchCombinedDetails(families: DeviceFamily[]): Promise<Map<string, ApiDeviceStatus> | null> {
     const requested = new Map<string, ApiDeviceStatus>();
@@ -390,14 +398,15 @@ export class IT600Gateway {
     } catch (err) {
       if (err instanceof IT600CommandError) {
         this.disableCombinedDetailRequests(`gateway rejected it: ${err.message}`);
-      } else if (err instanceof IT600ConnectionError) {
+      } else {
+        // Dropped connections and unreadable (truncated, undecryptable) answers both count.
         this.combinedFailures += 1;
-        if (this.debug) console.log(`Combined details request failed (${this.combinedFailures}/${COMBINED_FAILURE_LIMIT}): ${err.message}`);
+        if (this.debug) console.log(`Combined details request failed (${this.combinedFailures}/${COMBINED_FAILURE_LIMIT}): ${(err as Error).message}`);
         if (this.combinedFailures >= COMBINED_FAILURE_LIMIT) {
-          this.disableCombinedDetailRequests('repeated connection failures');
+          this.disableCombinedDetailRequests(err instanceof IT600ConnectionError
+            ? 'repeated connection failures'
+            : 'repeated unreadable answers');
         }
-      } else if (this.debug) {
-        console.log(`Combined details request failed: ${(err as Error).message}`);
       }
       return null;
     }

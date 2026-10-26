@@ -1,4 +1,5 @@
 import { test } from 'node:test';
+import type { TestContext } from 'node:test';
 import assert from 'node:assert/strict';
 import { IT600Gateway } from '../lib/salus-api';
 import { loadFixture } from './helpers/fixtures';
@@ -22,6 +23,20 @@ function setup(fake: Partial<FakeGatewayOptions> = {}) {
   // The climate map is private; read it through the same cast the parser tests would need.
   const climateCount = () => (gateway as unknown as { climateDevices: Map<string, unknown> }).climateDevices.size;
   return { transport, gateway, climateCount };
+}
+
+/**
+ * Silence the one fallback notice the gateway logs (keeps test output clean)
+ * and return a check that it was logged exactly once, with `reason`.
+ */
+function expectFallbackLog(t: TestContext, reason: RegExp): () => void {
+  const log = t.mock.method(console, 'log', () => undefined);
+  return () => {
+    assert.equal(log.mock.callCount(), 1);
+    const message = String(log.mock.calls[0].arguments[0]);
+    assert.match(message, /per device type from now on/);
+    assert.match(message, reason);
+  };
 }
 
 // The fixture answers 11 climate entries and the parser yields all 11 (the brief
@@ -71,7 +86,8 @@ test('a single dropped combined request falls back for that poll only', async ()
   assert.equal(gateway.lastPollUsedCombined, true);
 });
 
-test('an answer with a different Endpoint counts as left out', async () => {
+test('an answer with a different Endpoint counts as left out', async (t) => {
+  const checkLog = expectFallbackLog(t, /left out 13 of 13/);
   const shifted = JSON.parse(JSON.stringify(detailPool[0])) as typeof detailPool[0];
   for (const entry of shifted.id ?? []) entry.data.Endpoint = 99;
   const { gateway, climateCount } = setup({ detailPool: [shifted] });
@@ -80,10 +96,12 @@ test('an answer with a different Endpoint counts as left out', async () => {
   assert.equal(gateway.combinedDetailRequests, false);
   assert.equal(gateway.lastPollUsedCombined, false);
   assert.ok(climateCount() > 0);
+  checkLog();
 });
 
 for (const [name, outcome] of [['rejection', 'reject'], ['when devices are left out', 'omit']] as const) {
-  test(`combined falls back on ${name}`, async () => {
+  test(`combined falls back on ${name}`, async (t) => {
+    const checkLog = expectFallbackLog(t, outcome === 'reject' ? /rejected/ : /left out 1 of 13/);
     // First deviceid request is the combined one; the per-type fallback is answered.
     const { transport, gateway, climateCount } = setup({
       onDetails: (_ids, call) => (call === 0 ? outcome : 'ok'),
@@ -94,10 +112,12 @@ for (const [name, outcome] of [['rejection', 'reject'], ['when devices are left 
     assert.equal(gateway.lastPollUsedCombined, false);
     assert.equal(transport.detailRequests.length, 3, 'combined request, then per-type for climate and wiring centres');
     assert.equal(climateCount(), EXPECTED_CLIMATE);
+    checkLog();
   });
 }
 
-test('combined falls back after 3 drops', async () => {
+test('combined falls back after 3 drops', async (t) => {
+  const checkLog = expectFallbackLog(t, /repeated connection failures/);
   // A dropped poll is 3 calls: the combined request, then one per-type request per family.
   const { transport, gateway, climateCount } = setup({
     onDetails: (_ids, call) => (call < 9 && call % 3 === 0 ? 'drop' : 'ok'),
@@ -113,6 +133,29 @@ test('combined falls back after 3 drops', async () => {
 
   await gateway.pollStatus();
   assert.equal(transport.detailRequests.length, 11, 'per-type only from now on');
+  checkLog();
+});
+
+test('combined falls back after 3 unreadable answers', async (t) => {
+  const checkLog = expectFallbackLog(t, /repeated unreadable answers/);
+  // A truncated answer cannot be decrypted or parsed; like a drop it costs the
+  // combined request plus one per-type request per family.
+  const { transport, gateway, climateCount } = setup({
+    onDetails: (_ids, call) => (call < 9 && call % 3 === 0 ? 'truncate' : 'ok'),
+  });
+  gateway.setCombinedDetailRequests(true);
+  for (let poll = 1; poll <= 3; poll += 1) {
+    assert.equal(gateway.combinedDetailRequests, true, `still on before poll ${poll}`);
+    await gateway.pollStatus();
+    assert.equal(gateway.lastPollUsedCombined, false);
+    assert.equal(climateCount(), EXPECTED_CLIMATE);
+  }
+  assert.equal(gateway.combinedDetailRequests, false);
+  assert.equal(transport.detailRequests.length, 9);
+
+  await gateway.pollStatus();
+  assert.equal(transport.detailRequests.length, 11, 'per-type only from now on');
+  checkLog();
 });
 
 test('a successful combined request resets the drop counter', async () => {

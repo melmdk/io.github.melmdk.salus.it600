@@ -7,9 +7,11 @@ import {
   IT600AuthenticationError,
   IT600ConnectionError,
   IT600Gateway,
+  IT600UnreachableError,
   IT600UnsupportedFirmwareError,
 } from '../lib/salus-api';
 import { AesCbcProtocol, ProtocolName } from '../lib/protocol';
+import type { Transport } from '../lib/transport';
 import { loadFixture } from './helpers/fixtures';
 import { fakeGateway, FakeGatewayOptions } from './helpers/fake-gateway';
 
@@ -105,6 +107,47 @@ test('a transient error on one candidate does not yield a wrong-EUID verdict', a
   // others only see undecryptable frames, which proves nothing about the EUID.
   const { gateway } = setup({ failFirst: 1 });
   await assert.rejects(gateway.connect(), IT600ConnectionError);
+});
+
+test('a network error on the stored protocol does not re-detect', async () => {
+  // The root answers, so this is not "unreachable"; but probing the other
+  // protocols on every reconnect tick would only add requests.
+  const { transport, gateway } = setup({ protocol: 'aes-256-cbc', failFirst: 1 }, { protocol: 'aes-256-cbc' });
+  await assert.rejects(gateway.connect(), (err: Error) => {
+    assert.ok(err instanceof IT600ConnectionError);
+    assert.ok(!(err instanceof IT600UnreachableError));
+    return true;
+  });
+  assert.equal(transport.requests.length, 1);
+  assert.equal(gateway.protocolName, 'aes-256-cbc');
+
+  // The next reconnect tick uses the stored protocol again and succeeds.
+  assert.equal((await gateway.connect()).protocol, 'aes-256-cbc');
+  assert.equal(transport.requests.length, 2);
+});
+
+test('an empty response is a network error, not a wrong EUID', async () => {
+  const empty: Transport = Object.assign(async () => Buffer.alloc(0), { probeRoot: async () => undefined });
+  let requests = 0;
+  const counting: Transport = Object.assign(async (p: string, b: Buffer) => {
+    requests += 1;
+    return empty(p, b);
+  }, { probeRoot: empty.probeRoot });
+
+  await assert.rejects(new IT600Gateway(EUID, HOST, { transport: counting }).connect(), (err: Error) => {
+    assert.ok(err instanceof IT600ConnectionError);
+    assert.ok(!(err instanceof IT600AuthenticationError));
+    return true;
+  });
+  assert.equal(requests, 3, 'every candidate tried');
+
+  // With a stored protocol it stops after the one request.
+  requests = 0;
+  await assert.rejects(
+    new IT600Gateway(EUID, HOST, { transport: counting, protocol: 'aes-256-cbc' }).connect(),
+    IT600ConnectionError,
+  );
+  assert.equal(requests, 1);
 });
 
 test('reject frames map to unsupported firmware', async () => {

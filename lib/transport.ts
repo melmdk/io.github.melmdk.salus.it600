@@ -34,7 +34,8 @@ export function httpTransport(host: string, port: number, timeoutMs: number): Tr
         const chunks: Buffer[] = [];
         res.on('data', (chunk: Buffer) => chunks.push(chunk));
         res.on('end', () => resolve(Buffer.concat(chunks)));
-        res.on('error', reject);
+        // A connection lost mid-answer is a network error like any other.
+        res.on('error', (err) => reject(new TransportError(`Error communicating with gateway: ${err.message}`)));
       },
     );
     req.on('error', (err) => reject(new TransportError(`Error communicating with gateway: ${err.message}`)));
