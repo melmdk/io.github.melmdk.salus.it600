@@ -22,6 +22,7 @@ export interface GatewayProtocol {
 }
 
 const BLOCK_SIZE = 16;
+const utf8 = new TextDecoder('utf-8', { fatal: true });
 const CCM_SUFFIX = Buffer.from('9a4ba190ac2b5139b32c3528', 'ascii');
 const CCM_TAG_LENGTH = 8;
 const CCM_NONCE_LENGTH = 8;
@@ -58,7 +59,7 @@ export class AesCbcProtocol implements GatewayProtocol {
   unwrapResponse(raw: Buffer): string {
     const aligned = raw.subarray(0, raw.length - (raw.length % BLOCK_SIZE));
     const decipher = crypto.createDecipheriv(this.algorithm, this.key, ENCRYPTION_IV);
-    return Buffer.concat([decipher.update(aligned), decipher.final()]).toString('utf8');
+    return utf8.decode(Buffer.concat([decipher.update(aligned), decipher.final()]));
   }
 }
 
@@ -115,7 +116,7 @@ export class AesCcmProtocol implements GatewayProtocol {
     decipher.setAuthTag(tag);
     const plain = decipher.update(ciphertext);
     decipher.final();
-    return plain.toString('utf8');
+    return utf8.decode(plain);
   }
 }
 
@@ -139,5 +140,6 @@ export function createProtocol(name: ProtocolName, euid: string): GatewayProtoco
     case 'aes-256-cbc': return new AesCbcProtocol(euid);
     case 'aes-128-cbc': return new AesCbcProtocol(euid, { aes128: true });
     case 'aes-256-ccm': return new AesCcmProtocol(euid);
+    default: throw new Error(`Unknown protocol: ${String(name)}`);
   }
 }

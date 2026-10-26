@@ -115,3 +115,7 @@ test('createProtocol builds each named protocol', () => {
     assert.equal(createProtocol(name, '0123456789ABCDEF').name, name);
   }
 });
+
+test('createProtocol throws on an unknown name', () => {
+  assert.throws(() => createProtocol('rot13' as never, '0123456789ABCDEF'), /Unknown protocol/);
+});

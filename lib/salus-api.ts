@@ -3,11 +3,12 @@
  * Handles encrypted communication with the UG600/UGE600 gateway.
  */
 
-import * as crypto from 'crypto';
-import * as http from 'http';
+import { AesCbcProtocol, createProtocol, normaliseEuid, protocolCandidates } from './protocol';
+import type { GatewayProtocol, ProtocolName } from './protocol';
+import { httpTransport, TransportError } from './transport';
+import type { Transport } from './transport';
 
 import {
-  ENCRYPTION_IV,
   TEMP_CELSIUS,
   SUPPORT_TARGET_TEMPERATURE,
   SUPPORT_PRESET_MODE,
@@ -88,12 +89,23 @@ export class IT600AuthenticationError extends IT600Error {
   }
 }
 
+/** Every candidate was refused or undecryptable, but the gateway answers. */
+export class IT600UnsupportedFirmwareError extends IT600Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'IT600UnsupportedFirmwareError';
+  }
+}
+
 export class IT600CommandError extends IT600Error {
   constructor(message: string) {
     super(message);
     this.name = 'IT600CommandError';
   }
 }
+
+/** Gateway decrypted the request but answered `status != success`. */
+class IT600RejectedError extends IT600CommandError {}
 
 /** Mutex for serializing requests */
 class Mutex {
@@ -123,10 +135,12 @@ class Mutex {
 
 /** IT600 Gateway API client */
 export class IT600Gateway {
+  private euid: string;
   private host: string;
-  private port: number;
-  private requestTimeout: number;
-  private encryptionKey: Buffer;
+  private transport: Transport;
+  private protocol: GatewayProtocol;
+  /** True once `protocol` is known to work (stored or detected). */
+  private detected = false;
   private mutex: Mutex;
   private debug: boolean;
 
@@ -141,100 +155,70 @@ export class IT600Gateway {
   constructor(
     euid: string,
     host: string,
-    port: number = DEFAULT_PORT,
-    requestTimeout: number = DEFAULT_REQUEST_TIMEOUT,
-    debug: boolean = false,
+    opts: {
+      port?: number;
+      requestTimeout?: number;
+      debug?: boolean;
+      protocol?: ProtocolName;
+      transport?: Transport;
+    } = {},
   ) {
+    this.euid = normaliseEuid(euid);
     this.host = host;
-    this.port = port;
-    this.requestTimeout = requestTimeout;
-    this.debug = debug;
+    this.debug = opts.debug ?? false;
     this.mutex = new Mutex();
+    this.transport = opts.transport
+      ?? httpTransport(host, opts.port ?? DEFAULT_PORT, opts.requestTimeout ?? DEFAULT_REQUEST_TIMEOUT);
 
-    // Derive encryption key from EUID
-    const hash = crypto.createHash('md5')
-      .update(`Salus-${euid.toLowerCase()}`)
-      .digest();
-    this.encryptionKey = Buffer.concat([hash, Buffer.alloc(16)]);
+    // Until detection runs, talk the legacy protocol; a stored name that is
+    // unknown or unusable for this EUID counts as "none stored".
+    this.protocol = new AesCbcProtocol(this.euid);
+    if (opts.protocol) {
+      try {
+        this.protocol = createProtocol(opts.protocol, this.euid);
+        this.detected = true;
+      } catch {
+        // fall through to probing
+      }
+    }
   }
 
-  /** Encrypt data using AES-256-CBC */
-  private encrypt(plain: string): Buffer {
-    const cipher = crypto.createCipheriv('aes-256-cbc', this.encryptionKey, ENCRYPTION_IV);
-    const padded = Buffer.concat([cipher.update(plain, 'utf8'), cipher.final()]);
-    return padded;
-  }
-
-  /** Decrypt data using AES-256-CBC */
-  private decrypt(encrypted: Buffer): string {
-    const decipher = crypto.createDecipheriv('aes-256-cbc', this.encryptionKey, ENCRYPTION_IV);
-    const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
-    return decrypted.toString('utf8');
-  }
-
-  /** Make encrypted HTTP request to gateway */
-  private async makeRequest(command: string, body: Record<string, unknown>): Promise<ApiResponse> {
+  /** Send one request under `protocol` and return the parsed, successful response. */
+  private async exchange(
+    protocol: GatewayProtocol,
+    command: string,
+    body: Record<string, unknown>,
+  ): Promise<ApiResponse> {
     await this.mutex.acquire();
 
     try {
       const url = `/deviceid/${command}`;
       const bodyJson = JSON.stringify(body);
-      const encryptedBody = this.encrypt(bodyJson);
 
       if (this.debug) {
-        console.log(`Gateway request: POST ${url}`);
+        console.log(`Gateway request (${protocol.name}): POST ${url}`);
         console.log(bodyJson);
       }
 
-      const response = await new Promise<Buffer>((resolve, reject) => {
-        const req = http.request(
-          {
-            hostname: this.host,
-            port: this.port,
-            path: url,
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Content-Length': encryptedBody.length,
-            },
-            timeout: this.requestTimeout,
-          },
-          (res) => {
-            const chunks: Buffer[] = [];
-            res.on('data', (chunk: Buffer) => chunks.push(chunk));
-            res.on('end', () => resolve(Buffer.concat(chunks)));
-            res.on('error', reject);
-          },
-        );
+      let raw: Buffer;
+      try {
+        raw = await this.transport(url, protocol.wrapRequest(bodyJson));
+      } catch (err) {
+        if (err instanceof TransportError) throw new IT600ConnectionError(err.message);
+        throw err;
+      }
 
-        req.on('error', (err) => {
-          reject(new IT600ConnectionError(
-            `Error communicating with gateway: ${err.message}`,
-          ));
-        });
-
-        req.on('timeout', () => {
-          req.destroy();
-          reject(new IT600ConnectionError('Gateway request timeout'));
-        });
-
-        req.write(encryptedBody);
-        req.end();
-      });
-
-      const decrypted = this.decrypt(response);
+      // Throws when the frame cannot be decrypted or is not valid JSON.
+      const decrypted = protocol.unwrapResponse(raw);
+      const responseJson = JSON.parse(decrypted) as ApiResponse;
 
       if (this.debug) {
         console.log('Gateway response:');
         console.log(decrypted);
       }
 
-      const responseJson = JSON.parse(decrypted) as ApiResponse;
-
       if (responseJson.status !== 'success') {
-        throw new IT600CommandError(
-          `Gateway rejected '${command}' command`,
-        );
+        throw new IT600RejectedError(`Gateway rejected '${command}' command`);
       }
 
       return responseJson;
@@ -243,47 +227,63 @@ export class IT600Gateway {
     }
   }
 
-  /** Connect to gateway and validate credentials */
-  async connect(): Promise<string> {
-    try {
-      const response = await this.makeRequest('read', { requestAttr: 'readall' });
+  /** Make encrypted request to gateway using the current protocol */
+  private makeRequest(command: string, body: Record<string, unknown>): Promise<ApiResponse> {
+    return this.exchange(this.protocol, command, body);
+  }
 
-      const gateway = response.id?.find(
+  /** Protocol detected or stored for this gateway, or null if not known yet. */
+  get protocolName(): ProtocolName | null {
+    return this.detected ? this.protocol.name : null;
+  }
+
+  /**
+   * Connect to the gateway, detecting its protocol: the stored one first, then
+   * cbc-256, cbc-128 and ccm. Mirrors salus-it600-client's detection.
+   */
+  async connect(): Promise<{ gatewayMac: string; protocol: ProtocolName }> {
+    const candidates: GatewayProtocol[] = [];
+    if (this.detected) candidates.push(this.protocol);
+    for (const candidate of protocolCandidates(this.euid)) {
+      if (!candidates.some((c) => c.name === candidate.name)) candidates.push(candidate);
+    }
+
+    let sawReject = false;
+    let response: ApiResponse | null = null;
+    for (const candidate of candidates) {
+      try {
+        response = await this.exchange(candidate, 'read', { requestAttr: 'readall' });
+        this.protocol = candidate;
+        this.detected = true;
+        break;
+      } catch (err) {
+        // Any failure only means "not this protocol"; the verdict comes below.
+        if (err instanceof IT600RejectedError) sawReject = true;
+        if (this.debug) console.log(`Protocol ${candidate.name} failed: ${(err as Error).message}`);
+      }
+    }
+
+    if (response) {
+      const mac = response.id?.find(
         (device) => device.sGateway?.NetworkLANMAC && device.sGateway.NetworkLANMAC.length > 0,
-      );
-
-      if (!gateway?.sGateway?.NetworkLANMAC) {
+      )?.sGateway?.NetworkLANMAC;
+      if (!mac) {
         throw new IT600CommandError('Gateway response did not contain gateway information');
       }
-
       // Cache readall response so first pollStatus() can reuse it
       this.pendingReadall = response;
-
-      return gateway.sGateway.NetworkLANMAC;
-    } catch (err) {
-      if (err instanceof IT600ConnectionError) {
-        // Try a simple HTTP request to check if host is reachable
-        try {
-          await new Promise<void>((resolve, reject) => {
-            const req = http.get(
-              { hostname: this.host, port: this.port, timeout: this.requestTimeout },
-              () => resolve(),
-            );
-            req.on('error', reject);
-            req.on('timeout', () => {
-              req.destroy();
-              reject(new Error('timeout'));
-            });
-          });
-
-          // Host is reachable but decryption failed - wrong EUID
-          throw new IT600AuthenticationError('Check if EUID is correct');
-        } catch {
-          throw new IT600ConnectionError('Check if host/IP address is correct');
-        }
-      }
-      throw err;
+      return { gatewayMac: mac, protocol: this.protocol.name };
     }
+
+    try {
+      await this.transport.probeRoot?.();
+    } catch {
+      throw new IT600ConnectionError(`No gateway answering at ${this.host}`);
+    }
+    if (sawReject) {
+      throw new IT600UnsupportedFirmwareError("Gateway firmware uses an encryption this app doesn't support");
+    }
+    throw new IT600AuthenticationError('Wrong EUID: check the 16 characters on the gateway label');
   }
 
   /** Fetch deviceid details for a filtered set of devices */
