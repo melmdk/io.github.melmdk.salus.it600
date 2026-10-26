@@ -871,6 +871,8 @@ export class IT600Gateway {
 
     let requestData: Record<string, unknown>;
     if (device.model === 'FC600') {
+      // HoldType 6 is the SQ610 Away; the FC600 does not list it.
+      if (holdType === 6) throw new IT600CommandError('Away is not supported on this thermostat');
       requestData = { sComm: { SetHoldType: holdType } };
     } else {
       // Standard thermostats don't support Eco or Temporary Hold

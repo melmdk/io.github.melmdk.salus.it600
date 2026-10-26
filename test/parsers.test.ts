@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { IT600Gateway } from '../lib/salus-api';
+import { IT600CommandError, IT600Gateway } from '../lib/salus-api';
 import { parseClimateDevice } from '../lib/parsers/climate';
 import { parseWiringCentre } from '../lib/parsers/wiring-centre';
 import { diffProblems } from '../lib/parsers/common';
@@ -61,6 +61,35 @@ test('away writes HoldType 6', async () => {
 
 test('temporary hold on an SQ610 still writes HoldType 0', async () => {
   assert.deepEqual(await writeFor('Temporary Hold'), { sIT600TH: { SetHoldType: 0 } });
+});
+
+async function fc600Gateway() {
+  const euid = '0123456789ABCDEF';
+  // No FC600 in the fixtures: relabel Gæsteværelse, the write path keys on the model.
+  const pool = clone(loadFixture('deviceid-combined'));
+  const entry = (pool.id ?? []).find((e) => (e.sZDO?.DeviceName ?? '').includes('Gæsteværelse'));
+  assert.ok(entry?.DeviceL);
+  entry.DeviceL.ModelIdentifier_i = 'FC600';
+  const transport = fakeGateway({
+    protocol: 'aes-256-cbc', euid, fixtures: { readall: loadFixture('readall') }, detailPool: [pool],
+  });
+  const gateway = new IT600Gateway(euid, '10.0.0.9', { transport, protocol: 'aes-256-cbc' });
+  await gateway.pollStatus();
+  const target = [...gateway.getClimateDevices().values()].find((d) => d.name === 'Gæsteværelse');
+  assert.equal(target?.model, 'FC600');
+  return { transport, gateway, id: target.uniqueId };
+}
+
+test('away is rejected on an FC600 and nothing is written', async () => {
+  const { transport, gateway, id } = await fc600Gateway();
+  await assert.rejects(gateway.setClimatePreset(id, 'Away'), (err: Error) => {
+    assert.ok(err instanceof IT600CommandError);
+    assert.equal(err.message, 'Away is not supported on this thermostat');
+    return true;
+  });
+  assert.equal(transport.writes.length, 0);
+  await gateway.setClimatePreset(id, 'Eco');
+  assert.deepEqual(transport.writes[0].id?.[0].sComm, { SetHoldType: 10 });
 });
 
 test('thermostat problems from error flags', () => {
