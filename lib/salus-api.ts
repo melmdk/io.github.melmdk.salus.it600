@@ -248,7 +248,19 @@ export class IT600Gateway {
       if (!candidates.some((c) => c.name === candidate.name)) candidates.push(candidate);
     }
 
+    const unreachable = () => new IT600ConnectionError(`No gateway answering at ${this.host}`);
+    const rootAnswers = async (): Promise<boolean> => {
+      try {
+        await this.transport.probeRoot?.();
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
     let sawReject = false;
+    let sawGarbage = false;
+    let sawTransportError = false;
     let response: ApiResponse | null = null;
     for (const candidate of candidates) {
       try {
@@ -257,9 +269,17 @@ export class IT600Gateway {
         this.detected = true;
         break;
       } catch (err) {
-        // Any failure only means "not this protocol"; the verdict comes below.
-        if (err instanceof IT600RejectedError) sawReject = true;
         if (this.debug) console.log(`Protocol ${candidate.name} failed: ${(err as Error).message}`);
+        if (err instanceof IT600ConnectionError) {
+          sawTransportError = true;
+          // Network failure: stop at once if nothing answers, so a dead host
+          // costs one timeout instead of one per candidate.
+          if (!(await rootAnswers())) throw unreachable();
+        } else if (err instanceof IT600RejectedError) {
+          sawReject = true;
+        } else {
+          sawGarbage = true;
+        }
       }
     }
 
@@ -275,15 +295,16 @@ export class IT600Gateway {
       return { gatewayMac: mac, protocol: this.protocol.name };
     }
 
-    try {
-      await this.transport.probeRoot?.();
-    } catch {
-      throw new IT600ConnectionError(`No gateway answering at ${this.host}`);
-    }
+    if (!(await rootAnswers())) throw unreachable();
     if (sawReject) {
       throw new IT600UnsupportedFirmwareError("Gateway firmware uses an encryption this app doesn't support");
     }
-    throw new IT600AuthenticationError('Wrong EUID: check the 16 characters on the gateway label');
+    // A skipped candidate may have been the right one, so garbage alone proves nothing.
+    if (sawGarbage && !sawTransportError) {
+      throw new IT600AuthenticationError('Wrong EUID: check the 16 characters on the gateway label');
+    }
+    // Only network failures, although the root answers: not an EUID problem.
+    throw unreachable();
   }
 
   /** Fetch deviceid details for a filtered set of devices */

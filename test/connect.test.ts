@@ -48,9 +48,10 @@ test('uses stored protocol without probing', async () => {
 });
 
 test('falls back to detection when stored protocol fails', async () => {
-  const { gateway } = setup({ protocol: 'aes-256-cbc' }, { protocol: 'aes-128-cbc' });
+  const { transport, gateway } = setup({ protocol: 'aes-256-cbc' }, { protocol: 'aes-128-cbc' });
   const result = await gateway.connect();
   assert.equal(result.protocol, 'aes-256-cbc');
+  assert.equal(transport.requests.length, 2);
 });
 
 test('invalid stored protocol is treated as none', async () => {
@@ -82,6 +83,28 @@ test('connect reports unreachable', async () => {
     assert.equal(err.message, 'No gateway answering at 10.0.0.9');
     return true;
   });
+});
+
+test('unreachable host costs a single protocol request', async () => {
+  const { transport, gateway } = setup({ unreachable: true });
+  await assert.rejects(gateway.connect(), IT600ConnectionError);
+  assert.equal(transport.requests.length, 1);
+});
+
+test('transient network errors are not reported as wrong EUID', async () => {
+  const { gateway } = setup({ failFirst: 3 });
+  await assert.rejects(gateway.connect(), (err: Error) => {
+    assert.ok(err instanceof IT600ConnectionError);
+    assert.equal(err.message, 'No gateway answering at 10.0.0.9');
+    return true;
+  });
+});
+
+test('a transient error on one candidate does not yield a wrong-EUID verdict', async () => {
+  // The first candidate (the right one) is lost to the network error; the
+  // others only see undecryptable frames, which proves nothing about the EUID.
+  const { gateway } = setup({ failFirst: 1 });
+  await assert.rejects(gateway.connect(), IT600ConnectionError);
 });
 
 test('reject frames map to unsupported firmware', async () => {
