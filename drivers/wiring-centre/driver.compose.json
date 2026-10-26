@@ -28,7 +28,7 @@
           "en": "Gateway IP Address"
         },
         "usernamePlaceholder": {
-          "en": "192.168.1.100"
+          "en": "Leave empty to use the saved gateway"
         },
         "passwordLabel": {
           "en": "Gateway EUID"
@@ -62,7 +62,7 @@
           "en": "Gateway IP Address"
         },
         "usernamePlaceholder": {
-          "en": "192.168.1.100"
+          "en": "Leave empty to use the saved gateway"
         },
         "passwordLabel": {
           "en": "Gateway EUID"
