@@ -50,9 +50,6 @@
         "title": {
           "en": "A problem started"
         },
-        "titleFormatted": {
-          "en": "A problem started on [[device]]: [[problem]]"
-        },
         "hint": {
           "en": "Triggers when a device reports a problem it did not report before."
         },
