@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-10-26
+
+### Added
+- Protocol auto-detection: AES-256-CBC, then AES-128-CBC, then AES-256-CCM (newer UG800 firmware). The detected protocol is stored and used on restart
+- SQ610 "Away" preset
+- Wiring-centre (it600WC) device with connectivity, problem alarm and signal (RSSI/LQI)
+- Thermostat problem alarm (`alarm_generic` and `salus_problems`) and a `problem_started` flow trigger
+- Signal capabilities `salus_rssi` and `salus_lqi`
+- Repair for every driver
+- Combined device-detail requests with automatic fallback to per-type requests (verified on a real gateway)
+- Test suite (`node:test`) with sanitised gateway fixtures
+
+### Changed
+- Pairing reuses the app's existing gateway connection; the credentials screen only appears on first setup or when the gateway can't be reached
+- One shared gateway-credentials flow for all drivers
+- The settings page saves IP and EUID in one step and shows the connection status
+- Clear error messages: "No gateway answering at <ip>", "Wrong EUID: check the 16 characters on the gateway label" and "Gateway firmware uses an encryption this app doesn't support"
+- One shared request lock across all gateway instances
+- EUID input is normalised
+
+### Fixed
+- Misleading "bad decrypt" error
+- EUID placeholder that looked like a real EUID
+- Pairing list missing devices that dropped out of a single poll
+- A transient network error reported as a wrong EUID
+- Slow failure when the gateway is unreachable
+
+### Known limitations
+- On SQ610 thermostats "Temporary Hold" still reads and writes as Follow Schedule (unchanged)
+- Skipping the credentials screen during pairing is covered by tests but not yet verified on a real Homey
+- The wiring-centre icon reuses the thermostat icon
+
 ## [0.9.6] - 2026-02-08
 
 ### Fixed

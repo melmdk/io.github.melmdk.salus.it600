@@ -82,10 +82,11 @@ npx homey app publish
 
 ### API Communication
 - Local HTTP to gateway on port 80
-- AES-256-CBC encryption with PKCS7 padding
-- Key derived from: `MD5("Salus-{euid.toLowerCase()}")` + 16 zero bytes (32 bytes total = 256 bits)
-- Fixed IV: `[0x88, 0xa6, 0xb0, 0x79, 0x5d, 0x85, 0xdb, 0xfc, 0xe6, 0xe0, 0xb3, 0xe9, 0xa6, 0x29, 0x65, 0x4b]`
-- All requests serialized (gateway handles few concurrent connections)
+- Protocols (`lib/protocol.ts`): AES-256-CBC, AES-128-CBC, AES-256-CCM (newer UG800 firmware)
+- Detection (`IT600Gateway.connect()` in `lib/salus-api.ts`): stored protocol first, then cbc-256, cbc-128, ccm. The detected protocol is persisted in the app's `gateway` setting and reused on restart
+- CBC key: `MD5("Salus-{euid.toLowerCase()}")` + 16 zero bytes (256-bit); fixed IV `[0x88, 0xa6, 0xb0, 0x79, 0x5d, 0x85, 0xdb, 0xfc, 0xe6, 0xe0, 0xb3, 0xe9, 0xa6, 0x29, 0x65, 0x4b]`
+- The app owns the one gateway connection; pairing and repair reuse it (`lib/pairing.ts`)
+- One request lock shared by all `IT600Gateway` instances (gateway handles few concurrent connections)
 
 ### Device Detection
 | Device Type | API Attribute | Models |
@@ -104,7 +105,8 @@ npx homey app publish
 
 ```
 ├── lib/
-│   ├── salus-api.ts      # API client (encryption, HTTP)
+│   ├── salus-api.ts      # API client (detection, polling, HTTP)
+│   ├── protocol.ts       # CBC-256 / CBC-128 / CCM protocols
 │   ├── device-types.ts   # Device type mappings
 │   └── constants.ts      # Shared constants
 ├── drivers/
@@ -129,7 +131,11 @@ npx homey app publish
    - Find EUID on gateway label (16 hex chars)
    - Enable "Local WiFi Mode" in Salus app
 
-2. **Without hardware:**
+2. **Automated tests:**
+   - `npm test` runs the `node:test` suite against sanitised gateway fixtures
+   - `npm run capture` re-captures fixtures from the gateway in `test-config.json` (git-ignored, never commit the EUID)
+
+3. **Without hardware:**
    - Validate structure: `npx homey app validate`
    - Check manifest: `npx homey app validate --level publish`
 
@@ -147,6 +153,9 @@ npx homey app publish
 ## Common Issues
 
 - **Connection failed:** Check gateway IP and EUID
+- **"No gateway answering at <ip>":** Host unreachable or wrong IP
+- **"Wrong EUID: check the 16 characters on the gateway label":** Gateway answered but the EUID doesn't decrypt
+- **"Gateway firmware uses an encryption this app doesn't support":** Gateway rejects every known protocol
 - **EUID not working:** Try `0000000000000000` as fallback
 - **Device not found:** Ensure paired in official Salus app first
 
