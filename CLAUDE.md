@@ -29,7 +29,7 @@ All commits must follow the [Conventional Commits](https://www.conventionalcommi
 - `test` - Adding or updating tests
 - `chore` - Maintenance tasks, dependencies, CI
 
-**Scopes:** `api`, `thermostat`, `sensor`, `switch`, `cover`, `pairing`, `flow`, `ci`
+**Scopes:** `api`, `thermostat`, `sensor`, `switch`, `cover`, `wiring-centre`, `pairing`, `flow`, `ci`
 
 **Examples:**
 ```
@@ -96,6 +96,7 @@ npx homey app publish
 | Binary Sensor | `sIASZS` or `sBasicS` | SW600, OS600, WLS600, SD600 |
 | Switch | `sOnOffS` | SPE600, RS600, SP600 |
 | Cover | `sLevelS` | RS600 |
+| Wiring Centre | `sIT600WC` (or model `it600WC`) | it600WC |
 
 ### Polling
 - Default interval: 30 seconds
@@ -105,18 +106,28 @@ npx homey app publish
 ## File Structure
 
 ```
+├── app.ts                    # Owns the gateway connection, polling, settings
 ├── lib/
-│   ├── salus-api.ts      # API client (detection, polling, HTTP)
-│   ├── protocol.ts       # CBC-256 / CBC-128 / CCM protocols
-│   ├── device-types.ts   # Device type mappings
-│   └── constants.ts      # Shared constants
+│   ├── salus-api.ts          # API client (detection, polling, writes)
+│   ├── protocol.ts           # CBC-256 / CBC-128 / CCM protocols
+│   ├── transport.ts          # HTTP transport (swapped for a fake in tests)
+│   ├── parsers/              # Pure parsers: climate.ts, wiring-centre.ts, common.ts
+│   ├── pairing.ts            # Pair/repair flow shared by all drivers
+│   ├── gateway-settings.ts   # `gateway` setting shape, migration, error texts
+│   ├── diagnostics.ts        # Problem alarm text and new-problem detection
+│   ├── device-types.ts       # Device type mappings
+│   └── constants.ts          # Shared constants
 ├── drivers/
-│   ├── thermostat/       # Climate control
+│   ├── thermostat/           # Climate control
 │   ├── temperature-sensor/
-│   ├── binary-sensor/    # Door/window/moisture/smoke
-│   ├── switch/           # Smart plugs
-│   └── cover/            # Blinds/shutters
-└── .homeycompose/        # Homey Compose config
+│   ├── binary-sensor/        # Door/window/moisture/smoke
+│   ├── switch/               # Smart plugs
+│   ├── cover/                # Blinds/shutters
+│   └── wiring-centre/        # it600WC: connected, problems, signal
+├── settings/index.html       # Gateway IP/EUID, combined requests, status
+├── test/                     # node:test suite, fixtures, fake gateway
+├── scripts/                  # Fixture capture and live checks (dev only)
+└── .homeycompose/            # Homey Compose config
 ```
 
 ## Reference Materials

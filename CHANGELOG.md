@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Protocol auto-detection: AES-256-CBC, then AES-128-CBC, then AES-256-CCM (newer UG800 firmware). The detected protocol is stored and used on restart
-- SQ610 "Away" preset
+- SQ610 "Away" preset (the FC600 refuses it with "Away is not supported on this thermostat")
 - Wiring-centre (it600WC) device with a "Connected" indicator (`salus_connected`, also reflected in availability), problem alarm and signal (RSSI/LQI)
 - Thermostat problem alarm (`alarm_generic` and `salus_problems`) and a `problem_started` flow trigger
 - Signal capabilities `salus_rssi` and `salus_lqi`
@@ -18,8 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test suite (`node:test`) with sanitised gateway fixtures
 
 ### Changed
-- Pairing reuses the app's existing gateway connection; the credentials screen only appears on first setup or when the gateway can't be reached
-- One shared gateway-credentials flow for all drivers
+- Pairing reuses the app's existing gateway connection: the credentials screen is skipped when the app is already connected (see Known limitations)
+- One shared gateway-credentials flow for all drivers; its IP field says that leaving it empty uses the saved gateway
 - The settings page saves IP and EUID in one step and shows the connection status
 - Device details are fetched in one combined request by default instead of one request per device type (the 0.9.6 behaviour). If the gateway rejects it, leaves devices out or keeps failing, the app switches back to per-type requests for the session
 - Clear error messages: "No gateway answering at <ip>", "Wrong EUID: check the 16 characters on the gateway label" and "Gateway firmware uses an encryption this app doesn't support"
@@ -30,7 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Misleading "bad decrypt" error
 - EUID placeholder that looked like a real EUID
 - Pairing list missing devices that dropped out of a single poll
-- A transient network error reported as a wrong EUID
+- A transient network error or an empty answer reported as a wrong EUID
+- Every protocol probed again on each reconnect attempt when the gateway drops a request under the known protocol
 - Slow failure when the gateway is unreachable
 
 ### Known limitations
