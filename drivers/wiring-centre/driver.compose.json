@@ -1,0 +1,84 @@
+{
+  "name": {
+    "en": "Wiring Centre"
+  },
+  "class": "sensor",
+  "capabilities": [
+    "alarm_generic",
+    "salus_problems",
+    "salus_rssi",
+    "salus_lqi"
+  ],
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [
+    "lan"
+  ],
+  "pair": [
+    {
+      "id": "gateway_credentials",
+      "template": "login_credentials",
+      "options": {
+        "title": {
+          "en": "Connect to Gateway"
+        },
+        "usernameLabel": {
+          "en": "Gateway IP Address"
+        },
+        "usernamePlaceholder": {
+          "en": "192.168.1.100"
+        },
+        "passwordLabel": {
+          "en": "Gateway EUID"
+        },
+        "passwordPlaceholder": {
+          "en": "16 characters from the gateway label"
+        }
+      }
+    },
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ],
+  "repair": [
+    {
+      "id": "gateway_credentials",
+      "template": "login_credentials",
+      "options": {
+        "title": {
+          "en": "Connect to Gateway"
+        },
+        "usernameLabel": {
+          "en": "Gateway IP Address"
+        },
+        "usernamePlaceholder": {
+          "en": "192.168.1.100"
+        },
+        "passwordLabel": {
+          "en": "Gateway EUID"
+        },
+        "passwordPlaceholder": {
+          "en": "16 characters from the gateway label"
+        }
+      }
+    },
+    {
+      "id": "done",
+      "template": "done"
+    }
+  ],
+  "images": {
+    "small": "/drivers/wiring-centre/assets/images/small.png",
+    "large": "/drivers/wiring-centre/assets/images/large.png",
+    "xlarge": "/drivers/wiring-centre/assets/images/xlarge.png"
+  }
+}

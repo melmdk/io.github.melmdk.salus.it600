@@ -36,6 +36,9 @@ class ThermostatDriver extends Homey.Driver {
         // Add thermostat mode capability
         capabilities.push('thermostat_mode');
 
+        // Diagnostics
+        capabilities.push('alarm_generic', 'salus_problems');
+
         // Build thermostat_mode values based on device's supported modes
         const modeValues: Array<{ id: string; title: { en: string } }> = [];
         if (device.hvacModes.includes('off')) {

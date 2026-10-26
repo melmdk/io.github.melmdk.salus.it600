@@ -1,0 +1,9 @@
+{
+  "type": "number",
+  "title": { "en": "Signal strength" },
+  "units": { "en": "dBm" },
+  "getable": true,
+  "setable": false,
+  "insights": false,
+  "uiComponent": "sensor"
+}

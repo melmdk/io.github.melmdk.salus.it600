@@ -1,0 +1,8 @@
+{
+  "type": "number",
+  "title": { "en": "Link quality" },
+  "getable": true,
+  "setable": false,
+  "insights": false,
+  "uiComponent": "sensor"
+}

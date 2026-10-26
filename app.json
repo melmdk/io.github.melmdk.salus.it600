@@ -44,6 +44,44 @@
       "en": "Based on pyit600 and homeassistant_salus by Edgars Poplavskis (https://github.com/epoplavskis/pyit600)"
     }
   },
+  "flow": {
+    "triggers": [
+      {
+        "title": {
+          "en": "A problem started"
+        },
+        "titleFormatted": {
+          "en": "A problem started on [[device]]: [[problem]]"
+        },
+        "hint": {
+          "en": "Triggers when a device reports a problem it did not report before."
+        },
+        "tokens": [
+          {
+            "name": "device",
+            "type": "string",
+            "title": {
+              "en": "Device"
+            },
+            "example": {
+              "en": "Kældertrappe"
+            }
+          },
+          {
+            "name": "problem",
+            "type": "string",
+            "title": {
+              "en": "Problem"
+            },
+            "example": {
+              "en": "Low battery"
+            }
+          }
+        ],
+        "id": "problem_started"
+      }
+    ]
+  },
   "drivers": [
     {
       "name": {
@@ -501,9 +539,104 @@
         "xlarge": "/drivers/thermostat/assets/images/xlarge.png"
       },
       "id": "thermostat"
+    },
+    {
+      "name": {
+        "en": "Wiring Centre"
+      },
+      "class": "sensor",
+      "capabilities": [
+        "alarm_generic",
+        "salus_problems",
+        "salus_rssi",
+        "salus_lqi"
+      ],
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "pair": [
+        {
+          "id": "gateway_credentials",
+          "template": "login_credentials",
+          "options": {
+            "title": {
+              "en": "Connect to Gateway"
+            },
+            "usernameLabel": {
+              "en": "Gateway IP Address"
+            },
+            "usernamePlaceholder": {
+              "en": "192.168.1.100"
+            },
+            "passwordLabel": {
+              "en": "Gateway EUID"
+            },
+            "passwordPlaceholder": {
+              "en": "16 characters from the gateway label"
+            }
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "repair": [
+        {
+          "id": "gateway_credentials",
+          "template": "login_credentials",
+          "options": {
+            "title": {
+              "en": "Connect to Gateway"
+            },
+            "usernameLabel": {
+              "en": "Gateway IP Address"
+            },
+            "usernamePlaceholder": {
+              "en": "192.168.1.100"
+            },
+            "passwordLabel": {
+              "en": "Gateway EUID"
+            },
+            "passwordPlaceholder": {
+              "en": "16 characters from the gateway label"
+            }
+          }
+        },
+        {
+          "id": "done",
+          "template": "done"
+        }
+      ],
+      "images": {
+        "small": "/drivers/wiring-centre/assets/images/small.png",
+        "large": "/drivers/wiring-centre/assets/images/large.png",
+        "xlarge": "/drivers/wiring-centre/assets/images/xlarge.png"
+      },
+      "id": "wiring-centre"
     }
   ],
   "capabilities": {
+    "salus_lqi": {
+      "type": "number",
+      "title": {
+        "en": "Link quality"
+      },
+      "getable": true,
+      "setable": false,
+      "insights": false,
+      "uiComponent": "sensor"
+    },
     "salus_preset_mode": {
       "type": "enum",
       "title": {
@@ -550,6 +683,28 @@
           }
         }
       ]
+    },
+    "salus_problems": {
+      "type": "string",
+      "title": {
+        "en": "Problems"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor"
+    },
+    "salus_rssi": {
+      "type": "number",
+      "title": {
+        "en": "Signal strength"
+      },
+      "units": {
+        "en": "dBm"
+      },
+      "getable": true,
+      "setable": false,
+      "insights": false,
+      "uiComponent": "sensor"
     }
   }
 }

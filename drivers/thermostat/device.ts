@@ -3,6 +3,7 @@
 import Homey from 'homey';
 import type { IT600Gateway } from '../../lib/salus-api';
 import type { ClimateDevice } from '../../lib/device-types';
+import { computeDiagnostics } from '../../lib/diagnostics';
 import type { HvacMode, PresetMode } from '../../lib/constants';
 
 interface SalusIT600App extends Homey.App {
@@ -13,6 +14,7 @@ interface SalusIT600App extends Homey.App {
 class ThermostatDevice extends Homey.Device {
   private deviceId!: string;
   private updateHandler: (() => void) | null = null;
+  private previousProblems: string[] | null = null;
 
   async onInit(): Promise<void> {
     this.deviceId = this.getData().id as string;
@@ -26,6 +28,14 @@ class ThermostatDevice extends Homey.Device {
     if (!this.hasCapability('alarm_battery')) {
       await this.addCapability('alarm_battery').catch(this.error);
       this.log('Added alarm_battery capability');
+    }
+
+    // Diagnostics capabilities (for devices paired before v0.10)
+    for (const capability of ['alarm_generic', 'salus_problems']) {
+      if (!this.hasCapability(capability)) {
+        await this.addCapability(capability).catch(this.error);
+        this.log(`Added ${capability} capability`);
+      }
     }
 
     // Register capability listeners
@@ -104,7 +114,27 @@ class ThermostatDevice extends Homey.Device {
       setIfChanged('salus_preset_mode', device.presetMode);
     }
 
+    // Signal capabilities are added only once the device reports a value
+    for (const [capability, value] of [['salus_rssi', device.rssi], ['salus_lqi', device.lqi]] as const) {
+      if (value === null) continue;
+      if (!this.hasCapability(capability)) {
+        await this.addCapability(capability).catch(this.error);
+        this.log(`Added ${capability} capability`);
+      }
+      setIfChanged(capability, value);
+    }
+
+    const diagnostics = computeDiagnostics(this.previousProblems, device.problems);
+    this.previousProblems = device.problems;
+    if (this.hasCapability('alarm_generic')) setIfChanged('alarm_generic', diagnostics.alarm);
+    if (this.hasCapability('salus_problems')) setIfChanged('salus_problems', diagnostics.text);
+
     await Promise.all(updates).catch(this.error);
+
+    const trigger = this.homey.flow.getTriggerCard('problem_started');
+    for (const problem of diagnostics.newProblems) {
+      trigger.trigger({ device: this.getName(), problem }).catch(this.error);
+    }
   }
 
   async onTargetTemperature(value: number): Promise<void> {
