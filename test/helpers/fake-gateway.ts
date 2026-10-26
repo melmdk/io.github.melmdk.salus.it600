@@ -15,9 +15,29 @@ export interface FakeGatewayOptions {
   reject?: boolean;
   /** Nothing answers: requests and the root probe both fail. */
   unreachable?: boolean;
+  /**
+   * Entries `deviceid` requests are answered from: each answer holds the pool
+   * entries whose UniID was asked for. Without it `fixtures.deviceid` is used.
+   */
+  detailPool?: ApiResponse[];
+  /**
+   * Decide per `deviceid` request: answer it, reject it, leave the last
+   * requested device out of the answer, or drop the connection.
+   * `callIndex` counts `deviceid` requests from 0.
+   */
+  onDetails?: (ids: string[], callIndex: number) => DetailsOutcome;
 }
 
-export type FakeTransport = Transport & { requests: string[] };
+/** What the gateway does with one `deviceid` request. */
+export type DetailsOutcome = 'ok' | 'reject' | 'omit' | 'drop';
+
+export type FakeTransport = Transport & {
+  requests: string[];
+  /** Decoded `requestAttr` of every request, in order. */
+  attrs: string[];
+  /** UniIDs asked for in every `deviceid` request, in order. */
+  detailRequests: string[][];
+};
 
 /**
  * In-memory gateway. Like the real one, a request it cannot decrypt gets a
@@ -37,13 +57,27 @@ export function fakeGateway(opts: FakeGatewayOptions): FakeTransport {
       throw new TransportError('Error communicating with gateway: ECONNRESET');
     }
 
-    let request: { requestAttr?: string };
+    let request: { requestAttr?: string; id?: Array<{ data?: { UniID?: string } }> };
     try {
-      request = JSON.parse(gateway.unwrapResponse(body)) as { requestAttr?: string };
+      request = JSON.parse(gateway.unwrapResponse(body)) as typeof request;
     } catch {
       return failFrame();
     }
     if (opts.reject) return failFrame();
+    transport.attrs.push(request.requestAttr ?? '');
+
+    if (request.requestAttr === 'deviceid') {
+      const ids = (request.id ?? []).map((item) => item.data?.UniID ?? '');
+      transport.detailRequests.push(ids);
+      const outcome = opts.onDetails?.(ids, transport.detailRequests.length - 1) ?? 'ok';
+      if (outcome === 'drop') throw new TransportError('Error communicating with gateway: ECONNRESET');
+      if (outcome === 'reject') return failFrame();
+      if (opts.detailPool) {
+        const wanted = outcome === 'omit' ? ids.slice(0, -1) : ids;
+        const entries = opts.detailPool.flatMap((r) => r.id ?? []).filter((e) => wanted.includes(e.data?.UniID));
+        return gateway.wrapRequest(JSON.stringify({ status: 'success', id: entries }));
+      }
+    }
 
     const response: ApiResponse = path.endsWith('/write')
       ? ({ status: 'success' } as ApiResponse)
@@ -52,6 +86,8 @@ export function fakeGateway(opts: FakeGatewayOptions): FakeTransport {
   }) as FakeTransport;
 
   transport.requests = [];
+  transport.attrs = [];
+  transport.detailRequests = [];
   transport.probeRoot = async () => {
     if (opts.unreachable) throw new TransportError('Gateway request timeout');
   };

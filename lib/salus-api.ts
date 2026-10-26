@@ -107,6 +107,18 @@ export class IT600CommandError extends IT600Error {
 /** Gateway decrypted the request but answered `status != success`. */
 class IT600RejectedError extends IT600CommandError {}
 
+/** Consecutive dropped combined requests before they are switched off. */
+const COMBINED_FAILURE_LIMIT = 3;
+
+/** One kind of device, fetched and refreshed together. */
+interface DeviceFamily {
+  name: string;
+  devices: ApiDeviceStatus[];
+  refresh: (details: ApiDeviceStatus[]) => void;
+}
+
+const detailKey = (device: ApiDeviceStatus): string => `${device.data?.UniID}|${device.data?.Endpoint}`;
+
 /** Mutex for serializing requests */
 class Mutex {
   private locked = false;
@@ -151,6 +163,8 @@ export class IT600Gateway {
   private coverDevices: Map<string, CoverDevice> = new Map();
   private sensorDevices: Map<string, SensorDevice> = new Map();
   private pendingReadall: ApiResponse | null = null;
+  private combinedDetails = false;
+  private combinedFailures = 0;
 
   constructor(
     euid: string,
@@ -317,6 +331,73 @@ export class IT600Gateway {
     return status.id || [];
   }
 
+  /** Whether polls fetch all device details in one `deviceid` request. Off by default. */
+  get combinedDetailRequests(): boolean {
+    return this.combinedDetails;
+  }
+
+  /** Opt in or out of combined `deviceid` requests (a failure switches them off again). */
+  setCombinedDetailRequests(enabled: boolean): void {
+    this.combinedDetails = enabled;
+    this.combinedFailures = 0;
+  }
+
+  private disableCombinedDetailRequests(reason: string): void {
+    this.combinedDetails = false;
+    console.log(`Requesting device details per device type from now on, the combined request did not work (${reason})`);
+  }
+
+  /**
+   * Fetch every family's details in one `deviceid` request. Returns null (so
+   * callers go per type) when the gateway rejects it, leaves a device out, or
+   * drops the connection COMBINED_FAILURE_LIMIT times in a row.
+   */
+  private async fetchCombinedDetails(families: DeviceFamily[]): Promise<Map<string, ApiDeviceStatus> | null> {
+    const requested = new Map<string, ApiDeviceStatus>();
+    for (const family of families) {
+      for (const device of family.devices) {
+        if (device.data?.UniID) requested.set(detailKey(device), device);
+      }
+    }
+    if (requested.size === 0) return null;
+
+    let answer: ApiDeviceStatus[];
+    try {
+      const status = await this.makeRequest('read', {
+        requestAttr: 'deviceid',
+        id: [...requested.values()].map((d) => ({ data: d.data })),
+      });
+      answer = status.id || [];
+    } catch (err) {
+      if (err instanceof IT600CommandError) {
+        this.disableCombinedDetailRequests(`gateway rejected it: ${err.message}`);
+      } else if (err instanceof IT600ConnectionError) {
+        this.combinedFailures += 1;
+        if (this.debug) console.log(`Combined details request failed (${this.combinedFailures}/${COMBINED_FAILURE_LIMIT}): ${err.message}`);
+        if (this.combinedFailures >= COMBINED_FAILURE_LIMIT) {
+          this.disableCombinedDetailRequests('repeated connection failures');
+        }
+      } else if (this.debug) {
+        console.log(`Combined details request failed: ${(err as Error).message}`);
+      }
+      return null;
+    }
+
+    const indexed = new Map<string, ApiDeviceStatus>();
+    for (const item of answer) {
+      if (item.data?.UniID) indexed.set(detailKey(item), item);
+    }
+    const answeredIds = new Set([...indexed.values()].map((d) => d.data.UniID));
+    const missing = [...requested.values()].filter((d) => !answeredIds.has(d.data.UniID));
+    if (missing.length > 0) {
+      this.disableCombinedDetailRequests(`answer left out ${missing.length} of ${requested.size} devices`);
+      return null;
+    }
+
+    this.combinedFailures = 0;
+    return indexed;
+  }
+
   /** Poll status of all devices */
   async pollStatus(): Promise<void> {
     // Reuse cached readall from connect() if available
@@ -330,34 +411,56 @@ export class IT600Gateway {
     const gatewayDevices = response.id.filter((d) => d.sGateway);
     this.refreshGatewayDevice(gatewayDevices);
 
-    // Separate deviceid request per device type (gateway requires this)
-    const climateDevices = response.id.filter((d) => d.sIT600TH || d.sTherS);
-    const binarySensors = response.id.filter((d) =>
-      d.sIASZS ||
-      (d.sBasicS?.ModelIdentifier && BINARY_SENSOR_MODELS.includes(d.sBasicS.ModelIdentifier)),
-    );
-    const tempSensors = response.id.filter((d) => d.sTempS);
-    const switches = response.id.filter((d) => d.sOnOffS);
-    const covers = response.id.filter((d) => d.sLevelS);
+    // Device families, each refreshed from its own deviceid details. Adding a
+    // family is one entry here.
+    const families: DeviceFamily[] = [
+      {
+        name: 'climate devices',
+        devices: response.id.filter((d) => d.sIT600TH || d.sTherS),
+        refresh: (details) => this.refreshClimateDevices(details),
+      },
+      {
+        name: 'binary sensors',
+        devices: response.id.filter((d) =>
+          d.sIASZS ||
+          (d.sBasicS?.ModelIdentifier && BINARY_SENSOR_MODELS.includes(d.sBasicS.ModelIdentifier)),
+        ),
+        refresh: (details) => this.refreshBinarySensorDevices(details),
+      },
+      {
+        name: 'sensors',
+        devices: response.id.filter((d) => d.sTempS),
+        refresh: (details) => this.refreshSensorDevices(details),
+      },
+      {
+        name: 'switches',
+        devices: response.id.filter((d) => d.sOnOffS),
+        refresh: (details) => this.refreshSwitchDevices(details),
+      },
+      {
+        name: 'covers',
+        devices: response.id.filter((d) => d.sLevelS),
+        refresh: (details) => this.refreshCoverDevices(details),
+      },
+    ];
 
     if (this.debug) {
-      console.log(`Poll: ${fromCache ? 'cached' : 'fresh'} readall, ${response.id.length} devices: climate=${climateDevices.length} binary=${binarySensors.length} temp=${tempSensors.length} switch=${switches.length} cover=${covers.length}`);
+      const counts = families.map((f) => `${f.name}=${f.devices.length}`).join(' ');
+      console.log(`Poll: ${fromCache ? 'cached' : 'fresh'} readall, ${response.id.length} devices: ${counts}`);
     }
 
-    try { this.refreshClimateDevices(await this.fetchDeviceDetails(climateDevices)); }
-    catch (e) { console.error('Failed to poll climate devices:', e); }
+    const combined = this.combinedDetails ? await this.fetchCombinedDetails(families) : null;
 
-    try { this.refreshBinarySensorDevices(await this.fetchDeviceDetails(binarySensors)); }
-    catch (e) { console.error('Failed to poll binary sensors:', e); }
-
-    try { this.refreshSensorDevices(await this.fetchDeviceDetails(tempSensors)); }
-    catch (e) { console.error('Failed to poll sensors:', e); }
-
-    try { this.refreshSwitchDevices(await this.fetchDeviceDetails(switches)); }
-    catch (e) { console.error('Failed to poll switches:', e); }
-
-    try { this.refreshCoverDevices(await this.fetchDeviceDetails(covers)); }
-    catch (e) { console.error('Failed to poll covers:', e); }
+    for (const family of families) {
+      try {
+        const details = combined
+          ? family.devices.map((d) => combined.get(detailKey(d))).filter((d): d is ApiDeviceStatus => !!d)
+          : await this.fetchDeviceDetails(family.devices);
+        family.refresh(details);
+      } catch (e) {
+        console.error(`Failed to poll ${family.name}:`, e);
+      }
+    }
   }
 
   /** Parse device name from JSON string */
