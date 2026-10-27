@@ -222,7 +222,7 @@ test('background reconnects write the status only when it changes; user connects
   await connection.pollOnce();
   assert.equal(settings.writesTo('gateway_status').length, 1, 'same failure twice: one write');
 
-  await assert.rejects(connection.connect(HOST, EUID));
+  await assert.rejects(connection.connect(HOST, EUID), { message: `No gateway answering at ${HOST}` });
   assert.equal(settings.writesTo('gateway_status').length, 2, 'a user connect always reports');
 
   await connection.pollOnce();
@@ -293,7 +293,7 @@ test('a failed connect without a new choice leaves the saved gateway alone', asy
   const writes = settings.writesTo('gateway').length;
 
   // Pairing and repair send no choice; the settings page may resend the saved one.
-  await assert.rejects(connection.connect('10.0.0.99', EUID));
+  await assert.rejects(connection.connect('10.0.0.99', EUID), { message: `No gateway answering at ${HOST}` });
   await connection.applyInput({ host: '10.0.0.99', euid: EUID, combinedDetails: true, at: 2 });
   assert.equal(settings.writesTo('gateway').length, writes);
 });
@@ -406,6 +406,37 @@ test('single network errors on the stored protocol keep it without probing', asy
   assert.equal(connection.getGateway(), null);
   await failedAttempt();
   await failedAttempt();
+  assert.equal(savedProtocol(), 'aes-256-cbc');
+});
+
+test('any other connect error resets the stored-protocol failure count', async () => {
+  // Requests are dropped while the root answers (a stored-protocol failure),
+  // except while the whole host is down (an unreachable error).
+  let hostDown = false;
+  const { connection, requests, savedProtocol } = realSetup({}, (inner) => Object.assign(
+    async () => {
+      throw new TransportError('Error communicating with gateway: ECONNRESET');
+    },
+    {
+      probeRoot: async () => {
+        if (hostDown) throw new TransportError('Error communicating with gateway: EHOSTUNREACH');
+        return inner.probeRoot?.();
+      },
+    },
+  ));
+  const attempt = async () => {
+    const before = requests();
+    await connection.pollOnce();
+    return requests() - before;
+  };
+
+  assert.equal(await attempt(), 1, 'stored failure 1');
+  assert.equal(await attempt(), 1, 'stored failure 2');
+  hostDown = true;
+  assert.equal(await attempt(), 1, 'unreachable: resets the count');
+  hostDown = false;
+  assert.equal(await attempt(), 1, 'stored failure 1 after the reset');
+  assert.equal(await attempt(), 1, 'still the stored protocol only: the count was reset, not 3');
   assert.equal(savedProtocol(), 'aes-256-cbc');
 });
 
