@@ -60,34 +60,32 @@ async function main(): Promise<void> {
     console.log(result);
     if (result !== 'AWAY OK') process.exitCode = 1;
     // The write is always attempted (and may have reached the gateway even on error), so always restore.
-    {
-      let ok = false;
-      // Each restore is attempted on its own, so a failed one does not skip the other.
-      try {
-        await gateway.setClimatePreset(id, originalPreset);
-      } catch (err) {
-        console.log(`preset restore error: ${(err as Error).message}`);
-      }
-      try {
-        await gateway.setClimateTemperature(id, originalSetpoint);
-      } catch (err) {
-        console.log(`setpoint restore error: ${(err as Error).message}`);
-      }
-      try {
-        // The gateway needs a moment to report the restored values (up to ~18 s).
-        for (let attempt = 0; attempt < RESTORE_ATTEMPTS && !ok; attempt += 1) {
-          await sleep(3000);
-          await gateway.pollStatus();
-          const after = findTarget(gateway);
-          ok = Math.abs(after.targetTemperature - originalSetpoint) < 0.01 && after.presetMode === originalPreset;
-          console.log(`after restore: setpoint ${after.targetTemperature}, preset ${after.presetMode}`);
-        }
-      } catch (err) {
-        console.log(`restore error: ${(err as Error).message}`);
-      }
-      console.log(ok ? 'restored' : 'NOT RESTORED: check the thermostat by hand');
-      if (!ok) process.exitCode = 1;
+    let ok = false;
+    // Each restore is attempted on its own, so a failed one does not skip the other.
+    try {
+      await gateway.setClimatePreset(id, originalPreset);
+    } catch (err) {
+      console.log(`preset restore error: ${(err as Error).message}`);
     }
+    try {
+      await gateway.setClimateTemperature(id, originalSetpoint);
+    } catch (err) {
+      console.log(`setpoint restore error: ${(err as Error).message}`);
+    }
+    try {
+      // The gateway needs a moment to report the restored values (up to ~18 s).
+      for (let attempt = 0; attempt < RESTORE_ATTEMPTS && !ok; attempt += 1) {
+        await sleep(3000);
+        await gateway.pollStatus();
+        const after = findTarget(gateway);
+        ok = Math.abs(after.targetTemperature - originalSetpoint) < 0.01 && after.presetMode === originalPreset;
+        console.log(`after restore: setpoint ${after.targetTemperature}, preset ${after.presetMode}`);
+      }
+    } catch (err) {
+      console.log(`restore error: ${(err as Error).message}`);
+    }
+    console.log(ok ? 'restored' : 'NOT RESTORED: check the thermostat by hand');
+    if (!ok) process.exitCode = 1;
   }
 }
 

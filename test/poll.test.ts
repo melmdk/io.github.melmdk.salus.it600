@@ -230,3 +230,15 @@ test('gateway notices go to its logger, the fallback notice once per instance', 
   assert.equal(consoleLog.mock.callCount(), 0);
   assert.equal(consoleError.mock.callCount(), 0);
 });
+
+test('detail entries without a UniID are skipped, the rest are refreshed', async () => {
+  const pool = JSON.parse(JSON.stringify(detailPool[0])) as typeof detailPool[0];
+  const stray = JSON.parse(JSON.stringify(pool.id?.find((d) => d.sIT600TH))) as NonNullable<typeof pool.id>[number];
+  stray.data = { Endpoint: stray.data.Endpoint } as typeof stray.data;
+  const deviceid = { status: 'success', id: [...(pool.id ?? []), stray] } as typeof pool;
+  // Per type, every deviceid request is answered with this list, stray entry included.
+  const { gateway, climateCount } = setup({ detailPool: undefined, fixtures: { readall, deviceid } });
+  await gateway.pollStatus();
+  assert.equal(climateCount(), EXPECTED_CLIMATE);
+  assert.ok([...gateway.getClimateDevices().keys()].every((id) => /^00000000000000[0-9a-f]{2}$/.test(id)));
+});

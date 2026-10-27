@@ -1,10 +1,11 @@
 /**
- * Test script for Salus IT600 gateway connection.
+ * Test script for Salus IT600 gateway connection (read-only: connect + one poll).
  *
  * Usage: npx ts-node test-connection.ts
  *
  * Requires test-config.json (gitignored) with:
  * { "host": "x.x.x.x", "euid": "xxxx" }
+ * Never prints the EUID or the gateway MAC.
  */
 
 import * as fs from 'fs';
@@ -29,12 +30,12 @@ async function main() {
   const config: TestConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
   console.log(`Connecting to gateway at ${config.host}...`);
 
-  const gateway = new IT600Gateway(config.euid, config.host, 80, 10000, false);
+  const gateway = new IT600Gateway(config.euid, config.host, { port: 80, requestTimeout: 10000, debug: false });
 
   try {
-    // Connect
-    const mac = await gateway.connect();
-    console.log(`\n✓ Connected! Gateway MAC: ${mac}\n`);
+    // Connect: detects the protocol (the MAC is not printed)
+    const { protocol } = await gateway.connect();
+    console.log(`\n✓ Connected! Protocol: ${protocol}\n`);
 
     // Poll devices
     await gateway.pollStatus();

@@ -375,13 +375,18 @@ export class IT600Gateway {
     throw unreachable();
   }
 
-  /** Fetch deviceid details for a filtered set of devices */
-  private async fetchDeviceDetails(devices: ApiDeviceStatus[]): Promise<ApiDeviceStatus[]> {
-    if (devices.length === 0) return [];
-    const status = await this.makeRequest('read', {
+  /** One `deviceid` request for `devices` (per type or combined). */
+  private requestDetails(devices: ApiDeviceStatus[]): Promise<ApiResponse> {
+    return this.makeRequest('read', {
       requestAttr: 'deviceid',
       id: devices.map((d) => ({ data: d.data })),
     });
+  }
+
+  /** Fetch deviceid details for a filtered set of devices */
+  private async fetchDeviceDetails(devices: ApiDeviceStatus[]): Promise<ApiDeviceStatus[]> {
+    if (devices.length === 0) return [];
+    const status = await this.requestDetails(devices);
     return status.id || [];
   }
 
@@ -427,10 +432,7 @@ export class IT600Gateway {
 
     let answer: ApiDeviceStatus[];
     try {
-      const status = await this.makeRequest('read', {
-        requestAttr: 'deviceid',
-        id: [...requested.values()].map((d) => ({ data: d.data })),
-      });
+      const status = await this.requestDetails([...requested.values()]);
       const ids: unknown = status.id ?? [];
       // A `success` answer without a device list is as unreadable as a truncated one.
       if (!Array.isArray(ids)) throw new TypeError('Combined answer has no device list');
@@ -568,44 +570,39 @@ export class IT600Gateway {
     }
   }
 
+  /**
+   * Parse a family's details into a new map keyed by uniqueId, passing each
+   * parser the device's previous state. The parsers skip (return null for)
+   * entries without a UniID, so that guard lives in one place.
+   */
+  private parseFamily<T extends { uniqueId: string }>(
+    devices: ApiDeviceStatus[],
+    previous: Map<string, T>,
+    parse: (device: ApiDeviceStatus, previous?: T) => T | null,
+    label: string,
+  ): Map<string, T> {
+    const parsedDevices = new Map<string, T>();
+    for (const device of devices) {
+      try {
+        const parsed = parse(device, previous.get(device.data?.UniID ?? ''));
+        if (parsed) parsedDevices.set(parsed.uniqueId, parsed);
+      } catch (err) {
+        this.logger.error(`Failed to parse ${label} ${device.data?.UniID}:`, err);
+      }
+    }
+    return parsedDevices;
+  }
+
   /** Parse climate devices from batch response */
   private refreshClimateDevices(devices: ApiDeviceStatus[]): void {
     if (devices.length === 0) return;
-    const newDevices = new Map<string, ClimateDevice>();
-
-    for (const device of devices) {
-      const uniqueId = device.data?.UniID;
-      if (!uniqueId) continue;
-
-      try {
-        const parsed = parseClimateDevice(device, this.climateDevices.get(uniqueId));
-        if (parsed) newDevices.set(uniqueId, parsed);
-      } catch (err) {
-        this.logger.error(`Failed to parse climate device ${uniqueId}:`, err);
-      }
-    }
-
-    this.climateDevices = newDevices;
+    this.climateDevices = this.parseFamily(devices, this.climateDevices, parseClimateDevice, 'climate device');
   }
 
   /** Parse wiring centres from batch response */
   private refreshWiringCentreDevices(devices: ApiDeviceStatus[]): void {
     if (devices.length === 0) return;
-    const newDevices = new Map<string, WiringCentreDevice>();
-
-    for (const device of devices) {
-      const uniqueId = device.data?.UniID;
-      if (!uniqueId) continue;
-
-      try {
-        const parsed = parseWiringCentre(device, this.wiringCentreDevices.get(uniqueId));
-        if (parsed) newDevices.set(uniqueId, parsed);
-      } catch (err) {
-        this.logger.error(`Failed to parse wiring centre ${uniqueId}:`, err);
-      }
-    }
-
-    this.wiringCentreDevices = newDevices;
+    this.wiringCentreDevices = this.parseFamily(devices, this.wiringCentreDevices, parseWiringCentre, 'wiring centre');
   }
 
   /** Parse binary sensor devices from batch response */

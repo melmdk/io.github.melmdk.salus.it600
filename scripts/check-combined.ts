@@ -4,6 +4,7 @@
  * Usage: npx tsc -p tsconfig.test.json && node .test-build/scripts/check-combined.js
  * Reads test-config.json ({ host, euid }); never prints the EUID.
  * Prints COMBINED OK or COMBINED FAIL: <reason>, then restored / NOT RESTORED.
+ * Exits non-zero on COMBINED FAIL or NOT RESTORED.
  */
 import * as fs from 'fs';
 import * as path from 'path';
@@ -40,6 +41,7 @@ async function main(): Promise<void> {
   console.log(`baseline: ${baselineCount} climate devices; ${TARGET_NAME} setpoint ${originalSetpoint}, preset ${originalPreset}`);
   if (originalPreset !== PRESET_FOLLOW_SCHEDULE && originalPreset !== PRESET_PERMANENT_HOLD) {
     console.log(`COMBINED FAIL: not run, preset "${originalPreset}" cannot be restored exactly`);
+    process.exitCode = 1;
     return;
   }
 
@@ -70,6 +72,7 @@ async function main(): Promise<void> {
     result = `COMBINED FAIL: ${(err as Error).message}`;
   } finally {
     console.log(result);
+    if (result !== 'COMBINED OK') process.exitCode = 1;
     if (written) {
       let ok = false;
       // Each restore is attempted on its own, so a failed setpoint does not skip the preset.
