@@ -172,6 +172,17 @@ test('pairing list without a gateway names the saved address', async () => {
   });
 });
 
+test('pairing list without a gateway or a saved address asks for the IP', async () => {
+  const { session, trigger } = fakeSession();
+  const { app } = fakeApp({ gateway: null, savedHost: null });
+  registerGatewayPairing(session, app, () => []);
+
+  await assert.rejects(trigger('list_devices'), (err: Error) => {
+    assert.equal(err.message, 'Enter the gateway IP address');
+    return true;
+  });
+});
+
 test('repair always asks, reconnects and refreshes', async () => {
   const { session, handlers, trigger } = fakeSession();
   const { app, connects, refreshCount } = fakeApp({ gateway: connectedGateway() });

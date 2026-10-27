@@ -84,7 +84,8 @@ export function registerGatewayPairing(
   session.setHandler('list_devices', async () => {
     const gateway = app.getGateway();
     if (!gateway) {
-      throw new Error(`No gateway answering at ${app.getSavedHost() ?? 'the saved address'}`);
+      const savedHost = app.getSavedHost();
+      throw new Error(savedHost ? `No gateway answering at ${savedHost}` : 'Enter the gateway IP address');
     }
     const lastSeen = listDevices(gateway);
     try {

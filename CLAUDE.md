@@ -83,7 +83,7 @@ npx homey app publish
 ### API Communication
 - Local HTTP to gateway on port 80
 - Protocols (`lib/protocol.ts`): AES-256-CBC, AES-128-CBC, AES-256-CCM (newer UG800 firmware)
-- Detection (`IT600Gateway.connect()` in `lib/salus-api.ts`): stored protocol first, then cbc-256, cbc-128, ccm. The detected protocol is persisted in the app's `gateway` setting and reused on restart
+- Detection (`IT600Gateway.connect()` in `lib/salus-api.ts`): stored protocol first, then cbc-256, cbc-128, ccm. The detected protocol is persisted in the app's `gateway` setting and reused on restart. Exception: a network error (or empty answer) on the stored protocol fails the connect without re-detecting; only an undecryptable or rejected answer re-detects
 - CBC key: `MD5("Salus-{euid.toLowerCase()}")` + 16 zero bytes (256-bit); fixed IV `[0x88, 0xa6, 0xb0, 0x79, 0x5d, 0x85, 0xdb, 0xfc, 0xe6, 0xe0, 0xb3, 0xe9, 0xa6, 0x29, 0x65, 0x4b]`
 - The app owns the one gateway connection; pairing and repair reuse it (`lib/pairing.ts`)
 - One request lock shared by all `IT600Gateway` instances (gateway handles few concurrent connections)
@@ -167,8 +167,8 @@ npx homey app publish
 - **Connection failed:** Check gateway IP and EUID
 - **"No gateway answering at <ip>":** Host unreachable or wrong IP
 - **"Wrong EUID: check the 16 characters on the gateway label":** Gateway answered but the EUID doesn't decrypt
+- **EUID from the label rejected:** Some gateways accept `0000000000000000` if the label EUID is rejected
 - **"Gateway firmware uses an encryption this app doesn't support":** Gateway rejects every known protocol
-- **EUID not working:** Try `0000000000000000` as fallback
 - **Device not found:** Ensure paired in official Salus app first
 
 ---

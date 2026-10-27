@@ -93,7 +93,9 @@ class SalusIT600App extends Homey.App implements SalusAppApi {
 
   /**
    * Connect (or reconnect) the app-level gateway. Normalises the EUID, tries
-   * the stored protocol first (connect() re-detects if it fails), persists
+   * the stored protocol first (connect() re-detects when its answer can't be
+   * decrypted or is rejected; a network error on the stored protocol fails
+   * the connect without re-detecting), persists
    * `{host, euid, protocol, combinedDetails}` and writes `gateway_status`.
    * `combinedDetails` is the settings page choice; without it the stored
    * preference is kept. On failure the API error is thrown and the previous
@@ -182,7 +184,8 @@ class SalusIT600App extends Homey.App implements SalusAppApi {
         if (!settings) return;
 
         this.log(`Gateway offline, attempting reconnect to ${settings.host}...`);
-        // Same path as connectGateway: stored protocol first, re-detect on failure.
+        // Same path as connectGateway: stored protocol first, re-detect when it
+        // can't be decrypted or is rejected (not on a network error).
         await this.queueConnect(settings.host, settings.euid, false);
         this.log('Gateway reconnected');
       }
