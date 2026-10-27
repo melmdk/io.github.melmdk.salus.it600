@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clear error messages: "No gateway answering at <ip>", "Wrong EUID: check the 16 characters on the gateway label" and "Gateway firmware uses an encryption this app doesn't support"
 - One shared request lock across all gateway instances
 - EUID input is normalised
+- The settings page refuses an EUID that isn't 12 or 16 hex characters ("Wrong EUID: check the 16 characters on the gateway label") without saving
+- The wiring centre has its own icon
 
 ### Fixed
 - Misleading "bad decrypt" error
@@ -33,6 +35,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A transient network error or an empty answer reported as a wrong EUID
 - Every protocol probed again on each reconnect attempt when the gateway drops a request under the known protocol
 - Slow failure when the gateway is unreachable
+- A stored protocol that keeps failing with a network error or an empty answer while the gateway answers was retried forever; after 3 such connects in a row the next one detects the protocol again (once) and stores the result
+- The "Use combined device requests" choice was lost when the connect after saving the settings failed
+- The settings page stopped waiting on any status, including a background reconnect's; it now waits for the outcome of its own save
+- Thermostats and wiring centres set their availability on every poll; they now do so only when it changes
 
 ### Known limitations
 - On SQ610 thermostats "Temporary Hold" still reads and writes as Follow Schedule (unchanged)
