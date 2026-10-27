@@ -16,6 +16,12 @@ export interface FakeGatewayOptions {
   /** Nothing answers: requests and the root probe both fail. */
   unreachable?: boolean;
   /**
+   * What a request the gateway cannot decrypt gets: a `{"status":"fail"}`
+   * frame under the gateway's key (the default, like the real UGE600), a
+   * dropped connection, or an empty answer.
+   */
+  undecryptable?: 'fail-frame' | 'drop' | 'empty';
+  /**
    * Entries `deviceid` requests are answered from: each answer holds the pool
    * entries whose UniID was asked for. Without it the entries of
    * `fixtures.deviceid` are answered whatever was asked for.
@@ -23,15 +29,16 @@ export interface FakeGatewayOptions {
   detailPool?: ApiResponse[];
   /**
    * Decide per `deviceid` request: answer it, reject it, leave the last
-   * requested device out of the answer, drop the connection, or send only
-   * the first half of the answer frame. Works with and without `detailPool`.
+   * requested device out of the answer, drop the connection, send only
+   * the first half of the answer frame, or answer `success` with an `id`
+   * that is not a list. Works with and without `detailPool`.
    * `callIndex` counts `deviceid` requests from 0.
    */
   onDetails?: (ids: string[], callIndex: number) => DetailsOutcome;
 }
 
 /** What the gateway does with one `deviceid` request. */
-export type DetailsOutcome = 'ok' | 'reject' | 'omit' | 'drop' | 'truncate';
+export type DetailsOutcome = 'ok' | 'reject' | 'omit' | 'drop' | 'truncate' | 'malformed';
 
 export type FakeTransport = Transport & {
   requests: string[];
@@ -65,6 +72,8 @@ export function fakeGateway(opts: FakeGatewayOptions): FakeTransport {
     try {
       request = JSON.parse(gateway.unwrapResponse(body)) as typeof request;
     } catch {
+      if (opts.undecryptable === 'drop') throw new TransportError('Error communicating with gateway: ECONNRESET');
+      if (opts.undecryptable === 'empty') return Buffer.alloc(0);
       return failFrame();
     }
     if (opts.reject) return failFrame();
@@ -77,6 +86,7 @@ export function fakeGateway(opts: FakeGatewayOptions): FakeTransport {
       const outcome = opts.onDetails?.(ids, transport.detailRequests.length - 1) ?? 'ok';
       if (outcome === 'drop') throw new TransportError('Error communicating with gateway: ECONNRESET');
       if (outcome === 'reject') return failFrame();
+      if (outcome === 'malformed') return gateway.wrapRequest(JSON.stringify({ status: 'success', id: {} }));
       let entries = opts.detailPool
         ? opts.detailPool.flatMap((r) => r.id ?? []).filter((e) => ids.includes(e.data?.UniID))
         : opts.fixtures.deviceid?.id ?? [];

@@ -3,8 +3,13 @@ import assert from 'node:assert/strict';
 import { GatewayConnection } from '../lib/gateway-connection';
 import type { ConnectTarget, ManagedGateway, SettingsStore } from '../lib/gateway-connection';
 import type { GatewayStatus } from '../lib/gateway-settings';
-import { IT600UnreachableError } from '../lib/salus-api';
+import { IT600Gateway, IT600UnreachableError } from '../lib/salus-api';
 import type { ProtocolName } from '../lib/protocol';
+import { TransportError } from '../lib/transport';
+import type { Transport } from '../lib/transport';
+import { loadFixture } from './helpers/fixtures';
+import { fakeGateway } from './helpers/fake-gateway';
+import type { FakeGatewayOptions } from './helpers/fake-gateway';
 
 const EUID = '0123456789ABCDEF';
 const HOST = '10.0.0.9';
@@ -266,4 +271,105 @@ test('settings page input reconnects with the pair and its combined-requests cho
   await connection.applyInput({ host: HOST });
   assert.equal(created.length, 1, 'incomplete input is ignored');
   assert.equal(errors[0][0], 'Ignoring incomplete gateway settings from the settings page');
+});
+
+/**
+ * A connection whose gateway clients are real IT600Gateways talking to one
+ * in-memory gateway, so requests are counted across connect attempts. The
+ * saved settings say the gateway speaks aes-256-cbc.
+ */
+function realSetup(fake: Partial<FakeGatewayOptions>, wrap: (inner: Transport) => Transport = (inner) => inner) {
+  const settings = fakeSettings({ gateway: { ...SAVED, combinedDetails: false } });
+  const inner = fakeGateway({ protocol: 'aes-256-cbc', euid: EUID, fixtures: { readall: loadFixture('readall') }, ...fake });
+  const transport = wrap(inner);
+  let requests = 0;
+  const counting = Object.assign(async (path: string, body: Buffer) => {
+    requests += 1;
+    return transport(path, body);
+  }, { probeRoot: transport.probeRoot });
+  const logs: string[] = [];
+  const logger = {
+    log: (...args: unknown[]) => logs.push(args.map(String).join(' ')),
+    error: () => undefined,
+  };
+  const connection = new GatewayConnection<IT600Gateway>({
+    settings: settings.store,
+    logger,
+    createGateway: ({ host, euid, protocol }) => new IT600Gateway(euid, host, { protocol, transport: counting, logger }),
+    onDevicesUpdated: () => undefined,
+  });
+  const savedProtocol = () => (settings.values.get('gateway') as { protocol?: string }).protocol;
+  return { connection, settings, logs, requests: () => requests, savedProtocol };
+}
+
+for (const [label, undecryptable] of [['a network error', 'drop'], ['an empty answer', 'empty']] as const) {
+  test(`a stored protocol that fails with ${label} on 3 connects in a row is re-detected once`, async () => {
+    // The gateway moved to aes-128-cbc; it answers aes-256-cbc requests with a dropped connection or nothing.
+    const { connection, logs, requests, savedProtocol } = realSetup({ protocol: 'aes-128-cbc', undecryptable });
+
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      await connection.pollOnce();
+      assert.equal(connection.getGateway(), null, `attempt ${attempt} fails`);
+      assert.equal(requests(), attempt, 'only the stored protocol is tried (no probing)');
+      assert.equal(savedProtocol(), 'aes-256-cbc');
+    }
+
+    // The 4th attempt drops the stored protocol and detects: cbc-256 (fails again), then cbc-128.
+    await connection.pollOnce();
+    assert.equal(connection.getGateway()?.protocolName, 'aes-128-cbc');
+    assert.equal(savedProtocol(), 'aes-128-cbc', 'the detected protocol is persisted');
+    assert.ok(logs.some((line) => /aes-256-cbc failed 3 connects in a row.*detecting/.test(line)), logs.join('\n'));
+  });
+}
+
+test('single network errors on the stored protocol keep it without probing', async () => {
+  let down = false;
+  const { connection, requests, savedProtocol } = realSetup({}, (inner) => Object.assign(
+    async (path: string, body: Buffer) => {
+      if (down) throw new TransportError('Error communicating with gateway: ECONNRESET');
+      return inner(path, body);
+    },
+    { probeRoot: inner.probeRoot },
+  ));
+
+  const failedAttempt = async () => {
+    const before = requests();
+    await connection.pollOnce();
+    assert.equal(connection.getGateway(), null);
+    assert.equal(requests() - before, 1, 'one request: the stored protocol only');
+  };
+
+  down = true;
+  await failedAttempt();
+  await failedAttempt();
+  down = false;
+  await connection.pollOnce();
+  assert.equal(connection.getGateway()?.protocolName, 'aes-256-cbc', 'a success resets the count');
+
+  // Drop the gateway again (a failed poll) and fail twice more: still no probing.
+  down = true;
+  await connection.pollOnce();
+  assert.equal(connection.getGateway(), null);
+  await failedAttempt();
+  await failedAttempt();
+  assert.equal(savedProtocol(), 'aes-256-cbc');
+});
+
+test('after a failed re-detect the stored protocol gets 3 more tries before the next one', async () => {
+  // Every request is dropped while the root answers: the stored protocol and
+  // the re-detect both fail, and re-detection does not run on every tick.
+  const { connection, requests, savedProtocol } = realSetup({}, (inner) => Object.assign(
+    async () => {
+      throw new TransportError('Error communicating with gateway: ECONNRESET');
+    },
+    { probeRoot: inner.probeRoot },
+  ));
+  const perAttempt: number[] = [];
+  for (let attempt = 1; attempt <= 8; attempt += 1) {
+    const before = requests();
+    await connection.pollOnce();
+    perAttempt.push(requests() - before);
+  }
+  assert.deepEqual(perAttempt, [1, 1, 1, 3, 1, 1, 1, 3]);
+  assert.equal(savedProtocol(), 'aes-256-cbc', 'a failed re-detect keeps the stored protocol');
 });

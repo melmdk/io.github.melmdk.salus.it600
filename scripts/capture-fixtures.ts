@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import * as http from 'http';
 import * as path from 'path';
 import { ENCRYPTION_IV, BINARY_SENSOR_MODELS } from '../lib/constants';
-import { sanitiseGatewayPayload, IdMap } from '../test/helpers/sanitise';
+import { sanitiseGatewayPayload, IdMap } from '../lib/sanitise';
 import type { ApiResponse } from '../lib/device-types';
 
 type Dev = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any

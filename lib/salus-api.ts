@@ -10,6 +10,8 @@ import type { Transport } from './transport';
 import { modelOf, parseDeviceName } from './parsers/common';
 import { parseClimateDevice } from './parsers/climate';
 import { parseWiringCentre } from './parsers/wiring-centre';
+import { sanitiseGatewayPayload } from './sanitise';
+import type { IdMap } from './sanitise';
 
 import {
   TEMP_CELSIUS,
@@ -83,6 +85,18 @@ export class IT600UnreachableError extends IT600ConnectionError {
   }
 }
 
+/**
+ * The stored protocol got a network error or an empty answer although the
+ * gateway's root page answers. connect() does not re-detect on it; the caller
+ * may drop the stored protocol after repeated failures.
+ */
+export class IT600StoredProtocolError extends IT600ConnectionError {
+  constructor(message: string) {
+    super(message);
+    this.name = 'IT600StoredProtocolError';
+  }
+}
+
 export class IT600AuthenticationError extends IT600Error {
   constructor(message: string) {
     super(message);
@@ -107,6 +121,12 @@ export class IT600CommandError extends IT600Error {
 
 /** Gateway decrypted the request but answered `status != success`. */
 class IT600RejectedError extends IT600CommandError {}
+
+/** Where a gateway logs (the Homey app passes its log/error; the default is the console). */
+export interface GatewayLogger {
+  log(...args: unknown[]): void;
+  error(...args: unknown[]): void;
+}
 
 /** Consecutive dropped combined requests before they are switched off. */
 const COMBINED_FAILURE_LIMIT = 3;
@@ -163,6 +183,7 @@ export class IT600Gateway {
   private detected = false;
   private mutex: Mutex;
   private debug: boolean;
+  private readonly logger: GatewayLogger;
 
   private gatewayDevice: GatewayDevice | null = null;
   private climateDevices: Map<string, ClimateDevice> = new Map();
@@ -175,6 +196,10 @@ export class IT600Gateway {
   private combinedDetails = false;
   private combinedFailures = 0;
   private usedCombined = false;
+  /** The per-type fallback notice is logged once per instance. */
+  private fallbackLogged = false;
+  /** Dummy ids for real device ids in this instance's debug logs, consistent across lines. */
+  private readonly debugIds: IdMap = new Map();
 
   constructor(
     euid: string,
@@ -185,11 +210,13 @@ export class IT600Gateway {
       debug?: boolean;
       protocol?: ProtocolName;
       transport?: Transport;
+      logger?: GatewayLogger;
     } = {},
   ) {
     this.euid = normaliseEuid(euid);
     this.host = host;
     this.debug = opts.debug ?? false;
+    this.logger = opts.logger ?? console;
     this.mutex = gatewayMutex;
     this.transport = opts.transport
       ?? httpTransport(host, opts.port ?? DEFAULT_PORT, opts.requestTimeout ?? DEFAULT_REQUEST_TIMEOUT);
@@ -220,8 +247,8 @@ export class IT600Gateway {
       const bodyJson = JSON.stringify(body);
 
       if (this.debug) {
-        console.log(`Gateway request (${protocol.name}): POST ${url}`);
-        console.log(bodyJson);
+        this.logger.log(`Gateway request (${protocol.name}): POST ${url}`);
+        this.logger.log(this.redacted(body));
       }
 
       let raw: Buffer;
@@ -239,8 +266,8 @@ export class IT600Gateway {
       const responseJson = JSON.parse(decrypted) as ApiResponse;
 
       if (this.debug) {
-        console.log('Gateway response:');
-        console.log(decrypted);
+        this.logger.log('Gateway response:');
+        this.logger.log(this.redacted(responseJson));
       }
 
       if (responseJson.status !== 'success') {
@@ -251,6 +278,11 @@ export class IT600Gateway {
     } finally {
       this.mutex.release();
     }
+  }
+
+  /** JSON of a request or response for a debug log, redacted like the test fixtures. */
+  private redacted(payload: object): string {
+    return JSON.stringify(sanitiseGatewayPayload(payload as ApiResponse, this.debugIds));
   }
 
   /** Make encrypted request to gateway using the current protocol */
@@ -300,7 +332,7 @@ export class IT600Gateway {
         this.detected = true;
         break;
       } catch (err) {
-        if (this.debug) console.log(`Protocol ${candidate.name} failed: ${(err as Error).message}`);
+        if (this.debug) this.logger.log(`Protocol ${candidate.name} failed: ${(err as Error).message}`);
         if (err instanceof IT600ConnectionError) {
           sawTransportError = true;
           // Network failure: stop at once if nothing answers, so a dead host
@@ -308,8 +340,9 @@ export class IT600Gateway {
           if (!(await rootAnswers())) throw unreachable();
           // The stored protocol worked before and a network failure says nothing
           // about it: retry it on the next reconnect instead of probing the others.
-          // Only undecryptable frames or rejections re-detect.
-          if (candidate === stored) throw err;
+          // Only undecryptable frames or rejections re-detect here; the app drops
+          // the stored protocol after repeated failures (GatewayConnection).
+          if (candidate === stored) throw new IT600StoredProtocolError((err as Error).message);
         } else if (err instanceof IT600RejectedError) {
           sawReject = true;
         } else {
@@ -370,7 +403,9 @@ export class IT600Gateway {
 
   private disableCombinedDetailRequests(reason: string): void {
     this.combinedDetails = false;
-    console.log(`Requesting device details per device type from now on, the combined request did not work (${reason})`);
+    if (this.fallbackLogged) return;
+    this.fallbackLogged = true;
+    this.logger.log(`Requesting device details per device type from now on, the combined request did not work (${reason})`);
   }
 
   /**
@@ -378,6 +413,8 @@ export class IT600Gateway {
    * callers go per type) when the gateway rejects it or leaves a device out,
    * and for a failed request; COMBINED_FAILURE_LIMIT failures in a row
    * (dropped connections or unreadable answers) switch combined requests off.
+   * Never throws: every failure is either counted or switches combined
+   * requests off with one log line.
    */
   private async fetchCombinedDetails(families: DeviceFamily[]): Promise<Map<string, ApiDeviceStatus> | null> {
     const requested = new Map<string, ApiDeviceStatus>();
@@ -394,14 +431,17 @@ export class IT600Gateway {
         requestAttr: 'deviceid',
         id: [...requested.values()].map((d) => ({ data: d.data })),
       });
-      answer = status.id || [];
+      const ids: unknown = status.id ?? [];
+      // A `success` answer without a device list is as unreadable as a truncated one.
+      if (!Array.isArray(ids)) throw new TypeError('Combined answer has no device list');
+      answer = ids;
     } catch (err) {
       if (err instanceof IT600CommandError) {
         this.disableCombinedDetailRequests(`gateway rejected it: ${err.message}`);
       } else {
         // Dropped connections and unreadable (truncated, undecryptable) answers both count.
         this.combinedFailures += 1;
-        if (this.debug) console.log(`Combined details request failed (${this.combinedFailures}/${COMBINED_FAILURE_LIMIT}): ${(err as Error).message}`);
+        if (this.debug) this.logger.log(`Combined details request failed (${this.combinedFailures}/${COMBINED_FAILURE_LIMIT}): ${(err as Error).message}`);
         if (this.combinedFailures >= COMBINED_FAILURE_LIMIT) {
           this.disableCombinedDetailRequests(err instanceof IT600ConnectionError
             ? 'repeated connection failures'
@@ -413,7 +453,7 @@ export class IT600Gateway {
 
     const indexed = new Map<string, ApiDeviceStatus>();
     for (const item of answer) {
-      if (item.data?.UniID) indexed.set(detailKey(item), item);
+      if (item?.data?.UniID) indexed.set(detailKey(item), item);
     }
     // Same key as the lookup in pollStatus, so nothing validated is later dropped.
     const missing = [...requested.keys()].filter((key) => !indexed.has(key));
@@ -479,7 +519,7 @@ export class IT600Gateway {
 
     if (this.debug) {
       const counts = families.map((f) => `${f.name}=${f.devices.length}`).join(' ');
-      console.log(`Poll: ${fromCache ? 'cached' : 'fresh'} readall, ${response.id.length} devices: ${counts}`);
+      this.logger.log(`Poll: ${fromCache ? 'cached' : 'fresh'} readall, ${response.id.length} devices: ${counts}`);
     }
 
     this.usedCombined = false;
@@ -492,14 +532,21 @@ export class IT600Gateway {
         if (combined) {
           details = family.devices.map((d) => combined.get(detailKey(d))).filter((d): d is ApiDeviceStatus => !!d);
           // Devices without a UniID cannot be in the combined request: ask per type.
+          // If that fails, only they miss this poll; the combined details still count.
           const unkeyed = family.devices.filter((d) => !d.data?.UniID);
-          if (unkeyed.length > 0) details = details.concat(await this.fetchDeviceDetails(unkeyed));
+          if (unkeyed.length > 0) {
+            try {
+              details = details.concat(await this.fetchDeviceDetails(unkeyed));
+            } catch (e) {
+              this.logger.error(`Failed to poll ${unkeyed.length} ${family.name} without a UniID:`, e);
+            }
+          }
         } else {
           details = await this.fetchDeviceDetails(family.devices);
         }
         family.refresh(details);
       } catch (e) {
-        console.error(`Failed to poll ${family.name}:`, e);
+        this.logger.error(`Failed to poll ${family.name}:`, e);
       }
     }
   }
@@ -534,7 +581,7 @@ export class IT600Gateway {
         const parsed = parseClimateDevice(device, this.climateDevices.get(uniqueId));
         if (parsed) newDevices.set(uniqueId, parsed);
       } catch (err) {
-        console.error(`Failed to parse climate device ${uniqueId}:`, err);
+        this.logger.error(`Failed to parse climate device ${uniqueId}:`, err);
       }
     }
 
@@ -554,7 +601,7 @@ export class IT600Gateway {
         const parsed = parseWiringCentre(device, this.wiringCentreDevices.get(uniqueId));
         if (parsed) newDevices.set(uniqueId, parsed);
       } catch (err) {
-        console.error(`Failed to parse wiring centre ${uniqueId}:`, err);
+        this.logger.error(`Failed to parse wiring centre ${uniqueId}:`, err);
       }
     }
 
@@ -612,7 +659,7 @@ export class IT600Gateway {
 
         newDevices.set(uniqueId, binarySensor);
       } catch (err) {
-        console.error(`Failed to parse binary sensor ${uniqueId}:`, err);
+        this.logger.error(`Failed to parse binary sensor ${uniqueId}:`, err);
       }
     }
 
@@ -650,7 +697,7 @@ export class IT600Gateway {
 
         newDevices.set(sensorId, sensor);
       } catch (err) {
-        console.error(`Failed to parse sensor ${uniqueId}:`, err);
+        this.logger.error(`Failed to parse sensor ${uniqueId}:`, err);
       }
     }
 
@@ -690,7 +737,7 @@ export class IT600Gateway {
 
         newDevices.set(uniqueId, switchDevice);
       } catch (err) {
-        console.error(`Failed to parse switch ${baseUniqueId}:`, err);
+        this.logger.error(`Failed to parse switch ${baseUniqueId}:`, err);
       }
     }
 
@@ -739,7 +786,7 @@ export class IT600Gateway {
 
         newDevices.set(uniqueId, coverDevice);
       } catch (err) {
-        console.error(`Failed to parse cover ${uniqueId}:`, err);
+        this.logger.error(`Failed to parse cover ${uniqueId}:`, err);
       }
     }
 

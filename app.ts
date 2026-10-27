@@ -21,13 +21,15 @@ class SalusIT600App extends Homey.App implements SalusAppApi {
 
     this.log('Salus IT600 app initialized');
 
+    // The connection and every gateway client log through the app.
+    const logger = {
+      log: (...args: unknown[]) => this.log(...args),
+      error: (...args: unknown[]) => this.error(...args),
+    };
     this.connection = new GatewayConnection<IT600Gateway>({
       settings: this.homey.settings,
-      logger: {
-        log: (...args: unknown[]) => this.log(...args),
-        error: (...args: unknown[]) => this.error(...args),
-      },
-      createGateway: ({ host, euid, protocol }) => new IT600Gateway(euid, host, { protocol }),
+      logger,
+      createGateway: ({ host, euid, protocol }) => new IT600Gateway(euid, host, { protocol, logger }),
       onDevicesUpdated: () => this.homey.emit('devices_updated'),
     });
     await this.connection.start();

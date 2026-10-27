@@ -1,4 +1,10 @@
-import type { ApiResponse } from '../../lib/device-types';
+/**
+ * Redaction for gateway payloads: used for the committed test fixtures and
+ * for the API client's debug logs, so neither carries network secrets, MAC
+ * or IP fields, cloud identifiers or real device ids.
+ */
+
+import type { ApiResponse } from './device-types';
 
 /**
  * Keys whose values are redacted wherever they appear in the tree: network

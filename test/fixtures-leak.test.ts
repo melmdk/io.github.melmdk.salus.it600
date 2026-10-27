@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import * as fs from 'fs';
 import * as path from 'path';
-import { SENSITIVE_KEY, SENSITIVE_BLOCK, DEVICE_ID_KEYS } from './helpers/sanitise';
+import { SENSITIVE_KEY, SENSITIVE_BLOCK, DEVICE_ID_KEYS } from '../lib/sanitise';
 
 const root = path.resolve(__dirname, '../..');
 const dir = path.join(root, 'test/fixtures');

@@ -8,6 +8,7 @@ import {
   IT600CommandError,
   IT600ConnectionError,
   IT600Gateway,
+  IT600StoredProtocolError,
   IT600UnreachableError,
   IT600UnsupportedFirmwareError,
 } from '../lib/salus-api';
@@ -117,6 +118,8 @@ test('a network error on the stored protocol does not re-detect', async () => {
   await assert.rejects(gateway.connect(), (err: Error) => {
     assert.ok(err instanceof IT600ConnectionError);
     assert.ok(!(err instanceof IT600UnreachableError));
+    // Marked, so the app can count repeated stored-protocol failures.
+    assert.ok(err instanceof IT600StoredProtocolError);
     return true;
   });
   assert.equal(transport.requests.length, 1);
@@ -146,7 +149,7 @@ test('an empty response is a network error, not a wrong EUID', async () => {
   requests = 0;
   await assert.rejects(
     new IT600Gateway(EUID, HOST, { transport: counting, protocol: 'aes-256-cbc' }).connect(),
-    IT600ConnectionError,
+    IT600StoredProtocolError,
   );
   assert.equal(requests, 1);
 });
@@ -219,4 +222,30 @@ test('a readall without gateway information fails the connect', async () => {
     assert.equal(err.message, 'Gateway response did not contain gateway information');
     return true;
   });
+});
+
+test('debug logs redact network fields and device ids', async () => {
+  const secrets = ['00:1E:5E:12:34:56', '192.168.7.7', 'my-home-wifi', 'hunter22', '001e5e0000abcdef'];
+  const readall = JSON.parse(JSON.stringify(loadFixture('readall'))) as ReturnType<typeof loadFixture>;
+  const gatewayEntry = readall.id?.find((device) => device.sGateway);
+  assert.ok(gatewayEntry?.sGateway);
+  Object.assign(gatewayEntry.sGateway, {
+    NetworkLANMAC: secrets[0], NetworkWiFiIP: secrets[1], NetworkSSID: secrets[2], NetworkPassword: secrets[3],
+  });
+  gatewayEntry.data.UniID = secrets[4];
+
+  const lines: string[] = [];
+  const logger = {
+    log: (...args: unknown[]) => lines.push(args.map(String).join(' ')),
+    error: (...args: unknown[]) => lines.push(args.map(String).join(' ')),
+  };
+  const transport = fakeGateway({ protocol: 'aes-256-cbc', euid: EUID, fixtures: { readall } });
+  const gateway = new IT600Gateway(EUID, HOST, { transport, protocol: 'aes-256-cbc', debug: true, logger });
+  // The client still sees the real values; only the log is redacted.
+  assert.equal((await gateway.connect()).gatewayMac, secrets[0]);
+
+  const log = lines.join('\n');
+  assert.match(log, /Gateway request \(aes-256-cbc\): POST \/deviceid\/read/);
+  assert.match(log, /"NetworkLANMAC":"REDACTED"/);
+  for (const secret of secrets) assert.ok(!log.toLowerCase().includes(secret.toLowerCase()), 'a secret reached the debug log');
 });

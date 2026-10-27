@@ -83,10 +83,11 @@ npx homey app publish
 ### API Communication
 - Local HTTP to gateway on port 80
 - Protocols (`lib/protocol.ts`): AES-256-CBC, AES-128-CBC, AES-256-CCM (newer UG800 firmware)
-- Detection (`IT600Gateway.connect()` in `lib/salus-api.ts`): stored protocol first, then cbc-256, cbc-128, ccm. The detected protocol is persisted in the app's `gateway` setting and reused on restart. Exception: a network error (or empty answer) on the stored protocol fails the connect without re-detecting; only an undecryptable or rejected answer re-detects
+- Detection (`IT600Gateway.connect()` in `lib/salus-api.ts`): stored protocol first, then cbc-256, cbc-128, ccm. The detected protocol is persisted in the app's `gateway` setting and reused on restart. Exception: a network error (or empty answer) on the stored protocol fails the connect without re-detecting; only an undecryptable or rejected answer re-detects. When that happens on 3 connects in a row while the gateway's root page answers, the next connect drops the stored protocol and re-detects once (`lib/gateway-connection.ts`)
 - CBC key: `MD5("Salus-{euid.toLowerCase()}")` + 16 zero bytes (256-bit); fixed IV `[0x88, 0xa6, 0xb0, 0x79, 0x5d, 0x85, 0xdb, 0xfc, 0xe6, 0xe0, 0xb3, 0xe9, 0xa6, 0x29, 0x65, 0x4b]`
 - The app owns the one gateway connection; pairing and repair reuse it (`lib/pairing.ts`)
 - One request lock shared by all `IT600Gateway` instances (gateway handles few concurrent connections)
+- Debug logs (`debug: true`) redact request and response bodies with the fixture sanitiser (`lib/sanitise.ts`); the gateway logs through the app's log/error
 
 ### Device Detection
 | Device Type | API Attribute | Models |
@@ -116,6 +117,7 @@ npx homey app publish
 │   ├── pairing.ts            # Pair/repair flow shared by all drivers
 │   ├── gateway-settings.ts   # `gateway` setting shape, migration, error texts
 │   ├── diagnostics.ts        # Problem alarm text and new-problem detection
+│   ├── sanitise.ts           # Redaction for fixtures and debug logs
 │   ├── device-types.ts       # Device type mappings
 │   └── constants.ts          # Shared constants
 ├── drivers/

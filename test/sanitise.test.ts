@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { sanitiseGatewayPayload } from './helpers/sanitise';
+import { sanitiseGatewayPayload } from '../lib/sanitise';
 import type { ApiResponse } from '../lib/device-types';
 
 const payload = {
