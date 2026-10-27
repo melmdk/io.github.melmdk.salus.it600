@@ -47,21 +47,21 @@ function fakeDevice() {
   return { device, calls, failNextCall: () => { failNext = true; } };
 }
 
-test('apply calls Homey only when availability changes', async () => {
+test('update calls Homey only when availability changes', async () => {
   const tracker = new AvailabilityTracker();
   const { device, calls } = fakeDevice();
   for (const reason of [null, null, null, 'Device offline', 'Device offline', null]) {
-    await tracker.apply(device, reason);
+    await tracker.update(device, reason);
   }
   assert.deepEqual(calls, ['available', 'unavailable: Device offline', 'available']);
 });
 
-test('apply rethrows a failed call and retries it on the next update', async () => {
+test('update rethrows a failed call and retries it on the next update', async () => {
   const tracker = new AvailabilityTracker();
   const { device, calls, failNextCall } = fakeDevice();
   failNextCall();
-  await assert.rejects(tracker.apply(device, 'Device not found'), /Homey busy/);
-  await tracker.apply(device, 'Device not found');
-  await tracker.apply(device, 'Device not found');
+  await assert.rejects(tracker.update(device, 'Device not found'), /Homey busy/);
+  await tracker.update(device, 'Device not found');
+  await tracker.update(device, 'Device not found');
   assert.deepEqual(calls, ['unavailable: Device not found', 'unavailable: Device not found']);
 });

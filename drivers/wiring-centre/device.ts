@@ -55,7 +55,7 @@ class WiringCentreDevice extends Homey.Device {
 
   /** Set the device available (null) or unavailable with `reason`, only when that changes. */
   private applyAvailability(reason: string | null): Promise<void> {
-    return this.availability.apply(this, reason).catch(this.error);
+    return this.availability.update(this, reason).catch(this.error);
   }
 
   async updateState(): Promise<void> {

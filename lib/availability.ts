@@ -35,7 +35,7 @@ export class AvailabilityTracker {
    * that differs from what was last applied. A failed call is rethrown and
    * retried on the next update.
    */
-  async apply(device: AvailabilityTarget, reason: string | null): Promise<void> {
+  async update(device: AvailabilityTarget, reason: string | null): Promise<void> {
     if (!this.changed(reason)) return;
     try {
       await (reason === null ? device.setAvailable() : device.setUnavailable(reason));
