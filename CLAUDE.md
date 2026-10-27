@@ -106,8 +106,9 @@ npx homey app publish
 ## File Structure
 
 ```
-├── app.ts                    # Owns the gateway connection, polling, settings
+├── app.ts                    # Homey glue: settings, poll timer, devices_updated
 ├── lib/
+│   ├── gateway-connection.ts # The app's gateway connection: connect queue, reconnects, status
 │   ├── salus-api.ts          # API client (detection, polling, writes)
 │   ├── protocol.ts           # CBC-256 / CBC-128 / CCM protocols
 │   ├── transport.ts          # HTTP transport (swapped for a fake in tests)
