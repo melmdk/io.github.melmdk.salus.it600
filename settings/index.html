@@ -46,6 +46,9 @@
         var saveEl = document.getElementById('save');
         var statusEl = document.getElementById('status');
         var waiting = null;
+        // `at` nonce of the save being applied; the app echoes it in that save's gateway_status.
+        var pendingSave = null;
+        var WRONG_EUID = 'Wrong EUID: check the 16 characters on the gateway label';
 
         function showStatus(msg, ok) {
           statusEl.textContent = msg;
@@ -61,13 +64,17 @@
         function stopWaiting() {
           if (waiting) clearTimeout(waiting);
           waiting = null;
+          pendingSave = null;
           setBusy(false);
         }
 
-        // The app writes the outcome of every connect to gateway_status.
+        // The app writes the outcome of every connect to gateway_status. While a
+        // save is being applied, only the status that answers it counts: a
+        // background reconnect of the old gateway may report in the meantime.
         function loadStatus() {
           Homey.get('gateway_status', function(err, status) {
             if (err || !status || !status.message) return;
+            if (waiting && status.input !== pendingSave) return;
             showStatus(status.message, status.ok);
             if (waiting) stopWaiting();
           });
@@ -90,22 +97,27 @@
 
         saveEl.addEventListener('click', function() {
           var host = hostEl.value.trim();
-          var euid = euidEl.value.replace(/\s+/g, '');
+          // Same normalisation as the app (normaliseEuid): no whitespace, uppercase.
+          var euid = euidEl.value.replace(/\s+/g, '').toUpperCase();
 
           if (!host) return showStatus('Gateway IP address is required.', false);
           if (!euid) return showStatus('Gateway EUID is required.', false);
+          // Gateway labels carry 16 hex characters (some 12); anything else cannot work.
+          if (!/^(?:[0-9A-F]{12}|[0-9A-F]{16})$/.test(euid)) return showStatus(WRONG_EUID, false);
 
           setBusy(true);
           statusEl.style.display = 'none';
+          // One change: the app reconnects once, with the new IP, EUID and request mode together.
+          // `at` makes every save a new value, so re-saving the same pair still reconnects,
+          // and the app echoes it in the status that answers this save.
+          var input = { host: host, euid: euid, combinedDetails: combinedEl.checked, at: Date.now() };
+          pendingSave = input.at;
           // Started before saving: the app may answer before the save callback runs.
           waiting = setTimeout(function() {
             stopWaiting();
             showStatus('Saved. Still waiting for the gateway to answer.', false);
           }, 45000);
 
-          // One change: the app reconnects once, with the new IP, EUID and request mode together.
-          // `at` makes every save a new value, so re-saving the same pair still reconnects.
-          var input = { host: host, euid: euid, combinedDetails: combinedEl.checked, at: Date.now() };
           Homey.set('gateway_input', input, function(err) {
             if (err) {
               stopWaiting();

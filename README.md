@@ -97,7 +97,8 @@ You can view and update your gateway connection settings at any time:
 **Homey app > More > Apps > Salus IT600 > Settings**
 
 - **Save & Connect** saves the IP address and EUID together and reconnects once with the pair. The page then shows the outcome of that connect
-- **Use combined device requests** (on by default) fetches all device details in one request. If the gateway rejects it, leaves devices out or keeps failing, the app falls back to one request per device type on its own
+- **Use combined device requests** (on by default) fetches all device details in one request. If the gateway rejects it, leaves devices out or keeps failing, the app falls back to one request per device type on its own. The choice is kept even when the connect fails
+- An EUID that isn't 12 or 16 hex characters is refused before anything is sent
 
 ## Features
 

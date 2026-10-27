@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  connectedSettings, connectionErrorMessage, inputCombinedDetails, migrateGatewaySettings,
+  connectedSettings, connectionErrorMessage, failedConnectSettings, inputCombinedDetails, inputNonce,
+  migrateGatewaySettings,
 } from '../lib/gateway-settings';
 import {
   IT600AuthenticationError,
@@ -113,4 +114,20 @@ test('inputCombinedDetails reads only an explicit boolean', () => {
   assert.equal(inputCombinedDetails({ host: 'h', euid: 'e', at: 1 }), undefined);
   assert.equal(inputCombinedDetails({ combinedDetails: 'false' }), undefined);
   assert.equal(inputCombinedDetails(null), undefined);
+});
+
+test('failedConnectSettings keeps only a new combined-requests choice', () => {
+  const previous = { host: '10.0.0.1', euid: '0123456789ABCDEF', protocol: 'aes-256-cbc' as const, combinedDetails: true };
+  assert.deepEqual(failedConnectSettings(previous, false), { ...previous, combinedDetails: false });
+  assert.equal(failedConnectSettings(previous, true), null, 'same choice: nothing to write');
+  assert.equal(failedConnectSettings(previous, undefined), null, 'no choice sent');
+  assert.equal(failedConnectSettings(null, false), null, 'no saved gateway to attach it to');
+  assert.deepEqual(previous.combinedDetails, true, 'previous is not modified');
+});
+
+test('inputNonce reads only a numeric at', () => {
+  assert.equal(inputNonce({ host: 'h', euid: 'e', at: 1712 }), 1712);
+  assert.equal(inputNonce({ host: 'h', euid: 'e', at: '1712' }), undefined);
+  assert.equal(inputNonce({ host: 'h', euid: 'e' }), undefined);
+  assert.equal(inputNonce(null), undefined);
 });

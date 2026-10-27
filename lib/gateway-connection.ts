@@ -10,7 +10,8 @@
  */
 
 import {
-  connectedSettings, connectionErrorMessage, inputCombinedDetails, migrateGatewaySettings,
+  connectedSettings, connectionErrorMessage, failedConnectSettings, inputCombinedDetails, inputNonce,
+  migrateGatewaySettings,
 } from './gateway-settings';
 import type { GatewaySettings, GatewayStatus } from './gateway-settings';
 import type { ProtocolName } from './protocol';
@@ -47,6 +48,16 @@ export interface ConnectTarget {
   host: string;
   euid: string;
   protocol?: ProtocolName;
+}
+
+/** How one queued connect reports and what it carries from the settings page. */
+interface ConnectOptions {
+  /** Always write `gateway_status` and log a failure (user connects); background reconnects write changes only. */
+  report: boolean;
+  /** The settings page's combined-requests choice, when it sent one. */
+  combinedDetails?: boolean;
+  /** The `at` nonce of the settings page save, echoed in `gateway_status`. */
+  input?: number;
 }
 
 export interface GatewayConnectionOptions<G extends ManagedGateway> {
@@ -135,10 +146,11 @@ export class GatewayConnection<G extends ManagedGateway> {
    * writes `gateway_status`.
    * `combinedDetails` is the settings page choice; without it the stored
    * preference is kept. On failure the API error is thrown and the previous
-   * gateway stays in use.
+   * gateway stays in use; only a new combined-requests choice is persisted
+   * (and applied to that gateway).
    */
   connect(host: string, euid: string, combinedDetails?: boolean): Promise<G> {
-    return this.queueConnect(host, euid, true, combinedDetails);
+    return this.queueConnect(host, euid, { report: true, combinedDetails });
   }
 
   /** The settings page saved IP and EUID as one change (`gateway_input`): reconnect once with the pair. */
@@ -152,7 +164,10 @@ export class GatewayConnection<G extends ManagedGateway> {
 
     this.logger.log(`Gateway settings changed, connecting to ${input.host}`);
     try {
-      await this.connect(input.host, input.euid, inputCombinedDetails(raw));
+      // The status names this save, so the page doesn't take a background outcome for its answer.
+      await this.queueConnect(input.host, input.euid, {
+        report: true, combinedDetails: inputCombinedDetails(raw), input: inputNonce(raw),
+      });
       await this.refreshDevices();
       this.logger.log('Gateway reconnected with new settings');
     } catch (err) {
@@ -179,7 +194,7 @@ export class GatewayConnection<G extends ManagedGateway> {
         // Same path as connect(): stored protocol first, re-detect when it
         // can't be decrypted or is rejected (after a network error only once
         // that repeated STORED_PROTOCOL_FAILURE_LIMIT times).
-        await this.queueConnect(settings.host, settings.euid, false);
+        await this.queueConnect(settings.host, settings.euid, { report: false });
         this.logger.log('Gateway reconnected');
       }
 
@@ -200,18 +215,17 @@ export class GatewayConnection<G extends ManagedGateway> {
     this.onDevicesUpdated();
   }
 
-  private queueConnect(host: string, euid: string, alwaysReport: boolean, combinedDetails?: boolean): Promise<G> {
+  private queueConnect(host: string, euid: string, opts: ConnectOptions): Promise<G> {
     this.pendingConnects += 1;
-    const run = this.connectQueue.then(() => this.openGateway(host, euid, alwaysReport, combinedDetails));
+    const run = this.connectQueue.then(() => this.openGateway(host, euid, opts));
     this.connectQueue = run.catch(() => undefined);
     return run.finally(() => {
       this.pendingConnects -= 1;
     });
   }
 
-  private async openGateway(
-    host: string, euid: string, alwaysReport: boolean, combinedDetails?: boolean,
-  ): Promise<G> {
+  private async openGateway(host: string, euid: string, opts: ConnectOptions): Promise<G> {
+    const { report: alwaysReport, combinedDetails, input } = opts;
     const previous = this.loadSettings();
     const attempt = connectedSettings(previous, host, euid, undefined, combinedDetails);
     if (attempt.protocol && this.storedProtocolFailures >= STORED_PROTOCOL_FAILURE_LIMIT) {
@@ -229,7 +243,13 @@ export class GatewayConnection<G extends ManagedGateway> {
       this.storedProtocolFailures = err instanceof IT600StoredProtocolError ? this.storedProtocolFailures + 1 : 0;
       // Pairing and repair have no logger of their own; the poll loop logs its own failures.
       if (alwaysReport) this.logger.error(`Connecting to gateway at ${attempt.host} failed:`, err);
-      this.writeStatus(false, connectionErrorMessage(err), alwaysReport);
+      // The settings page's combined-requests choice outlives a failed connect.
+      const kept = failedConnectSettings(previous, combinedDetails);
+      if (kept) {
+        this.settings.set('gateway', kept);
+        this.gateway?.setCombinedDetailRequests(kept.combinedDetails !== false);
+      }
+      this.writeStatus(false, connectionErrorMessage(err), alwaysReport, input);
       throw err;
     }
 
@@ -239,16 +259,20 @@ export class GatewayConnection<G extends ManagedGateway> {
     gateway.setCombinedDetailRequests(settings.combinedDetails !== false);
     this.gateway = gateway;
     this.settings.set('gateway', settings);
-    this.writeStatus(true, `Connected to ${settings.host}`, alwaysReport);
+    this.writeStatus(true, `Connected to ${settings.host}`, alwaysReport, input);
     this.logger.log(`Connected to gateway at ${settings.host} (${detected}, combined detail requests ${settings.combinedDetails ? 'on' : 'off'})`);
     return gateway;
   }
 
-  /** Write `gateway_status`; background reconnects only write when the outcome changes. */
-  private writeStatus(ok: boolean, message: string, always: boolean): void {
+  /**
+   * Write `gateway_status`; background reconnects only write when the outcome
+   * changes. `input` is the nonce of the settings page save being answered.
+   */
+  private writeStatus(ok: boolean, message: string, always: boolean, input?: number): void {
     const current = this.settings.get('gateway_status') as GatewayStatus | null;
     if (!always && current?.ok === ok && current?.message === message) return;
     const status: GatewayStatus = { ok, message, at: new Date().toISOString() };
+    if (input !== undefined) status.input = input;
     this.settings.set('gateway_status', status);
   }
 }

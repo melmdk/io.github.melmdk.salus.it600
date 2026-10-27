@@ -28,7 +28,7 @@ export interface GatewayInput {
   euid: string;
   /** "Use combined device requests" checkbox; absent from older settings pages. */
   combinedDetails?: boolean;
-  /** Nonce (`Date.now()`) so saving identical values still fires the settings event; not read. */
+  /** Nonce (`Date.now()`): saving identical values still fires the settings event, and the status echoes it. */
   at?: number;
 }
 
@@ -37,6 +37,11 @@ export interface GatewayStatus {
   ok: boolean;
   message: string;
   at: string;
+  /**
+   * The `at` nonce of the settings page save this status answers; absent for
+   * pairing, repair and background reconnects. The page waits for its own.
+   */
+  input?: number;
 }
 
 const KNOWN_PROTOCOLS: readonly ProtocolName[] = ['aes-256-cbc', 'aes-128-cbc', 'aes-256-ccm'];
@@ -114,6 +119,26 @@ export function connectedSettings(
 export function inputCombinedDetails(raw: unknown): boolean | undefined {
   const value = raw && typeof raw === 'object' ? (raw as Record<string, unknown>).combinedDetails : undefined;
   return typeof value === 'boolean' ? value : undefined;
+}
+
+/** The `at` nonce of a `gateway_input` save, or undefined when the page sent none. */
+export function inputNonce(raw: unknown): number | undefined {
+  const value = raw && typeof raw === 'object' ? (raw as Record<string, unknown>).at : undefined;
+  return typeof value === 'number' ? value : undefined;
+}
+
+/**
+ * What to persist after a failed connect: the saved gateway with the settings
+ * page's new combined-requests choice. Host, EUID and protocol stay as they
+ * were (a pair that failed is never persisted). Null when there is nothing to
+ * write: no choice sent, the same choice, or no saved gateway to attach it to.
+ */
+export function failedConnectSettings(
+  previous: GatewaySettings | null,
+  combinedDetails?: boolean,
+): GatewaySettings | null {
+  if (!previous || combinedDetails === undefined || previous.combinedDetails === combinedDetails) return null;
+  return { ...previous, combinedDetails };
 }
 
 /** connect()'s verdicts: messages written for users that never contain the EUID. */

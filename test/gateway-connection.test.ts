@@ -273,6 +273,60 @@ test('settings page input reconnects with the pair and its combined-requests cho
   assert.equal(errors[0][0], 'Ignoring incomplete gateway settings from the settings page');
 });
 
+test('the combined-requests choice is kept when the connect fails', async () => {
+  const { connection, settings, created } = setup({ behaviours: [{}, { connect: unreachable }] });
+  await connection.connect(HOST, EUID);
+  assert.equal(created[0].combined, true);
+
+  // Unchecked together with a mistyped IP: the connect fails.
+  await connection.applyInput({ host: '10.0.0.99', euid: EUID, combinedDetails: false, at: 1 });
+  assert.deepEqual(settings.values.get('gateway'), {
+    host: HOST, euid: EUID, protocol: 'aes-256-cbc', combinedDetails: false,
+  }, 'only the choice is persisted, not the failed pair');
+  assert.equal(created[0].combined, false, 'the running gateway follows the choice');
+  assert.equal((settings.values.get('gateway_status') as GatewayStatus).ok, false);
+});
+
+test('a failed connect without a new choice leaves the saved gateway alone', async () => {
+  const { connection, settings } = setup({ behaviours: [{}, { connect: unreachable }] });
+  await connection.connect(HOST, EUID);
+  const writes = settings.writesTo('gateway').length;
+
+  // Pairing and repair send no choice; the settings page may resend the saved one.
+  await assert.rejects(connection.connect('10.0.0.99', EUID));
+  await connection.applyInput({ host: '10.0.0.99', euid: EUID, combinedDetails: true, at: 2 });
+  assert.equal(settings.writesTo('gateway').length, writes);
+});
+
+test('a failed first setup persists nothing', async () => {
+  const { connection, settings } = setup({ behaviours: [{ connect: unreachable }] });
+  await connection.applyInput({ host: HOST, euid: EUID, combinedDetails: false, at: 3 });
+  assert.deepEqual(settings.writesTo('gateway'), []);
+});
+
+test('the status of a settings page save names that save', async () => {
+  const { connection, settings } = setup({
+    settings: { gateway: SAVED },
+    behaviours: [
+      { connect: unreachable },
+      { poll: () => Promise.reject(new Error('Gateway request timeout')) },
+      { connect: unreachable },
+    ],
+  });
+  const status = () => settings.values.get('gateway_status') as GatewayStatus;
+  await connection.applyInput({ host: HOST, euid: EUID, at: 1712 });
+  assert.equal(status().input, 1712);
+
+  await connection.connect(HOST, EUID);
+  assert.equal(status().ok, true);
+  assert.equal(status().input, undefined, 'pairing and repair');
+
+  await connection.pollOnce(); // the poll fails and drops the gateway
+  await connection.pollOnce(); // the background reconnect fails
+  assert.equal(status().ok, false);
+  assert.equal(status().input, undefined, 'background reconnect');
+});
+
 /**
  * A connection whose gateway clients are real IT600Gateways talking to one
  * in-memory gateway, so requests are counted across connect attempts. The
