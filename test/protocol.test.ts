@@ -69,25 +69,52 @@ for (const [label, key] of [['16-char', 'euid16'], ['12-char', 'euid12']] as con
   });
 }
 
+/** Node's message when a CCM tag doesn't verify. */
+const CCM_AUTH_FAILURE = /Unsupported state or unable to authenticate data/;
+
 test('ccm rejects tampered tag', () => {
   const v = vectors.euids.euid16;
   const wire = hex(v.ccmWireHex);
   wire[wire.length - 8 - 1] ^= 0x01; // last tag byte
-  assert.throws(() => new AesCcmProtocol(v.euid).unwrapResponse(wire));
+  assert.throws(() => new AesCcmProtocol(v.euid).unwrapResponse(wire), CCM_AUTH_FAILURE);
 });
 
 test('ccm rejects data that is too short', () => {
-  assert.throws(() => new AesCcmProtocol('0123456789ABCDEF').unwrapResponse(Buffer.alloc(16)));
+  // tag (8) + nonce (8) and no ciphertext: refused before decrypting.
+  assert.throws(
+    () => new AesCcmProtocol('0123456789ABCDEF').unwrapResponse(Buffer.alloc(16)),
+    /Data too short for CCM \(16 bytes\)/,
+  );
 });
 
-test('ccm default nonce is 8 bytes and counter increments', () => {
+test('ccm accepts 17 bytes as long enough and fails only on the tag', () => {
+  // One ciphertext byte is the shortest frame that gets to decryption.
+  assert.throws(() => new AesCcmProtocol('0123456789ABCDEF').unwrapResponse(Buffer.alloc(17)), (err: Error) => {
+    assert.doesNotMatch(err.message, /too short/);
+    assert.match(err.message, CCM_AUTH_FAILURE);
+    return true;
+  });
+});
+
+test('ccm constructor throws on a non-hex EUID', () => {
+  assert.throws(() => new AesCcmProtocol('not-hex-euid!'), /EUID is not hex; AES-CCM unavailable/);
+  assert.throws(() => new AesCcmProtocol('0123456789ABCDE'), /EUID is not hex/, 'odd length');
+  assert.throws(() => new AesCcmProtocol(''), /EUID is not hex/, 'empty');
+});
+
+test('ccm default nonce is 8 bytes and counter increments', (t) => {
+  // 0x12345678 s: the nonce carries the low three bytes, big-endian.
+  t.mock.method(Date, 'now', () => 0x12345678 * 1000 + 999);
   const proto = new AesCcmProtocol('0123456789ABCDEF');
   const a = proto.wrapRequest(vectors.plaintext);
   const b = proto.wrapRequest(vectors.plaintext);
   const nonceA = a.subarray(a.length - 8);
   const nonceB = b.subarray(b.length - 8);
+  assert.equal(nonceA.length, 8);
   assert.equal(nonceA.readUInt16BE(3), 0);
   assert.equal(nonceB.readUInt16BE(3), 1);
+  assert.deepEqual([...nonceA.subarray(5)], [0x34, 0x56, 0x78]);
+  assert.deepEqual([...nonceB.subarray(5)], [0x34, 0x56, 0x78]);
   assert.equal(proto.unwrapResponse(a), vectors.plaintext);
   assert.equal(proto.unwrapResponse(b), vectors.plaintext);
 });

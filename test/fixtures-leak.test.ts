@@ -36,26 +36,41 @@ function configuredEuid(): string | null {
   }
 }
 
+/**
+ * Assert that a sanitised payload leaks nothing: no IPv4 text, device ids
+ * replaced by dummies, every value under a sensitive key `REDACTED` (strings,
+ * numbers and booleans alike) and every leaf of a sensitive block `REDACTED`.
+ */
+function assertRedacted(json: unknown): void {
+  walk(json, (key, value) => {
+    if (typeof value === 'string') {
+      assert.doesNotMatch(value, /\b\d{1,3}(\.\d{1,3}){3}\b/, `IPv4 in ${key}`);
+      if (key && DEVICE_ID_KEYS.has(key)) assert.match(value, /^00000000000000[0-9a-f]{2}$/, key);
+    }
+    if (key && !DEVICE_ID_KEYS.has(key) && SENSITIVE_KEY.test(key)) assert.equal(value, 'REDACTED', key);
+    if (key && SENSITIVE_BLOCK.test(key)) {
+      walk(value, (inner, leaf) => {
+        if (leaf === null || typeof leaf !== 'object') assert.equal(leaf, 'REDACTED', `${key}.${inner}`);
+      }, key);
+    }
+  });
+}
+
 test('fixtures exist', () => assert.ok(files.length >= 2));
+
+test('the leak check catches non-string values under sensitive keys', () => {
+  for (const leaked of [123456, true, false, 0]) {
+    const payload = { id: [{ sGateway: { NetworkLANMAC: 'REDACTED', LocalModeAccessCode: leaked } }] };
+    assert.throws(() => assertRedacted(payload), /LocalModeAccessCode/, String(leaked));
+  }
+  assert.doesNotThrow(() => assertRedacted({ id: [{ sGateway: { LocalModeAccessCode: 'REDACTED', ModelIdentifier: 'UGE600' } }] }));
+});
 
 for (const file of files) {
   const text = fs.readFileSync(path.join(dir, file), 'utf8');
   const json: unknown = JSON.parse(text);
 
-  test(`fixture ${file} has no leaked identifiers`, () => {
-    walk(json, (key, value) => {
-      if (typeof value === 'string') {
-        assert.doesNotMatch(value, /\b\d{1,3}(\.\d{1,3}){3}\b/, `IPv4 in ${key}`);
-        if (key && DEVICE_ID_KEYS.has(key)) assert.match(value, /^00000000000000[0-9a-f]{2}$/, key);
-        else if (key && SENSITIVE_KEY.test(key)) assert.equal(value, 'REDACTED', key);
-      }
-      if (key && SENSITIVE_BLOCK.test(key)) {
-        walk(value, (inner, leaf) => {
-          if (leaf === null || typeof leaf !== 'object') assert.equal(leaf, 'REDACTED', `${key}.${inner}`);
-        }, key);
-      }
-    });
-  });
+  test(`fixture ${file} has no leaked identifiers`, () => assertRedacted(json));
 
   test(`fixture ${file} has no MAC, EUID or cloud id values`, () => {
     walk(json, (key, value) => {

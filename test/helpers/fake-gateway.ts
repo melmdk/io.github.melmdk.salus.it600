@@ -17,13 +17,14 @@ export interface FakeGatewayOptions {
   unreachable?: boolean;
   /**
    * Entries `deviceid` requests are answered from: each answer holds the pool
-   * entries whose UniID was asked for. Without it `fixtures.deviceid` is used.
+   * entries whose UniID was asked for. Without it the entries of
+   * `fixtures.deviceid` are answered whatever was asked for.
    */
   detailPool?: ApiResponse[];
   /**
    * Decide per `deviceid` request: answer it, reject it, leave the last
    * requested device out of the answer, drop the connection, or send only
-   * the first half of the answer frame.
+   * the first half of the answer frame. Works with and without `detailPool`.
    * `callIndex` counts `deviceid` requests from 0.
    */
   onDetails?: (ids: string[], callIndex: number) => DetailsOutcome;
@@ -76,12 +77,15 @@ export function fakeGateway(opts: FakeGatewayOptions): FakeTransport {
       const outcome = opts.onDetails?.(ids, transport.detailRequests.length - 1) ?? 'ok';
       if (outcome === 'drop') throw new TransportError('Error communicating with gateway: ECONNRESET');
       if (outcome === 'reject') return failFrame();
-      if (opts.detailPool) {
-        const wanted = outcome === 'omit' ? ids.slice(0, -1) : ids;
-        const entries = opts.detailPool.flatMap((r) => r.id ?? []).filter((e) => wanted.includes(e.data?.UniID));
-        const frame = gateway.wrapRequest(JSON.stringify({ status: 'success', id: entries }));
-        return outcome === 'truncate' ? frame.subarray(0, Math.floor(frame.length / 2)) : frame;
+      let entries = opts.detailPool
+        ? opts.detailPool.flatMap((r) => r.id ?? []).filter((e) => ids.includes(e.data?.UniID))
+        : opts.fixtures.deviceid?.id ?? [];
+      if (outcome === 'omit') {
+        const left = ids[ids.length - 1];
+        entries = entries.filter((e) => e.data?.UniID !== left);
       }
+      const frame = gateway.wrapRequest(JSON.stringify({ status: 'success', id: entries }));
+      return outcome === 'truncate' ? frame.subarray(0, Math.floor(frame.length / 2)) : frame;
     }
 
     const response: ApiResponse = path.endsWith('/write')

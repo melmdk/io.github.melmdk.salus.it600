@@ -5,12 +5,13 @@ import * as crypto from 'crypto';
 import * as path from 'path';
 import {
   IT600AuthenticationError,
+  IT600CommandError,
   IT600ConnectionError,
   IT600Gateway,
   IT600UnreachableError,
   IT600UnsupportedFirmwareError,
 } from '../lib/salus-api';
-import { AesCbcProtocol, ProtocolName } from '../lib/protocol';
+import { AesCbcProtocol, AesCcmProtocol, ProtocolName } from '../lib/protocol';
 import type { Transport } from '../lib/transport';
 import { loadFixture } from './helpers/fixtures';
 import { fakeGateway, FakeGatewayOptions } from './helpers/fake-gateway';
@@ -168,14 +169,54 @@ test('reject frames map to unsupported firmware', async () => {
   });
 });
 
-test('wrong-key decrypt yielding invalid utf-8 is a decrypt failure', () => {
-  // A one-byte plaintext 0xff encrypted under the right key is valid PKCS7 but not UTF-8.
-  const cbc = new AesCbcProtocol(EUID);
+/** What Node's fatal TextDecoder throws for bytes that are not UTF-8. */
+const INVALID_UTF8 = (err: Error & { code?: string }) => {
+  assert.ok(err instanceof TypeError, err.message);
+  assert.equal(err.code, 'ERR_ENCODING_INVALID_ENCODED_DATA');
+  return true;
+};
+const NOT_UTF8 = Buffer.from([0xff, 0xfe]);
 
+test('a cbc frame that decrypts to invalid utf-8 throws', () => {
+  // Bytes ff fe encrypted under the right key: valid PKCS7 padding, but not UTF-8.
   const md5 = crypto.createHash('md5').update(`Salus-${EUID.toLowerCase()}`).digest();
   const key = Buffer.concat([md5, Buffer.alloc(16)]);
   const iv = Buffer.from([0x88, 0xa6, 0xb0, 0x79, 0x5d, 0x85, 0xdb, 0xfc, 0xe6, 0xe0, 0xb3, 0xe9, 0xa6, 0x29, 0x65, 0x4b]);
   const c = crypto.createCipheriv('aes-256-cbc', key, iv);
-  const wire = Buffer.concat([c.update(Buffer.from([0xff, 0xfe])), c.final()]);
-  assert.throws(() => cbc.unwrapResponse(wire));
+  const wire = Buffer.concat([c.update(NOT_UTF8), c.final()]);
+  assert.throws(() => new AesCbcProtocol(EUID).unwrapResponse(wire), INVALID_UTF8);
+});
+
+test('a ccm frame that decrypts to invalid utf-8 throws', () => {
+  // Bytes ff fe sealed under the right key and a valid tag: authentic, but not UTF-8.
+  const key = Buffer.concat([Buffer.from(EUID, 'hex'), Buffer.from('9a4ba190ac2b5139b32c3528', 'ascii')]);
+  const nonce = Buffer.from('a1b2c30001765432', 'hex');
+  const c = crypto.createCipheriv('aes-256-ccm', key, nonce, { authTagLength: 8 });
+  const ciphertext = c.update(NOT_UTF8);
+  c.final();
+  const wire = Buffer.concat([ciphertext, c.getAuthTag(), nonce]);
+  assert.throws(() => new AesCcmProtocol(EUID).unwrapResponse(wire), INVALID_UTF8);
+});
+
+test('one candidate rejected and the others undecryptable is unsupported firmware', async () => {
+  // The gateway speaks cbc-128 but refuses every request: cbc-256 and ccm see
+  // frames they cannot decrypt, cbc-128 sees a readable rejection.
+  const { transport, gateway } = setup({ protocol: 'aes-128-cbc', reject: true });
+  await assert.rejects(gateway.connect(), (err: Error) => {
+    assert.ok(err instanceof IT600UnsupportedFirmwareError);
+    assert.equal(err.message, "Gateway firmware uses an encryption this app doesn't support");
+    return true;
+  });
+  assert.equal(transport.requests.length, 3, 'every candidate tried');
+});
+
+test('a readall without gateway information fails the connect', async () => {
+  const readall = loadFixture('readall');
+  const withoutGateway = { ...readall, id: (readall.id ?? []).filter((device) => !device.sGateway) };
+  const { gateway } = setup({ fixtures: { readall: withoutGateway } });
+  await assert.rejects(gateway.connect(), (err: Error) => {
+    assert.ok(err instanceof IT600CommandError);
+    assert.equal(err.message, 'Gateway response did not contain gateway information');
+    return true;
+  });
 });

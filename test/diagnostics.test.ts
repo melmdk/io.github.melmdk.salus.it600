@@ -14,3 +14,23 @@ test('reports only new problems', () => {
 test('no problems', () => {
   assert.deepEqual(computeDiagnostics([], []), { alarm: false, text: '', newProblems: [] });
 });
+
+test('a problem that clears and comes back fires again', () => {
+  let previous: string[] | null = null;
+  const fired: string[][] = [];
+  for (const problems of [['A'], [], ['A']]) {
+    const result = computeDiagnostics(previous, problems);
+    fired.push(result.newProblems);
+    previous = problems;
+  }
+  // The first update only seeds; the comeback fires A again.
+  assert.deepEqual(fired, [[], [], ['A']]);
+});
+
+test('a persistent problem fires nothing', () => {
+  assert.deepEqual(computeDiagnostics(['A'], ['A']), { alarm: true, text: 'A', newProblems: [] });
+});
+
+test('null seed with no problems', () => {
+  assert.deepEqual(computeDiagnostics(null, []), { alarm: false, text: '', newProblems: [] });
+});

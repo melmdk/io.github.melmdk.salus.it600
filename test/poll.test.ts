@@ -20,8 +20,7 @@ function setup(fake: Partial<FakeGatewayOptions> = {}) {
     ...fake,
   });
   const gateway = new IT600Gateway(EUID, '10.0.0.9', { transport, protocol: 'aes-256-cbc' });
-  // The climate map is private; read it through the same cast the parser tests would need.
-  const climateCount = () => (gateway as unknown as { climateDevices: Map<string, unknown> }).climateDevices.size;
+  const climateCount = () => gateway.getClimateDevices().size;
   return { transport, gateway, climateCount };
 }
 
@@ -95,7 +94,8 @@ test('an answer with a different Endpoint counts as left out', async (t) => {
   await gateway.pollStatus();
   assert.equal(gateway.combinedDetailRequests, false);
   assert.equal(gateway.lastPollUsedCombined, false);
-  assert.ok(climateCount() > 0);
+  // The per-type fallback is answered from the same shifted pool, so every thermostat still arrives.
+  assert.equal(climateCount(), EXPECTED_CLIMATE);
   checkLog();
 });
 
@@ -181,6 +181,6 @@ test('one combined request covers climate and wiring centres, each refreshed fro
   assert.deepEqual(centres.map((c) => c.name).sort(), ['Depotrum', 'Kældertrappe']);
   assert.ok(gateway.getWiringCentreDevice(centres[0].uniqueId));
   // Neither family picked up the other's devices.
-  const climateIds = new Set((gateway as unknown as { climateDevices: Map<string, unknown> }).climateDevices.keys());
+  const climateIds = new Set(gateway.getClimateDevices().keys());
   assert.ok(centres.every((c) => !climateIds.has(c.uniqueId)));
 });
