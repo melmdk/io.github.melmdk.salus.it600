@@ -3,7 +3,8 @@
 import Homey from 'homey';
 import type { IT600Gateway } from '../../lib/salus-api';
 import type { WiringCentreDevice as WiringCentreData } from '../../lib/device-types';
-import { computeDiagnostics } from '../../lib/diagnostics';
+import { computeDiagnostics, fireProblemTriggers } from '../../lib/diagnostics';
+import { AvailabilityTracker } from '../../lib/availability';
 
 interface SalusIT600App extends Homey.App {
   getGateway(): IT600Gateway | null;
@@ -13,6 +14,7 @@ class WiringCentreDevice extends Homey.Device {
   private deviceId!: string;
   private updateHandler: (() => void) | null = null;
   private previousProblems: string[] | null = null;
+  private readonly availability = new AvailabilityTracker();
 
   async onInit(): Promise<void> {
     this.deviceId = this.getData().id as string;
@@ -51,23 +53,28 @@ class WiringCentreDevice extends Homey.Device {
     }
   }
 
+  /** Set the device available (null) or unavailable with `reason`, only when that changes. */
+  private applyAvailability(reason: string | null): Promise<void> {
+    return this.availability.apply(this, reason).catch(this.error);
+  }
+
   async updateState(): Promise<void> {
     const device = this.getDevice();
 
     if (!device) {
       await this.setConnected(false);
-      this.setUnavailable('Device not found').catch(this.error);
+      await this.applyAvailability('Device not found');
       return;
     }
 
     if (!device.connected) {
       await this.setConnected(false);
-      this.setUnavailable('Device offline').catch(this.error);
+      await this.applyAvailability('Device offline');
       return;
     }
 
     await this.setConnected(true);
-    const updates: Promise<void>[] = [this.setAvailable()];
+    const updates: Promise<void>[] = [this.applyAvailability(null)];
     const setIfChanged = (key: string, value: unknown): void => {
       if (this.getCapabilityValue(key) !== value) {
         updates.push(this.setCapabilityValue(key, value));
@@ -84,10 +91,7 @@ class WiringCentreDevice extends Homey.Device {
 
     await Promise.all(updates).catch(this.error);
 
-    const trigger = this.homey.flow.getTriggerCard('problem_started');
-    for (const problem of diagnostics.newProblems) {
-      trigger.trigger({ device: this.getName(), problem }).catch(this.error);
-    }
+    fireProblemTriggers(this.homey, this.getName(), diagnostics.newProblems, this.error);
   }
 }
 

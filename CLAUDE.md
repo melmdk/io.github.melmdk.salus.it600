@@ -116,7 +116,8 @@ npx homey app publish
 │   ├── parsers/              # Pure parsers: climate.ts, wiring-centre.ts, common.ts
 │   ├── pairing.ts            # Pair/repair flow shared by all drivers
 │   ├── gateway-settings.ts   # `gateway` setting shape, migration, error texts
-│   ├── diagnostics.ts        # Problem alarm text and new-problem detection
+│   ├── diagnostics.ts        # Problem alarm text, new-problem detection, problem_started triggers
+│   ├── availability.ts       # Device availability applied only on change
 │   ├── sanitise.ts           # Redaction for fixtures and debug logs
 │   ├── device-types.ts       # Device type mappings
 │   └── constants.ts          # Shared constants
