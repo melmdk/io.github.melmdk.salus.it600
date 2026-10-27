@@ -37,7 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Known limitations
 - On SQ610 thermostats "Temporary Hold" still reads and writes as Follow Schedule (unchanged)
 - Skipping the credentials screen during pairing is covered by tests but not yet verified on a real Homey
-- The wiring-centre icon reuses the thermostat icon
 
 ## [0.9.6] - 2026-02-08
 
