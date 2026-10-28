@@ -2,6 +2,7 @@
 
 import Homey from 'homey';
 import type { IT600Gateway } from '../../lib/salus-api';
+import { AvailabilityTracker } from '../../lib/availability';
 import type { SwitchDevice } from '../../lib/device-types';
 
 interface SalusIT600App extends Homey.App {
@@ -12,6 +13,7 @@ interface SalusIT600App extends Homey.App {
 class SwitchSalusDevice extends Homey.Device {
   private deviceId!: string;
   private updateHandler: (() => void) | null = null;
+  private readonly availability = new AvailabilityTracker();
 
   async onInit(): Promise<void> {
     this.deviceId = this.getData().id as string;
@@ -42,20 +44,25 @@ class SwitchSalusDevice extends Homey.Device {
     return gateway.getSwitchDevice(this.deviceId);
   }
 
+  /** Set the device available (null) or unavailable with `reason`, only when that changes. */
+  private applyAvailability(reason: string | null): Promise<void> {
+    return this.availability.update(this, reason).catch(this.error);
+  }
+
   async updateState(): Promise<void> {
     const device = this.getDevice();
 
     if (!device) {
-      this.setUnavailable('Device not found').catch(this.error);
+      await this.applyAvailability('Device not found');
       return;
     }
 
     if (!device.available) {
-      this.setUnavailable('Device offline').catch(this.error);
+      await this.applyAvailability('Device offline');
       return;
     }
 
-    const updates: Promise<void>[] = [this.setAvailable()];
+    const updates: Promise<void>[] = [this.applyAvailability(null)];
     if (this.getCapabilityValue('onoff') !== device.isOn) {
       updates.push(this.setCapabilityValue('onoff', device.isOn));
     }
