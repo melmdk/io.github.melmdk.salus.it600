@@ -79,7 +79,7 @@ async function makeRequest(host: string, key: Buffer, command: string, body: obj
 }
 
 async function main() {
-  const configPath = path.join(__dirname, 'test-config.json');
+  const configPath = path.join(__dirname, '../..', 'test-config.json');
   const config: TestConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
   const key = deriveKey(config.euid);
 

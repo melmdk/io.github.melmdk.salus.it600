@@ -49,7 +49,7 @@ async function main(): Promise<void> {
   const newSetpoint = originalSetpoint + 0.5;
   let result = 'COMBINED FAIL: no 3 consecutive polls served by the combined request with the new setpoint within 60 s';
   // Set before the write: a write that times out may still have reached the gateway.
-  let written = true;
+  const written = true;
   try {
     await gateway.setClimateTemperature(id, newSetpoint);
     console.log(`wrote setpoint ${newSetpoint}`);

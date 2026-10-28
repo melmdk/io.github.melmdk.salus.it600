@@ -36,6 +36,7 @@ import type { ApiDeviceStatus, ClimateDevice } from '../device-types';
 import { activeErrors, parseDeviceName, signalOf } from './common';
 
 /** Parse one thermostat payload; null when it is not a thermostat or has no UniID. */
+// eslint-disable-next-line import/prefer-default-export -- named like every parser, imported by name
 export function parseClimateDevice(device: ApiDeviceStatus, previous?: ClimateDevice): ClimateDevice | null {
   const uniqueId = device.data?.UniID;
   if (!uniqueId) return null;

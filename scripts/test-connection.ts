@@ -10,7 +10,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { IT600Gateway } from './lib/salus-api';
+import { IT600Gateway } from '../lib/salus-api';
 
 interface TestConfig {
   host: string;
@@ -19,7 +19,7 @@ interface TestConfig {
 
 async function main() {
   // Load config
-  const configPath = path.join(__dirname, 'test-config.json');
+  const configPath = path.join(__dirname, '../..', 'test-config.json');
 
   if (!fs.existsSync(configPath)) {
     console.error('Missing test-config.json. Create it with:');

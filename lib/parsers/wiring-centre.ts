@@ -9,6 +9,7 @@
 import type { ApiDeviceStatus, WiringCentreDevice } from '../device-types';
 import { activeErrors, modelOf, parseDeviceName, signalOf } from './common';
 
+// eslint-disable-next-line import/prefer-default-export -- named like every parser, imported by name
 export function parseWiringCentre(d: ApiDeviceStatus, previous?: WiringCentreDevice): WiringCentreDevice | null {
   const uniqueId = d.data?.UniID;
   if (!uniqueId) return null;
