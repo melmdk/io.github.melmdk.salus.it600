@@ -10,11 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - The wiring-centre image has a transparent background like the thermostat image
 - Temperature sensors, binary sensors, plugs and blinds tell Homey they are available only when that changes, as thermostats and wiring centres already do
+- Housekeeping: lint runs clean on tests and dev scripts, the dev scripts moved to `scripts/`, and the user-facing changelog in Homey lists every release
 
 ### Fixed
 - If the combined device requests are rejected again after you switched them back on, the app log says so again (it was silent the second time)
-- Housekeeping: lint runs clean on tests and dev scripts, the dev scripts moved to `scripts/`, and the user-facing changelog in Homey lists every release
-
 ## [0.10.0] - 2026-10-26
 
 ### Added

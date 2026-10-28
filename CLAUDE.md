@@ -193,8 +193,7 @@ npx homey app publish
 - `chore/*` - Maintenance branches
 
 ### Pull Requests
-- Create PR against `develop` for features
-- Create PR against `main` for hotfixes
+- Create PRs against `main`
 - Ensure `npm test`, `npm run lint` and `npx homey app validate --level verified` pass before merging
 - Use squash merge with conventional commit message
 
