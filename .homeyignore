@@ -3,6 +3,7 @@ plans/
 *.ts
 !*.d.ts
 tsconfig.json
+tsconfig.test.json
 .eslintrc.json
 CLAUDE.md
 .claude/
