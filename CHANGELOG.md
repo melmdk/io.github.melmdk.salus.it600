@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - If the combined device requests are rejected again after you switched them back on, the app log says so again (it was silent the second time)
+
 ## [0.10.0] - 2026-10-26
 
 ### Added
