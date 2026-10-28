@@ -12,23 +12,23 @@ import {
   IT600UnsupportedFirmwareError,
 } from '../lib/salus-api';
 
-const LEGACY = { host: '10.10.20.10', euid: '0123456789ABCDEF', combinedDetails: true };
+const LEGACY = { host: '192.0.2.10', euid: '0123456789ABCDEF', combinedDetails: true };
 
 test('migrateGatewaySettings accepts legacy shapes', () => {
-  const fromGateway = migrateGatewaySettings({ host: '10.10.20.10', euid: '0123 4567 89ab cdef' });
+  const fromGateway = migrateGatewaySettings({ host: '192.0.2.10', euid: '0123 4567 89ab cdef' });
   assert.deepEqual(fromGateway, LEGACY);
   assert.ok(fromGateway && !('protocol' in fromGateway));
 
-  assert.deepEqual(migrateGatewaySettings(null, '10.10.20.10', '0123456789ABCDEF'), LEGACY);
+  assert.deepEqual(migrateGatewaySettings(null, '192.0.2.10', '0123456789ABCDEF'), LEGACY);
   assert.equal(migrateGatewaySettings(null), null);
 });
 
 test('migrateGatewaySettings keeps a known protocol and drops an unknown one', () => {
   assert.deepEqual(
-    migrateGatewaySettings({ host: '10.10.20.10', euid: '0123456789ABCDEF', protocol: 'aes-256-ccm' }),
+    migrateGatewaySettings({ host: '192.0.2.10', euid: '0123456789ABCDEF', protocol: 'aes-256-ccm' }),
     { ...LEGACY, protocol: 'aes-256-ccm' },
   );
-  const unknown = migrateGatewaySettings({ host: '10.10.20.10', euid: '0123456789ABCDEF', protocol: 'rot13' });
+  const unknown = migrateGatewaySettings({ host: '192.0.2.10', euid: '0123456789ABCDEF', protocol: 'rot13' });
   assert.deepEqual(unknown, LEGACY);
   assert.ok(unknown && !('protocol' in unknown));
 });
@@ -43,11 +43,11 @@ test('migrateGatewaySettings defaults combined details on and keeps an explicit 
 
 test('migrateGatewaySettings rejects incomplete settings', () => {
   assert.equal(migrateGatewaySettings({ host: '', euid: '0123456789ABCDEF' }), null);
-  assert.equal(migrateGatewaySettings({ host: '10.10.20.10', euid: '   ' }), null);
-  assert.equal(migrateGatewaySettings('10.10.20.10'), null);
-  assert.equal(migrateGatewaySettings(undefined, '10.10.20.10', undefined), null);
+  assert.equal(migrateGatewaySettings({ host: '192.0.2.10', euid: '   ' }), null);
+  assert.equal(migrateGatewaySettings('192.0.2.10'), null);
+  assert.equal(migrateGatewaySettings(undefined, '192.0.2.10', undefined), null);
   // An incomplete `gateway` setting falls back to the legacy keys.
-  assert.deepEqual(migrateGatewaySettings({ host: '10.10.20.10' }, ' 10.10.20.10 ', '0123456789abcdef'), LEGACY);
+  assert.deepEqual(migrateGatewaySettings({ host: '192.0.2.10' }, ' 192.0.2.10 ', '0123456789abcdef'), LEGACY);
 });
 
 test('connection errors map to user-facing text only', () => {
@@ -80,8 +80,8 @@ test('connection errors map to user-facing text only', () => {
 test('connectedSettings reuses the stored protocol only for the same gateway', () => {
   const previous = { host: '10.0.0.1', euid: '0123456789ABCDEF', protocol: 'aes-128-cbc' as const, combinedDetails: false };
   // Same EUID, new IP (the gateway moved VLAN): protocol and preference carry over.
-  assert.deepEqual(connectedSettings(previous, '10.10.20.10', '0123456789ABCDEF'), {
-    host: '10.10.20.10', euid: '0123456789ABCDEF', protocol: 'aes-128-cbc', combinedDetails: false,
+  assert.deepEqual(connectedSettings(previous, '192.0.2.10', '0123456789ABCDEF'), {
+    host: '192.0.2.10', euid: '0123456789ABCDEF', protocol: 'aes-128-cbc', combinedDetails: false,
   });
   // A different gateway is probed afresh; first setup gets the default.
   assert.equal(connectedSettings(previous, '10.0.0.1', 'FEDCBA9876543210').protocol, undefined);

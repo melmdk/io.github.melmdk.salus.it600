@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import Module from 'node:module';
+import type { BinarySensorDevice, CoverDevice, SensorDevice, SwitchDevice } from '../lib/device-types';
 
 /**
  * Drivers import the Homey runtime, which does not exist under node:test, so
@@ -40,11 +41,14 @@ internals._load = (request, ...rest) => (
 
 interface Updatable { onInit(): Promise<void>; updateState(): Promise<void> }
 
-const drivers = [
-  { name: 'binary-sensor', getter: 'getBinarySensorDevice', data: { available: true, isOn: false } },
-  { name: 'cover', getter: 'getCoverDevice', data: { available: true, currentPosition: 50, isOpening: false, isClosing: false } },
-  { name: 'switch', getter: 'getSwitchDevice', data: { available: true, isOn: false, power: null } },
-  { name: 'temperature-sensor', getter: 'getSensorDevice', data: { available: true, currentTemperature: 20, currentHumidity: null, batteryLevel: null } },
+/** One driver under test: the gateway getter it reads and a device it can show (the fields it uses). */
+interface DriverCase { name: string; getter: string; data: Partial<BinarySensorDevice | CoverDevice | SwitchDevice | SensorDevice> }
+
+const drivers: DriverCase[] = [
+  { name: 'binary-sensor', getter: 'getBinarySensorDevice', data: { available: true, isOn: false } as Partial<BinarySensorDevice> },
+  { name: 'cover', getter: 'getCoverDevice', data: { available: true, currentPosition: 50, isOpening: false, isClosing: false } as Partial<CoverDevice> },
+  { name: 'switch', getter: 'getSwitchDevice', data: { available: true, isOn: false } as Partial<SwitchDevice> },
+  { name: 'temperature-sensor', getter: 'getSensorDevice', data: { available: true, state: 20 } as Partial<SensorDevice> },
 ];
 
 for (const { name, getter, data } of drivers) {
