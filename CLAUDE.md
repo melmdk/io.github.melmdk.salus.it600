@@ -68,8 +68,13 @@ Plans are stored in `plans/` and archived in `plans/archive/` when completed.
 # Install dependencies
 npm install
 
-# Validate app structure
-npx homey app validate
+# Tests, type check and lint
+npm test
+npm run build
+npm run lint
+
+# Validate app structure (CI uses --level verified)
+npx homey app validate --level verified
 
 # Run locally (requires Homey Pro)
 npx homey app run
@@ -129,8 +134,8 @@ npx homey app publish
 │   ├── cover/                # Blinds/shutters
 │   └── wiring-centre/        # it600WC: connected, problems, signal
 ├── settings/index.html       # Gateway IP/EUID, combined requests, status
-├── test/                     # node:test suite, fixtures, fake gateway
-├── scripts/                  # Fixture capture and live checks (dev only)
+├── test/                     # node:test suite, fixtures, fake gateway (drivers run against a stubbed `homey`)
+├── scripts/                  # Fixture capture, live checks and debug dumps (dev only; read host/EUID from test-config.json)
 └── .homeycompose/            # Homey Compose config
 ```
 
@@ -152,14 +157,15 @@ npx homey app publish
    - `npm run capture` re-captures fixtures from the gateway in `test-config.json` (git-ignored, never commit the EUID)
 
 3. **Without hardware:**
-   - Validate structure: `npx homey app validate`
-   - Check manifest: `npx homey app validate --level publish`
+   - Validate structure: `npx homey app validate --level verified` (what CI runs)
+   - Lint: `npm run lint` (tests and `scripts/` are linted against `tsconfig.test.json`)
 
 ## Publishing
 
 ### From GitHub Actions
-- Push tag `v*.*.*` triggers publish workflow
-- Requires `HOMEY_APP_TOKEN` secret
+- The "Publish Homey App" workflow (`.github/workflows/homey-app-publish.yml`) is a manual `workflow_dispatch`; pushing a tag does not publish
+- Requires the `HOMEY_PAT` secret
+- "Validate Homey App" runs on every push and pull request; "Update Homey App Version" is a manual workflow that bumps the version, tags it and creates a GitHub release
 
 ### Manual
 ```bash
@@ -181,14 +187,15 @@ npx homey app publish
 
 ### Branches
 - `main` - Production-ready code
-- `develop` - Integration branch for features
+- `develop` - Integration branch for features (not currently in use; branches go to `main`)
 - `feat/*` - Feature branches
 - `fix/*` - Bug fix branches
+- `chore/*` - Maintenance branches
 
 ### Pull Requests
 - Create PR against `develop` for features
 - Create PR against `main` for hotfixes
-- Ensure `npx homey app validate` passes before merging
+- Ensure `npm test`, `npm run lint` and `npx homey app validate --level verified` pass before merging
 - Use squash merge with conventional commit message
 
 ### Releases
@@ -199,17 +206,20 @@ npx homey app publish
 | `.homeycompose/app.json` | Homey app version (primary) |
 | `package.json` | npm package version |
 | `CHANGELOG.md` | Release notes |
+| `.homeychangelog.json` | Per-version text shown to users in Homey (plain English, one or two sentences) |
+
+`package-lock.json` follows via `npm install --package-lock-only`.
 
 Note: `app.json` is auto-generated from `.homeycompose/app.json` via `npx homey app build`
 
 **Release steps:**
-1. Merge `develop` into `main`
+1. Merge the work into `main`
 2. Update version in all files listed above
 3. Run `npx homey app build` to regenerate `app.json`
 4. Commit: `git commit -m "chore: release vX.Y.Z"`
 5. Create tag: `git tag -a vX.Y.Z -m "vX.Y.Z - Description"`
 6. Push: `git push && git push origin vX.Y.Z`
-7. GitHub Action publishes to Homey App Store
+7. Run the "Publish Homey App" workflow by hand (Actions tab) to publish to the Homey App Store
 
 ---
 
