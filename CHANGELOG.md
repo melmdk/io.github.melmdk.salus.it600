@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.1] - 2026-10-28
+
+### Changed
+- The wiring-centre image has a transparent background like the thermostat image
+- Temperature sensors, binary sensors, plugs and blinds tell Homey they are available only when that changes, as thermostats and wiring centres already do
+
+### Fixed
+- If the combined device requests are rejected again after you switched them back on, the app log says so again (it was silent the second time)
+- Housekeeping: lint runs clean on tests and dev scripts, the dev scripts moved to `scripts/`, and the user-facing changelog in Homey lists every release
+
 ## [0.10.0] - 2026-10-26
 
 ### Added
