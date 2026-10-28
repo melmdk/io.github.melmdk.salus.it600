@@ -1,7 +1,7 @@
 /**
  * Dump raw data from Salus IT600 gateway.
  *
- * Usage: npx ts-node dump-connection.ts
+ * Usage: npx tsc -p tsconfig.test.json && node .test-build/scripts/dump-connection.js
  *
  * Requires test-config.json (gitignored) with:
  * { "host": "x.x.x.x", "euid": "xxxx" }

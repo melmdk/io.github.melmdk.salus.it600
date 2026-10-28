@@ -1,7 +1,7 @@
 /**
  * Test script for Salus IT600 gateway connection (read-only: connect + one poll).
  *
- * Usage: npx ts-node test-connection.ts
+ * Usage: npx tsc -p tsconfig.test.json && node .test-build/scripts/test-connection.js
  *
  * Requires test-config.json (gitignored) with:
  * { "host": "x.x.x.x", "euid": "xxxx" }
