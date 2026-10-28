@@ -1,5 +1,26 @@
 {
-  "1.0.0": {
-    "en": "First version!"
+  "0.10.1": {
+    "en": "The wiring centre image now has a transparent background. If combined device requests stop working after you switch them back on, the app log says so again. Sensors, plugs and blinds now tell Homey they are available only when that changes."
+  },
+  "0.10.0": {
+    "en": "Adds wiring-centre support with a connected indicator and problem alarm, thermostat problem alarms and signal strength, and the Away preset for SQ610 thermostats. Pairing reuses the saved gateway, the gateway encryption is detected automatically, and error messages tell you what to fix."
+  },
+  "0.9.6": {
+    "en": "Device details are fetched per device type again, because the gateway needs separate requests. One device type failing no longer blocks the others."
+  },
+  "0.9.4": {
+    "en": "Faster start-up and fewer unnecessary updates in the Homey interface."
+  },
+  "0.9.3": {
+    "en": "The thermostat icon follows the light or dark theme, and the driver images now have the sizes Homey asks for."
+  },
+  "0.9.2": {
+    "en": "New app icon with the Salus Controls branding."
+  },
+  "0.9.1": {
+    "en": "New SQ610RF thermostat images and better setup and troubleshooting instructions."
+  },
+  "0.9.0": {
+    "en": "First release: Salus IT600 thermostats, temperature, door, window, water, smoke and occupancy sensors, plugs and roller shutters over the local gateway, no cloud needed."
   }
 }
