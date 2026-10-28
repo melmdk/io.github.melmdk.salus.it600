@@ -196,7 +196,7 @@ export class IT600Gateway {
   private combinedDetails = false;
   private combinedFailures = 0;
   private usedCombined = false;
-  /** The per-type fallback notice is logged once per instance. */
+  /** The per-type fallback notice is logged once per time combined requests are switched on. */
   private fallbackLogged = false;
   /** Dummy ids for real device ids in this instance's debug logs, consistent across lines. */
   private readonly debugIds: IdMap = new Map();
@@ -404,6 +404,8 @@ export class IT600Gateway {
   setCombinedDetailRequests(enabled: boolean): void {
     this.combinedDetails = enabled;
     this.combinedFailures = 0;
+    // Switched on again: if they are rejected again, say so again.
+    if (enabled) this.fallbackLogged = false;
   }
 
   private disableCombinedDetailRequests(reason: string): void {

@@ -214,7 +214,7 @@ test('a failed per-type fetch for unkeyed devices keeps the combined details', a
   assert.match(errors[0], /without a UniID/);
 });
 
-test('gateway notices go to its logger, the fallback notice once per instance', async (t) => {
+test('gateway notices go to its logger, the fallback notice once per combined-requests opt-in', async (t) => {
   const consoleLog = t.mock.method(console, 'log', () => undefined);
   const consoleError = t.mock.method(console, 'error', () => undefined);
   const { gateway, logs, checkFallbackLog } = setup({ onDetails: (ids) => (ids.length === 13 ? 'reject' : 'ok') });
@@ -222,11 +222,17 @@ test('gateway notices go to its logger, the fallback notice once per instance', 
   await gateway.pollStatus();
   checkFallbackLog(/rejected/);
 
-  // Switched on again (settings page) and rejected again: no second notice.
+  // Still off: a further poll does not log the notice again.
+  await gateway.pollStatus();
+  assert.equal(logs.length, 1);
+
+  // Switched on again (settings page) and rejected again: that fallback is logged too.
   gateway.setCombinedDetailRequests(true);
   await gateway.pollStatus();
   assert.equal(gateway.combinedDetailRequests, false);
-  assert.equal(logs.length, 1);
+  assert.equal(logs.length, 2, logs.join('\n'));
+  assert.match(logs[1], /per device type from now on/);
+  assert.match(logs[1], /rejected/);
   assert.equal(consoleLog.mock.callCount(), 0);
   assert.equal(consoleError.mock.callCount(), 0);
 });
